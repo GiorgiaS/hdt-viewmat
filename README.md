@@ -20,13 +20,11 @@ This is the official repository storing the implementation of the paper: "Effici
   - xlexwriter
 
 ## Run the System
-1. Unfold `bpel/Dataset/BPEL/Dataset178.zip`
-2. Unfold `bpel/Dataset/BPEL/Realistic.zip`
-3. Uncomment the lines in the `userSimulatorRandom.py` file from `408` to `1484` of the processes of interest to test.
-4. Run file `userSimulatorRandom.py`
+1. Uncomment the lines in the `userSimulatorRandom.py` file from `408` to `1484` of the processes of interest to test.
+2. Run file `userSimulatorRandom.py`
 
 ## Results
 Results are organised in _.xlsx_ files generated in the main directory.
-Results of the single processes are stored within `results` folder
+Results of the single processes are stored within the `results` folder
 
 [^1]: https://www.python.org/
