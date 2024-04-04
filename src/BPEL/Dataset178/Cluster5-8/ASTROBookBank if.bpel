@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="ASTROBookBank"
+    targetNamespace="http://enterprise.netbeans.org/bpel/VPOS_MPS/ASTROBookBank"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/VPOS_MPS/ASTROBookBank"
+    xmlns:ns0="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank"
+    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+    <import namespace="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank" location="ASTROBookBank.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+<partnerLinks>
+      <partnerLink myRole="bankJPG_Service" name="bankJPG_PLT" partnerLinkType="ns0:bankJPG_PLT" partnerRole="bankJPG_Customer"/>
+   </partnerLinks>
+   <variables>
+      <variable messageType="ns0:startTransactionMsg" name="startTransactionMsg"/>
+      <variable messageType="ns0:startTransactionAckMsg" name="startTransactionAckMsg"/>
+      <variable messageType="ns0:startTransactionErrMsg" name="startTransactionErrMsg"/>
+      <variable messageType="ns0:requestAvailableMsg" name="requestAvailableMsg"/>
+      <variable messageType="ns0:requestNotAvailableMsg" name="requestNotAvailableMsg"/>
+      <variable messageType="ns0:confirmMsg" name="confirmMsg"/>
+      <variable messageType="ns0:requestAvailableNackMsg" name="requestAvailableNackMsg"/>
+      <variable messageType="ns0:confirmAckMsg" name="confirmAckMsg"/>
+      <variable messageType="ns0:confirmErrMsg" name="confirmErrMsg"/>
+      <variable messageType="ns0:requestAvailableAckMsg" name="requestAvailableAckMsg"/>
+      <variable messageType="ns0:requestSubmittedMsg" name="requestSubmittedMsg"/>
+
+   </variables>
+   <correlationSets>
+      <correlationSet name="key" properties="ns0:key"/>
+   </correlationSets>
+   <sequence>
+      <receive createInstance="yes" name="startTransaction" operation="startTransaction" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_PT" variable="startTransactionMsg">
+         <correlations>
+            <correlation set="key" initiate="join" />
+         </correlations>
+      </receive>
+
+
+  <if name="checkRequest"> 
+         <condition>starts-with($startTransactionMsg.shopId,'ASTRO')</condition>
+			<sequence>
+			<assign>
+	
+              
+                  <copy>
+                     <from part="key" variable="startTransactionMsg"/>
+                     <to part="key" variable="startTransactionAckMsg"/>
+                  </copy>
+                  <copy>
+                     <from>concat($startTransactionMsg.shopId , $startTransactionMsg.key )</from>
+                     <to part="transactionId" variable="startTransactionAckMsg"/>
+                  </copy>
+                  <copy>
+                     <from>concat( 'MPS_' , $startTransactionMsg.amount , $startTransactionMsg.shopId)</from>
+                     <to part="digitalSign" variable="startTransactionAckMsg"/>
+                  </copy>
+                  <copy>
+                     <from>concat('http:\\VPOS_MPS\payment\',$startTransactionAckMsg.transactionId)</from>
+                     <to part="paymentURL" variable="startTransactionAckMsg"/>
+                  </copy>
+                  <copy>
+                     <from>"ASTROShop@astroproject.org"</from>
+                     <to part="shopEmail" variable="startTransactionAckMsg"/>
+                  </copy>
+                  <copy>
+                     <from>"ASTROShop@astroproject.org"</from>
+                     <to part="customerIP" variable="startTransactionAckMsg"/>
+                  </copy>
+               </assign>
+               <invoke inputVariable="Task1" name="Task1" operation="startTransactionAck" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="key"/>
+                  </correlations> 
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path1 path2 path3</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </invoke>
+
+                 <empty name="interact_with_customer"/>
+				<!--SEGUNDO RECEIVE-->
+             <receive name="requestSubmitted" operation="requestSubmitted" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_PT" variable="requestSubmittedMsg">
+                  <correlations>
+                     <correlation set="key"/>
+                  </correlations>
+               </receive> 
+
+             <if name="checkCustomer">
+                  <condition>contains($requestSubmittedMsg.transactionId ,'ASTRO')</condition> 
+                     <sequence>
+                        <assign>
+                           <copy>
+                              <from part="key" variable="startTransactionMsg"/>
+                              <to part="key" variable="requestAvailableMsg"/>
+                           </copy>
+                           <copy>
+                              <from part="transactionId" variable="startTransactionAckMsg"/>
+                              <to part="transactionId" variable="requestAvailableMsg"/>
+                           </copy>
+                        </assign>
+                        <invoke inputVariable="Task3" name="Task3" operation="requestAvailable" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                           <correlations>
+                              <correlation pattern="request" set="key"/>
+                           </correlations>
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+                           </bpelx:toProperties>
+                        </invoke>
+                      <pick name="confirm-nack">
+                           <onMessage operation="confirm" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_PT" variable="confirmMsg">
+                              <correlations>
+                                 <correlation set="key"/>
+                              </correlations>
+
+                              <if name="ifname">
+                                 <condition>contains($requestSubmittedMsg.transactionId ,'_')</condition>
+                                    <sequence>
+                                       <assign>
+                                          <copy>
+                                             <from part="key" variable="startTransactionMsg"/>
+                                             <to part="key" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from part="transactionId" variable="startTransactionAckMsg"/>
+                                             <to part="transactionId" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from part="shopId" variable="startTransactionMsg"/>
+                                             <to part="shopId" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>"12December2006"</from>
+                                             <to part="transactionDate" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>"12:03"</from>
+                                             <to part="transactionTime" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from part="amount" variable="startTransactionMsg"/>
+                                             <to part="transactionAmount" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>"Euro"</from>
+                                             <to part="transactionCurrency" variable="confirmAckMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>concat( $confirmAckMsg.transactionId ,$confirmAckMsg.transactionDate)</from>
+                                             <to part="transactionAuthorization" variable="confirmAckMsg"/>
+                                          </copy>
+                                       </assign> 
+                                       <invoke inputVariable="Task5" name="Task5" operation="confirmAck" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="key"/>
+                                          </correlations>
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task3:0.33</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path1</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </invoke>
+                                       <receive name="requestAvailableAck" operation="requestAvailableAck" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_PT" variable="requestAvailableAckMsg">
+                                          <correlations>
+                                             <correlation set="key"/>
+                                          </correlations>
+                                       </receive>
+                                       <empty name="SUCC"/>
+                                    </sequence> 
+                                 
+                                <else>
+                                    <sequence>
+                                       <assign>
+                                          <copy>
+                                             <from part="key" variable="startTransactionMsg"/>
+                                             <to part="key" variable="confirmErrMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>"3"</from>
+                                             <to part="errorCode" variable="confirmErrMsg"/>
+                                          </copy>
+                                          <copy>
+                                             <from>"transaction confirmation error"</from>
+                                             <to part="errorDesc" variable="confirmErrMsg"/>
+                                          </copy>
+                                       </assign>
+                                       <invoke inputVariable="Task6" name="Task6" operation="confirmErr" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="key"/>
+                                          </correlations>
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task3:0.33</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </invoke>
+                                       <empty name="FAIL4"/> 
+                                    </sequence>
+                                 </else>                             	 
+				</if>
+                           	</onMessage>
+                                <onMessage operation="requestAvailableNack" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_PT" variable="requestAvailableNackMsg">
+                              <correlations>
+                                 <correlation set="key"/>
+                              </correlations>
+                              <empty name="FAIL3"/>
+                           </onMessage>
+                        </pick>
+
+                     </sequence>
+                  
+                 <else>
+                     <sequence>
+                        <assign>
+                           <copy>
+                              <from part="key" variable="startTransactionMsg"/>
+                              <to part="key" variable="requestNotAvailableMsg"/>
+                           </copy>
+                           <copy>
+                              <from>"2"</from>
+                              <to part="errorCode" variable="requestNotAvailableMsg"/>
+                           </copy>
+                           <copy>
+                              <from>"requestNotAvailable: error in customer interaction"</from>
+                              <to part="errorDesc" variable="requestNotAvailableMsg"/>
+                           </copy>
+                        </assign>
+                        <invoke inputVariable="requestNotAvailableMsg" name="Task4" operation="requestNotAvailable" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                           <correlations>
+                              <correlation pattern="request" set="key"/>
+                           </correlations>
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path3</bpelx:toProperty>
+                           </bpelx:toProperties>
+                        </invoke>
+                        <empty name="FAIL2"/>
+                     </sequence>
+                  </else>
+               </if>
+
+            </sequence>
+         
+         <else>
+            <sequence>
+               <assign>
+                  <copy>
+                     <from part="key" variable="startTransactionMsg"/>
+                     <to part="key" variable="startTransactionErrMsg"/>
+                  </copy>
+                  <copy>
+                     <from>"1"</from>
+                     <to part="errorCode" variable="startTransactionErrMsg"/>
+                  </copy>
+                  <copy>
+                     <from>"startTransaction: error in Shop data"</from>
+                     <to part="errorDesc" variable="startTransactionErrMsg"/>
+                  </copy>
+               </assign>
+               <invoke inputVariable="startTransactionErrMsg" name="Task2" operation="startTransactionErr" partnerLink="bankJPG_PLT" portType="ns0:bankJPG_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="key"/>
+                  </correlations>
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path4</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </invoke>
+
+               <empty name="FAIL1"/>
+            </sequence>
+         </else>
+
+      </if>
+   </sequence>
+</process>

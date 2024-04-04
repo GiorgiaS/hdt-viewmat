@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="ProcesoAprobadorPrestamo"
+    targetNamespace="http://enterprise.netbeans.org/bpel/N6_ServicioPrestamo/ProcesoAprobadorPrestamo"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/N6_ServicioPrestamo/ProcesoAprobadorPrestamo"
+    xmlns:ns1="http://j2ee.netbeans.org/wsdl/ServicioAprobador"
+    xmlns:ns2="http://j2ee.netbeans.org/wsdl/ServicioAsesor"
+    xmlns:ns0="http://xml.netbeans.org/schema/Creditos"
+    xmlns:ns3="http://j2ee.netbeans.org/wsdl/ServicioPrestamos"
+    xmlns:uca="http://www.uca.es/xpath/2007/11"
+    uca:instrumentVariablesByDefault="yes">
+  <import namespace="http://j2ee.netbeans.org/wsdl/ServicioAprobador" location="ServicioAprobador.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <import namespace="http://j2ee.netbeans.org/wsdl/ServicioAsesor" location="ServicioAsesor.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <import namespace="http://j2ee.netbeans.org/wsdl/ServicioPrestamos" location="ServicioPrestamos.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <partnerLinks>
+    <partnerLink name="assessor" partnerLinkType="ns2:ServicioAsesor1" partnerRole="ServicioAsesorPortTypeRole"/>
+    <partnerLink name="approver" partnerLinkType="ns1:ServicioAprobador1" partnerRole="ServicioAprobadorPortTypeRole"/>
+    <partnerLink name="client" partnerLinkType="ns3:ServicioPrestamos1" myRole="ServicioPrestamosPortTypeRole"/>
+  </partnerLinks>
+  <extensions>
+    <extension mustUnderstand="no" namespace="http://www.uca.es/xpath/2007/11"/>
+  </extensions>
+  <variables>
+    <variable name="processOutput" messageType="ns3:ServicioPrestamosOperationReply" uca:instrument="yes"/>
+    <variable name="processInput" messageType="ns3:ServicioPrestamosOperationRequest" uca:instrument="yes"/>
+    <variable name="assessorOutput" messageType="ns2:ServicioAsesorOperationReply"/>
+    <variable name="assessorInput" messageType="ns2:ServicioAsesorOperationRequest" />
+    <variable name="approverOutput" messageType="ns1:ServicioAprobadorOperationReply"/>
+    <variable name="approverInput" messageType="ns1:ServicioAprobadorOperationRequest"/>
+    <variable name="llamarAprobador" type="xsd:boolean" uca:instrument="no"/>
+  </variables>
+  <sequence name="Main">
+    <receive name="Receive1" createInstance="yes" partnerLink="client" operation="concederCredito" portType="ns3:ServicioPrestamosPortType" variable="processInput"/>
+    <assign name="DefaultValues">
+      <copy>
+	<from>
+	  <literal><ns0:AssessorRequest><ns0:amount>0.0</ns0:amount></ns0:AssessorRequest></literal>
+	</from>
+	<to part="input" variable="assessorInput"/>
+      </copy>
+      <copy>
+	<from>
+	  <literal><ns0:ApprovalResponse><ns0:accept>false</ns0:accept></ns0:ApprovalResponse></literal>
+	  </from>
+	  <to part="output" variable="processOutput"/>
+      </copy>
+      <copy>
+	<from>
+	  <literal><ns0:ApprovalRequest><ns0:amount>0.0</ns0:amount></ns0:ApprovalRequest></literal>
+	</from>
+	<to part="input" variable="approverInput"/>
+      </copy>
+      <copy>
+	<from>true()</from>
+	<to variable="llamarAprobador"/>
+      </copy>
+    </assign>
+    <if name="If1">
+      <condition> number(string($processInput.input/ns0:amount)) &lt;= 10000 </condition>
+      <sequence name="SmallAmount">
+	<assign name="copyLoanInfoToAssessorInput">
+	  <copy>
+	    <from>$processInput.input/ns0:amount</from>
+	    <to>$assessorInput.input/ns0:amount</to>
+	  </copy>
+	</assign>
+	<invoke name="Task1" partnerLink="assessor" operation="asesorarCredito" portType="ns2:ServicioAsesorPortType" inputVariable="assessorInput" outputVariable="assessorOutput">
+		<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+			</bpelx:toProperties>
+	</invoke>
+	<if name="If2">
+	  <condition>string($assessorOutput.output/ns0:risk) != 'high'</condition>
+	  <sequence name="SmallAmountLowRisk">
+	    <assign name="approveLoan">
+	      <copy>
+		<from>true()</from>
+		<to>$processOutput.output/ns0:accept</to>
+	      </copy>
+	    </assign>
+	    <assign name="Llamada01">
+	      <copy>
+		<from>false()</from>
+		<to variable="llamarAprobador"/>
+	      </copy>
+	    </assign>
+	  </sequence>
+	  <else><empty/></else>
+	</if>
+      </sequence>
+    </if>
+    <if name="LlamarAprobadorIf">
+      <condition>$llamarAprobador</condition>
+      <sequence name="AskingApprover">
+	<assign name="copyLoanInfoToApproverInput2">
+	  <copy>
+	    <from>$processInput.input/ns0:amount</from>
+	    <to>$approverInput.input/ns0:amount</to>
+	  </copy>
+	</assign>
+	<invoke name="Task2"
+		partnerLink="approver"
+		operation="aprobarCredito"
+		portType="ns1:ServicioAprobadorPortType"
+		inputVariable="approverInput"
+		outputVariable="approverOutput">
+		<bpelx:toProperties>
+			<bpelx:toProperty name="probability">Task0:0.5 Task1:0.5</bpelx:toProperty>
+			<bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+		</bpelx:toProperties>
+	</invoke>
+	<assign name="copyApproval2">
+	  <copy>
+	    <from>$approverOutput.output/ns0:accept</from>
+	    <to>$processOutput.output/ns0:accept</to>
+	  </copy>
+	</assign>
+      </sequence>
+    </if>
+    <reply name="Reply1" partnerLink="client" operation="concederCredito" portType="ns3:ServicioPrestamosPortType" variable="processOutput"/>
+  </sequence>
+</process>

@@ -1,0 +1,1563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:ns2="http://j2ee.netbeans.org/wsdl/propiedadesWSDL" xmlns:ns1="http://j2ee.netbeans.org/wsdl/SynchronousSample" xmlns:ns4="http://j2ee.netbeans.org/wsdl/morosidadASNEF_WSDL" xmlns:ns3="http://j2ee.netbeans.org/wsdl/partnerWSDL" xmlns:tns="http://enterprise.netbeans.org/bpel/SynchronousSample/SynchronousSample" xmlns:ns0="http://xml.netbeans.org/schema/SynchronousSample" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://j2ee.netbeans.org/wsdl/obligacionesCIRBEwsdl" name="SynchronousSample" targetNamespace="http://enterprise.netbeans.org/bpel/SynchronousSample/SynchronousSample">
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="CLIENTE.wsdl" namespace="http://j2ee.netbeans.org/wsdl/SynchronousSample"/>
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="SEGURIDAD_SOCIAL.wsdl" namespace="http://j2ee.netbeans.org/wsdl/partnerWSDL"/>
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="REGISTRO_PROPIEDAD.wsdl" namespace="http://j2ee.netbeans.org/wsdl/propiedadesWSDL"/>
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="ASNEF.wsdl" namespace="http://j2ee.netbeans.org/wsdl/morosidadASNEF_WSDL"/>
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="CIRBE.wsdl" namespace="http://j2ee.netbeans.org/wsdl/obligacionesCIRBEwsdl"/>
+  <import importType="http://schemas.xmlsoap.org/wsdl/" location="AVAL.wsdl" namespace="http://j2ee.netbeans.org/wsdl/avalistaWSDL"/>
+  <partnerLinks>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/partnerWSDL" name="PL_SSOCIAL" partnerLinkType="tns:partnerWSDL" partnerRole="partnerWSDLPortTypeRole"/>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/propiedadesWSDL" name="PL_REGPROPIEDAD" partnerLinkType="tns:propiedadesWSDL" partnerRole="propiedadesWSDLPortTypeRole"/>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/morosidadASNEF_WSDL" name="PL_ASNEF" partnerLinkType="tns:morosidadASNEF_WSDL" partnerRole="morosidadASNEF_WSDLPortTypeRole"/>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/obligacionesCIRBEwsdl" name="PL_CIRBE" partnerLinkType="tns:obligacionesCIRBEwsdl" partnerRole="obligacionesCIRBEwsdlPortTypeRole"/>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/avalistaWSDL" name="PL_AVAL" partnerLinkType="tns:avalistaWSDL" partnerRole="avalistaWSDLPortTypeRole"/>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/SynchronousSample" myRole="SynchronousSamplePortTypeRole" name="PL_CLIENTE" partnerLinkType="tns:SynchronousSample"/>
+  </partnerLinks>
+  <variables>
+    <variable name="propiedadesEvaluacion" type="xsd:decimal"/>
+    <variable name="GlobalEvaluacion" type="xsd:decimal"/>
+    <variable name="acumuladoObligaciones" type="xsd:decimal"/>
+    <variable name="LaboralEvaluacion" type="xsd:decimal"/>
+    <variable name="necesarioAvalista" type="xsd:boolean"/>
+    <variable name="avalMoroso" type="xsd:boolean"/>
+    <variable name="avalEmbargado" type="xsd:boolean"/>
+
+    <variable messageType="ns1:errorMessage" name="error"/>
+    <variable name="prestamoConcedido" type="xsd:boolean"/>
+    <variable name="evaluoAvalista" type="xsd:boolean"/>
+    <variable name="SeguridadpropiedadesEvaluacion" type="xsd:decimal"/>
+    <variable messageType="ns1:entrada" name="datosAevaluar"/>
+    <variable name="TAE" type="xsd:decimal"/>
+    <variable name="TAERATE" type="xsd:decimal"/>
+    <variable name="POTENCIA" type="xsd:decimal"/>
+    <variable name="cuota" type="xsd:decimal"/>
+    <variable name="mesesPagar" type="xsd:decimal"/>
+    <variable name="idPrestamo" type="xsd:decimal"/>
+
+    <variable messageType="ns1:salida" name="CLIENTE_OperationOut"/>
+    <variable messageType="ns1:entrada" name="CLIENTE_OperationIn"/>
+    <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/avalistaWSDL" messageType="tns:AVAL_Response" name="AVAL_OperationOut"/>
+    <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/avalistaWSDL" messageType="tns:AVAL_Request" name="AVAL_OperationIn"/>
+  </variables>
+  <faultHandlers>
+    <!--errores-->
+    <catch faultName="tns:VidaLaboralFault">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorNumDias" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:ErrorEstudiosFault">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorEstudios" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:EstadoPropiedadInValidoFault">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorEstudios" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <!-- *** -->
+    <catch faultName="tns:FaultNumMesesDevolverIncorrecto">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<assign>
+	  <copy>
+	    <from>'Error Entrada:Numero Meses Reembolso incorrecto'</from>
+	    <to part="errorString" variable="error"/>
+	  </copy>
+	</assign>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorNumMesesDevolver" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:ErrorGrupoProfFault">		
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorProfesion" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:ErrorEstadCivilFault">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorCivil" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>
+    <!-- *** -->
+    <catch faultName="tns:FaultCantidadError">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<assign>
+	  <copy>
+	    <from>'Error Cantidad Solicitada: No se permite un préstamo menor a 3000€ ó mayor a 60.000€'</from>
+	    <to part="errorString" variable="error"/>
+	  </copy>
+	</assign>
+	<reply faultName="ns1:ErrorCancelacionFault" name="replyErrorCantidad" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="error"/>
+      </sequence>
+    </catch>		
+
+    <catch faultName="tns:DenegacionTrabajaPoco">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply name="ReplyTrabajaPoco" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+
+    <catch faultName="tns:DenegacionPropiedadEmbargada">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply name="ReplyPropEmbarg" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+
+    <catch faultName="tns:DenegacionMoroso">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply name="ReplyMoroso" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:DenegacionEvalPersonal">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply name="ReplyDenegarEvaluacionNegativa" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:DenegacionMesesCantidad">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<assign>
+	  <copy>
+	    <from>0</from>
+	    <to part="cuota" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>false()</from>
+	    <to part="dictamen" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>'Demasiados meses para esa cantidad'</from>
+	    <to part="razon" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	</assign>
+	<reply name="ReplyDenegadoPrimerUmbral" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+    <catch faultName="tns:DenegacionCanonFrances">
+      <sequence name="SequenceCanonFrancesDenegado">
+	<compensate name="ScopeCalculaGastos"/>
+	<assign name="AssignCanonFrancesDenegado">
+	  <copy>
+	    <from>0</from>
+	    <to part="cuota" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>false()</from>
+	    <to part="dictamen" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>'No pasa la frontera del Canon Frances'</from>
+	    <to part="razon" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	</assign>
+	<reply name="ReplyCanonFrances" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+
+    <catch faultName="tns:DenegacionEnParo">
+      <sequence>
+	<compensate name="ScopeCalculaGastos"/>
+	<reply name="ReplyDenegarEnParo" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+      </sequence>
+    </catch>
+
+  </faultHandlers>
+  <sequence name="MAIN">
+    <receive createInstance="yes" name="entradaCliente" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationIn"/>        
+    <sequence>
+      <assign>
+	<copy>
+	  <from>1</from>
+	  <to variable="propiedadesEvaluacion"/>
+	</copy>
+	<copy>
+	  <from>0</from>
+	  <to variable="idPrestamo"/>
+	</copy>
+	<copy>
+	  <from>false()</from>
+	  <to variable="necesarioAvalista"/>
+	</copy>
+	<copy>
+	  <from>false()</from>
+	  <to variable="avalMoroso"/>
+	</copy>
+	<copy>
+	  <from>false()</from>
+	  <to variable="avalEmbargado"/>
+	</copy>
+	<copy>
+	  <from>false()</from>
+	  <to variable="prestamoConcedido"/>
+	</copy>
+	<copy>
+	  <from>false()</from>
+	  <to variable="evaluoAvalista"/>
+	</copy>
+	<copy>
+	  <from part="datos" variable="CLIENTE_OperationIn"/>
+	  <to part="datos" variable="datosAevaluar"/>
+	</copy>
+      </assign>
+      <if>			
+	<condition>$CLIENTE_OperationIn.datos/ns0:numMesesPagar &lt; 12</condition>
+	<throw faultName="tns:FaultNumMesesDevolverIncorrecto"/>
+      </if>
+      <if>			
+	<condition>$CLIENTE_OperationIn.datos/ns0:cantidad &lt; 3000 or $CLIENTE_OperationIn.datos/ns0:cantidad &gt; 60000</condition>
+	<throw faultName="tns:FaultCantidadError"/>
+      </if>
+      <if>
+	<condition>  $CLIENTE_OperationIn.datos/ns0:numMesesPagar div $CLIENTE_OperationIn.datos/ns0:cantidad &gt; 0.0144  </condition>
+	<throw faultName="tns:DenegacionMesesCantidad"/>
+      </if>
+    </sequence>
+    <while name="WhileAvalista">
+      <condition>$prestamoConcedido = false()</condition>
+      <sequence>
+	<!-- flow principal-->
+	<!-- - - - -  - - - - - - - - - -  - - - - - - - - - -  - - - - - - SCOPE CALCULA GASTOS -  - -  - - - - - - - - - -  - - - - - - -->
+	<scope name="ScopeCalculaGastos">
+	  <variables>
+	    <variable messageType="ns5:CIRBE_Response" name="CIRBE_OperationOut"/>
+	    <variable messageType="ns5:CIRBE_Request" name="CIRBE_OperationIn"/>
+	    <variable messageType="ns5:CancelaNuevaObligacionRequest" name="CancelaNuevaObligacionIn"/>
+	    <variable messageType="ns5:CancelaNuevaObligacionResponse" name="CancelaNuevaObligacionOut"/>
+	  </variables>
+	  <compensationHandler>
+	    <sequence>
+	      <assign>
+		<copy>
+		  <from>$idPrestamo</from>
+		  <to part="idPrestamo" variable="CancelaNuevaObligacionIn"/>
+		</copy>
+	      </assign>
+	      <invoke inputVariable="CancelaNuevaObligacionIn" name="Task2" operation="CancelaNuevaObligacionCIRBE" outputVariable="CancelaNuevaObligacionOut" partnerLink="PL_CIRBE" portType="ns5:obligacionesCIRBEwsdlPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+	    </sequence>
+	  </compensationHandler>
+	  <sequence>
+	    <if>
+	      <condition>$evaluoAvalista = false()</condition>
+	      <sequence name="sequenceNoEvaluoAvalista3">
+		<assign>
+		  <copy>
+		    <from> $CLIENTE_OperationIn.datos/ns0:numMesesPagar</from>
+		    <to variable="mesesPagar"/>
+		  </copy>
+		  <copy>
+		    <from>8</from>
+		    <to variable="TAE"/>
+		  </copy>
+		  <copy>
+		    <from>($TAE div 100) div 12</from>
+		    <to variable="TAERATE"/>
+		  </copy>
+		  <copy>
+		    <from>1</from>
+		    <to variable="POTENCIA"/>
+		  </copy>
+		</assign>
+		<while>
+		  <condition>	($mesesPagar ) &gt; 0 </condition>
+		  <sequence>
+		    <assign>
+		      <copy>
+			<from>$POTENCIA * (1+$TAERATE)</from>
+			<to variable="POTENCIA"/>
+		      </copy>
+		      <copy>
+			<from>$mesesPagar - 1</from>
+			<to variable="mesesPagar"/>
+		      </copy>
+		    </assign>
+		  </sequence>
+		</while>
+		<assign>
+		  <copy>
+		    <from>(($CLIENTE_OperationIn.datos/ns0:cantidad  * $TAERATE)div(1-(1 div $POTENCIA))*100) div 100</from>
+		    <to variable="cuota"/>
+		  </copy>
+		  <copy>
+		    <from>$datosAevaluar.datos/ns0:dni</from>
+		    <to part="dni" variable="CIRBE_OperationIn"/>
+		  </copy>
+		  <copy>
+		    <from>$idPrestamo</from>
+		    <to part="idPrestamo" variable="CIRBE_OperationIn"/>
+		  </copy>
+		  <copy>
+		    <from>$cuota</from>
+		    <to part="cantidad" variable="CIRBE_OperationIn"/>
+		  </copy>
+		</assign>
+		<invoke inputVariable="CIRBE_OperationIn" name="Task1" operation="ConsultaYalmacenaCIRBE" outputVariable="CIRBE_OperationOut" partnerLink="PL_CIRBE" portType="ns5:obligacionesCIRBEwsdlPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+		<assign>
+		  <copy>
+		    <from>0</from>
+		    <to variable="acumuladoObligaciones"/>
+		  </copy>
+		</assign>
+		<forEach counterName="n" parallel="no">
+		  <startCounterValue>1</startCounterValue>
+		  <finalCounterValue>count($CIRBE_OperationOut.obligaciones/ns0:obl)</finalCounterValue>
+		  <scope>
+		    <sequence>
+		      <if>
+			<condition> $CIRBE_OperationOut.obligaciones/ns0:obl[$n]/ns0:TipoDeObligacion != 'Ninguno'</condition>
+			<sequence>
+			  <assign>
+			    <copy>
+			      <from>$CIRBE_OperationOut.obligaciones/ns0:obl[$n]/ns0:CantidadMensual + $acumuladoObligaciones</from>
+			      <to variable="acumuladoObligaciones"/>
+			    </copy>
+			  </assign>
+			</sequence>
+		      </if>
+		    </sequence>
+		  </scope>
+		</forEach>
+		<assign>
+		  <copy>
+		    <from>$acumuladoObligaciones + $datosAevaluar.datos/ns0:seguroVida + $datosAevaluar.datos/ns0:seguroCasa + $datosAevaluar.datos/ns0:gastoAgua + $datosAevaluar.datos/ns0:gastoLuz</from>
+		    <to variable="acumuladoObligaciones"/>
+		  </copy>
+		</assign>
+	      </sequence>
+	    </if>
+	  </sequence>
+	</scope>
+	<if>
+	  <condition>$acumuladoObligaciones &gt; $datosAevaluar.datos/ns0:salario * 0.4 and $evaluoAvalista = false()</condition>
+	  <throw faultName="tns:DenegacionCanonFrances"/>
+	</if>
+	<!-- - - - -  - - - - - - - - - -  - - - - - - - - - -  - - - - - - SCOPE CALCULA GASTOS  + ifCanon frances- - - -  - - - - - - - - - -  - - - - - - -->
+	<!-- - - - -  - - - - - - - - - -  - - - - - - - - - - flow principal - - - -  - - - - - - - - - -  - - - - - - - - - - -->
+        <flow name="flowPrincipal">
+	  <links>
+	    <link name="LinkVidaLaboral"/>
+	    <link name="LinkPropiedades"/>
+	  </links>
+	  <!-- -.- - - - - - - - - - - - - - - - - - - - - SCOPE propiedades- - - - - -  - - - - - - - - - - - - - - - - - - -->
+	  <scope isolated="yes" name="ScoperegistroPropiedades">
+	    <faultHandlers>
+	      <catch faultName="tns:DenegacionPropiedadEmbargada">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>0</from>
+		      <to part="cuota" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>false()</from>
+		      <to part="dictamen" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>'Tiene una propiedad embargada'</from>
+		      <to part="razon" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	      <catch faultName="tns:EstadoPropiedadInValidoFault">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>'Error Propiedades:El estado de esa propiedad no es valido'</from>
+		      <to part="errorString" variable="error"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	    </faultHandlers>
+	    <sources>
+	      <source linkName="LinkPropiedades"/>
+	    </sources>
+	    <variables>
+	      <variable name="contador2" type="xsd:decimal"/>
+	      <!--mensajes-->
+	      <variable messageType="ns2:REGPROPIEDAD_Response" name="REGPROPIEDAD_OperationOut"/>
+	      <variable messageType="ns2:REGPROPIEDAD_Request" name="REGPROPIEDAD_OperationIn"/>
+	    </variables>
+	    <sequence>
+	      <assign>
+		<copy>
+		  <from>1</from>
+		  <to variable="contador2"/>
+		</copy>
+	      </assign>
+	      <assign>
+		<copy>
+		  <from>$datosAevaluar.datos/ns0:dni</from>
+		  <to part="dni" variable="REGPROPIEDAD_OperationIn"/>
+		</copy>
+	      </assign>
+	      <invoke inputVariable="REGPROPIEDAD_OperationIn" name="Task3" operation="REGPROPIEDAD_Operation" outputVariable="REGPROPIEDAD_OperationOut" partnerLink="PL_REGPROPIEDAD" portType="ns2:propiedadesWSDLPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task0:0.5 Task1:0.5 Task2:1</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+	      <while name="WhilePropiedades">
+		<condition>$contador2 &lt;= count($REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple)</condition>
+		<sequence>
+		  <if>
+		    <condition> 'LibreDeCarga' = $REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple[$contador2]/ns0:Estado or 'HipotecadaConNosotros' = $REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple[$contador2]/ns0:Estado </condition>
+		    <sequence>
+		      <if>
+			<condition>$evaluoAvalista = true()</condition>
+			<sequence>							
+			  <assign name="AssignLibreDeCargaAvalista">
+			    <copy>
+			      <from>true()</from>
+			      <to variable="prestamoConcedido"/>
+			    </copy>
+			  </assign>
+			</sequence>
+		      </if>
+		      <assign>
+			<copy>
+			  <from>$propiedadesEvaluacion * 2</from>
+			  <to variable="propiedadesEvaluacion"/>
+			</copy>
+		      </assign>
+		    </sequence>
+		    <elseif>
+		      <condition> 'HipotecadaOtraEntidad' = $REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple[$contador2]/ns0:Estado </condition>
+		      <if>
+			<condition>$evaluoAvalista = false()</condition>
+			<assign name="AssignHipoOtraEntidad">
+			  <copy>
+			    <from>$propiedadesEvaluacion * 0.5</from>
+			    <to variable="propiedadesEvaluacion"/>
+			  </copy>
+			</assign>
+		      </if>
+		    </elseif>
+		    <!---->
+		    <elseif>
+		      <condition> 'Embargada' = $REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple[$contador2]/ns0:Estado </condition>
+		      <sequence>
+			<if>
+			  <condition>$evaluoAvalista = false()</condition>
+			  <throw faultName="tns:DenegacionPropiedadEmbargada"/>
+			  <else>	<!--evaluo al avalista. APAÑO HECHO PORQUE NO SÉ PORQUE NO ME FUNCIONABA COMO ESTABA ANTES.-->			
+			    <sequence>
+			      <assign>
+				<copy>
+				  <from>true()</from>
+				  <to variable="avalEmbargado"/>
+				</copy>
+			      </assign>
+			    </sequence>
+			  </else>
+			</if>
+		      </sequence>
+		    </elseif>
+		    <!---->
+		    <elseif>
+		      <condition> 'Ninguna' = $REGPROPIEDAD_OperationOut.propiedades/ns0:NotaSimple[$contador2]/ns0:Estado </condition>
+		      <assign>
+			<copy>
+			  <from>$propiedadesEvaluacion * 0.15</from>
+			  <to variable="propiedadesEvaluacion"/>
+			</copy>
+		      </assign>
+		    </elseif>
+		    <else>
+		      <throw faultName="tns:EstadoPropiedadInValidoFault"/>
+		    </else>
+		  </if>
+		  <assign>
+		    <copy>
+		      <from>$contador2 + 1</from>
+		      <to variable="contador2"/>
+		    </copy>
+		  </assign>
+		</sequence>
+	      </while>
+	      <if>
+		<condition>$evaluoAvalista = false()</condition>
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from variable="propiedadesEvaluacion"/>
+		      <to variable="SeguridadpropiedadesEvaluacion"/>
+		    </copy>
+		  </assign>
+		</sequence>
+	      </if>
+	    </sequence>
+	  </scope>
+	  <!-- - - - - - - - - - - - - - - - - - - - - - SCOPE propiedades- - - - - -  - - - - - - - - - - - - - - - - - - -->
+	  <!-- -.- - - - - - - - - - - - - - - - - - - - - SCOPE Vida laboral - - - - -  - - - - - - - - - - - - - - - - - - -->
+	  <scope isolated="yes" name="ScopeVidaLaboral">
+	    <faultHandlers>
+	      <catch faultName="tns:VidaLaboralFault">
+		<sequence name="sequenceVidaLaboralFault">
+		  <assign name="AssignErrorNumDias">
+		    <copy>
+		      <from>'Error Vida Laboral:La suma del numero de días por cada trabajo no coincide con el número de días totales'</from>
+		      <to part="errorString" variable="error"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	      <catch faultName="tns:DenegacionTrabajaPoco">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>0</from>
+		      <to part="cuota" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>false()</from>
+		      <to part="dictamen" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>'Ha trabajado usted muy poco'</from>
+		      <to part="razon" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	      <catch faultName="tns:DenegacionEnParo">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>0</from>
+		      <to part="cuota" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>false()</from>
+		      <to part="dictamen" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>'Actualmente está usted en paro'</from>
+		      <to part="razon" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	    </faultHandlers>
+	    <sources>
+	      <source linkName="LinkVidaLaboral"/>
+	    </sources>
+            <variables>
+	      <!-- variables de control-->
+	      <variable name="TipoContrato" type="xsd:double"/>
+	      <variable name="PuestoTrabajo" type="xsd:double"/>
+	      <variable name="numTrabajos" type="xsd:decimal"/>
+	      <variable name="contadorNum_dias" type="xsd:decimal"/>
+	      <variable name="coef1" type="xsd:decimal"/>
+	      <variable name="coef2" type="xsd:decimal"/>
+	      <variable name="contador" type="xsd:decimal"/>
+	      <variable name="ultimoTrabajo" type="xsd:decimal"/>
+	      <variable name="_diaHoy" type="xsd:decimal"/>
+	      <variable name="_mesHoy" type="xsd:decimal"/>
+	      <variable name="_anioHoy" type="xsd:decimal"/>
+	      <variable name="_diaVieja" type="xsd:decimal"/>
+	      <variable name="_mesVieja" type="xsd:decimal"/>
+	      <variable name="_anioVieja" type="xsd:decimal"/>
+	      <variable name="_contadorDias" type="xsd:decimal"/>
+	      <!---mensajes-->
+	      <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/partnerWSDL" messageType="ns3:SSOCIAL_Response" name="SSOCIAL_OperationOut"/>
+	      <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/partnerWSDL" messageType="ns3:SSOCIAL_Request" name="SSOCIAL_OperationIn"/>
+            </variables>
+	    <sequence>
+	      <if>
+		<condition>$evaluoAvalista = false()</condition>
+		<sequence name="sequenceNoevaluoAvalista1">
+		  <assign>
+		    <copy>
+		      <from>$datosAevaluar.datos/ns0:dni</from>
+		      <to part="dni" variable="SSOCIAL_OperationIn"/>
+		    </copy>
+		    <copy>
+		      <from>0</from>
+		      <to variable="contador"/>
+		    </copy>
+		    <copy>
+		      <from>1</from>
+		      <to variable="LaboralEvaluacion"/>
+		    </copy>
+		    <copy>
+		      <from>0</from>
+		      <to variable="contadorNum_dias"/>
+		    </copy>
+		  </assign>
+		  <invoke xmlns:tns="http://j2ee.netbeans.org/wsdl/partnerWSDL" inputVariable="SSOCIAL_OperationIn" name="Task4" operation="SSOCIAL_Operation" outputVariable="SSOCIAL_OperationOut" partnerLink="PL_SSOCIAL" portType="tns:partnerWSDLPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path3 path5 path7 path9 path11</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+		  <assign>
+		    <copy>
+		      <from>count($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo)</from>
+		      <to variable="ultimoTrabajo"/>
+		    </copy>
+		  </assign>
+		  <if>
+		    <condition> $SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$ultimoTrabajo]/ns0:FechaBaja != 'null' </condition>
+		    <sequence>
+		      <throw faultName="tns:DenegacionEnParo"/>
+		    </sequence>							
+		  </if>
+		  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+		  <!--<flow>-->
+		  <forEach counterName="n" parallel="no">
+		    <startCounterValue>1</startCounterValue>
+		    <finalCounterValue>count($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo)</finalCounterValue>
+		    <scope>
+		      <sequence>
+			<flow>
+			  <if>
+			    <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Contrato = '100'</condition>
+			    <assign name="IndTieCom">
+			      <copy>
+				<from>1</from>
+				<to variable="TipoContrato"/>
+			      </copy>
+			    </assign>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Contrato = '200'</condition>
+			      <assign name="IndTiePar">
+				<copy>
+				  <from>0.8</from>
+				  <to variable="TipoContrato"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Contrato = '401'</condition>
+			      <assign name="DDTieCom">
+				<copy>
+				  <from>0.64</from>
+				  <to variable="TipoContrato"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Contrato = '408'</condition>
+			      <assign name="TemTieCom">
+				<copy>
+				  <from>0.48</from>
+				  <to variable="TipoContrato"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Contrato = '501'</condition>
+			      <assign name="DDTiePar">
+				<copy>
+				  <from>0.32</from>
+				  <to variable="TipoContrato"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <else>
+			      <assign name="TemTiePar">
+				<copy>
+				  <from>0.16</from>
+				  <to variable="TipoContrato"/>
+				</copy>
+			      </assign>
+			    </else>
+			  </if>
+			  <if>
+			    <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '01'</condition>
+			    <assign name="Ingeniero">
+			      <copy>
+				<from>1</from>
+				<to variable="PuestoTrabajo"/>
+			      </copy>
+			    </assign>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '02'</condition>
+			      <assign name="Ing.Tec">
+				<copy>
+				  <from>0.9</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '03'</condition>
+			      <assign name="JefeAdm">
+				<copy>
+				  <from>0.81</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '04'</condition>
+			      <assign name="AyudNoTit">
+				<copy>
+				  <from>0.72</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '05'</condition>
+			      <assign name="OficAdmin">
+				<copy>
+				  <from>0.63</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '06'</condition>
+			      <assign name="Subalt">
+				<copy>
+				  <from>0.54</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '07'</condition>
+			      <assign name="AuxAdmin">
+				<copy>
+				  <from>0.45</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '08'</condition>
+			      <assign name="OfiPrim">
+				<copy>
+				  <from>0.36</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '09'</condition>
+			      <assign name="OfiTer">
+				<copy>
+				  <from>0.27</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <elseif>
+			      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:Puesto = '10'</condition>
+			      <assign name="Peones">
+				<copy>
+				  <from>0.18</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </elseif>
+			    <else>
+			      <assign name="Menores">
+				<copy>
+				  <from>0.09</from>
+				  <to variable="PuestoTrabajo"/>
+				</copy>
+			      </assign>
+			    </else>
+			  </if>
+			</flow>
+			<assign>
+			  <copy>
+			    <from>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:num_dias * $PuestoTrabajo * $TipoContrato + $contador</from>
+			    <to variable="contador"/>
+			  </copy>
+			  <copy>
+			    <from>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$n]/ns0:num_dias + $contadorNum_dias</from>
+			    <to variable="contadorNum_dias"/>
+			  </copy>
+			</assign>
+		      </sequence>
+		    </scope>
+		  </forEach>
+		  <!-- - - - - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - - -   - - - - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - - - -->
+		  <!-- cálculo aproximado del número de días trancurrido desde que empezó a trabajar por primera vez hasta la fecha de petición del préstamo-->
+		  <assign>
+		    <copy>
+		      <from>(number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:FechaEmision, 9, 2) ))</from>
+		      <to variable="_diaHoy"/>
+		    </copy>
+		    <copy>
+		      <from>(number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:FechaEmision, 6, 2) ))</from>
+		      <to variable="_mesHoy"/>
+		    </copy>
+		    <copy>
+		      <from>(number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:FechaEmision, 1, 4) ))</from>
+		      <to variable="_anioHoy"/>
+		    </copy>
+		    <copy>
+		      <from>number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[1]/ns0:FechaAlta, 9, 2))</from>
+		      <to variable="_diaVieja"/>
+		    </copy>
+		    <copy>
+		      <from>number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[1]/ns0:FechaAlta, 6, 2))</from>
+		      <to variable="_mesVieja"/>
+		    </copy>
+		    <copy>
+		      <from>number(substring($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[1]/ns0:FechaAlta, 1, 4))</from>
+		      <to variable="_anioVieja"/>
+		    </copy>
+		    <copy>
+		      <from>0</from>
+		      <to variable="_contadorDias"/>
+		    </copy>
+		  </assign>
+		  <while>
+		    <condition>($_mesVieja != $_mesHoy) or ($_diaVieja != $_diaHoy) or ($_anioVieja != $_anioHoy)
+		    </condition>
+		    <sequence>
+		      <if>
+			<condition>($_mesVieja ) = 1 or ($_mesVieja ) = 3 or ($_mesVieja ) = 5 or ($_mesVieja ) = 7 or ($_mesVieja ) = 8 or ($_mesVieja ) = 10 or ($_mesVieja ) = 12</condition>
+			<sequence>
+			  <if>
+			    <condition>$_diaVieja &lt;= 30 </condition>
+			    <sequence>
+			      <assign>
+				<copy>
+				  <from>$_diaVieja + 1</from>
+				  <to variable="_diaVieja"/>
+				</copy>
+			      </assign>
+			    </sequence>
+			    <else>
+			      <sequence>
+				<assign>
+				  <copy>
+				    <from>1</from>
+				    <to variable="_diaVieja"/>
+				  </copy>
+				</assign>
+				<!-- incrementamos mes-->
+				<if>
+				  <condition>$_mesVieja &lt;= 11</condition>
+				  <sequence>
+				    <assign>
+				      <copy>
+					<from>$_mesVieja + 1</from>
+					<to variable="_mesVieja"/>
+				      </copy>
+				    </assign>
+				  </sequence>
+				  <else><!-- si es diciembre, pasamos al siguiente año-->
+				    <sequence>
+				      <assign>
+					<copy>
+					  <from>1</from>
+					  <to variable="_mesVieja"/>
+					</copy>
+				      </assign>
+				      <assign>
+					<copy>
+					  <from>$_anioVieja + 1</from>
+					  <to variable="_anioVieja"/>
+					</copy>
+				      </assign>
+				    </sequence>
+				  </else>
+				</if>
+			      </sequence>
+			    </else>
+			  </if>
+			</sequence>
+			<elseif>
+			  <condition>($_mesVieja ) = 4 or ($_mesVieja ) = 6 or ($_mesVieja ) = 9 or ($_mesVieja ) = 11</condition>
+			  <sequence>
+			    <if>
+			      <condition>$_diaVieja &lt;= 29</condition>
+			      <sequence>
+				<assign>
+				  <copy>
+				    <from>$_diaVieja + 1</from>
+				    <to variable="_diaVieja"/>
+				  </copy>
+				</assign>
+			      </sequence>
+			      <else>
+				<sequence>
+				  <assign>
+				    <copy>
+				      <from>1</from>
+				      <to variable="_diaVieja"/>
+				    </copy>
+				  </assign>
+				  <if>
+				    <condition>$_mesVieja &lt;= 11</condition>
+				    <sequence>
+				      <assign>
+					<copy>
+					  <from>$_mesVieja + 1</from>
+					  <to variable="_mesVieja"/>
+					</copy>
+				      </assign>
+				    </sequence>
+				    <else>
+				      <sequence>
+					<assign>
+					  <copy>
+					    <from>1</from>
+					    <to variable="_mesVieja"/>
+					  </copy>
+					</assign>
+					<assign>
+					  <copy>
+					    <from>$_anioVieja + 1</from>
+					    <to variable="_anioVieja"/>
+					  </copy>
+					</assign>
+				      </sequence>
+				    </else>
+				  </if>
+				</sequence>
+			      </else>
+			    </if>
+			  </sequence>
+			</elseif>
+			<else><!-- mes de febrero-->
+			  <sequence>
+			    <if><!-- año bisiesto-->
+			      <condition>(($_anioVieja mod 4 = 0) or ($_anioVieja mod 100 != 0)) or (($_anioVieja mod 100 = 0) or ($_anioVieja mod 400 = 0))</condition>
+			      <sequence>
+				<if>
+				  <condition>$_diaVieja &lt;= 28</condition>
+				  <sequence>
+				    <assign>
+				      <copy>
+					<from>$_diaVieja + 1</from>
+					<to variable="_diaVieja"/>
+				      </copy>
+				    </assign>
+				  </sequence>
+				  <else>
+				    <sequence>
+				      <assign>
+					<copy>
+					  <from>1</from>
+					  <to variable="_diaVieja"/>
+					</copy>
+				      </assign>
+				      <if>
+					<condition>$_mesVieja &lt;= 11</condition>
+					<sequence>
+					  <assign>
+					    <copy>
+					      <from>$_mesVieja + 1</from>
+					      <to variable="_mesVieja"/>
+					    </copy>
+					  </assign>
+					</sequence>
+					<else>
+					  <sequence>
+					    <assign>
+					      <copy>
+						<from>1</from>
+						<to variable="_mesVieja"/>
+					      </copy>
+					    </assign>
+
+					    <assign>
+					      <copy>
+						<from>$_anioVieja + 1</from>
+						<to variable="_anioVieja"/>
+					      </copy>
+					    </assign>
+
+					  </sequence>
+					</else>
+				      </if>
+				    </sequence>
+				  </else>
+				</if>
+			      </sequence>
+			      <else>
+				<sequence>
+				  <if>
+				    <condition>$_diaVieja &lt;= 27</condition>
+				    <sequence>
+				      <assign>
+					<copy>
+					  <from>$_diaVieja + 1</from>
+					  <to variable="_diaVieja"/>
+					</copy>
+				      </assign>
+				    </sequence>
+				    <else>
+				      <if>(($_anioVieja mod 4 = 0) or ($_anioVieja mod 100 != 0)) or (($_anioVieja mod 100 = 0) or ($_anioVieja mod 400 = 0))
+				      <condition>$_mesVieja &lt;= 11</condition>
+				      <sequence>
+					<assign>
+					  <copy>
+					    <from>$_mesVieja + 1</from>
+					    <to variable="_mesVieja"/>
+					  </copy>
+					</assign>
+				      </sequence>
+				      <else>
+					<sequence>
+					  <assign>
+					    <copy>
+					      <from>1</from>
+					      <to variable="_mesVieja"/>
+					    </copy>
+					  </assign>
+
+					  <assign>
+					    <copy>
+					      <from>$_anioVieja + 1</from>
+					      <to variable="_anioVieja"/>
+					    </copy>
+					  </assign>
+					</sequence>
+				      </else>
+				      </if>
+				    </else>
+				  </if>
+				</sequence>
+			      </else> 
+			    </if>
+			  </sequence>
+			</else>
+		      </if>
+		      <assign>
+			<copy>
+			  <from>$_contadorDias + 1</from>
+			  <to variable="_contadorDias"/>
+			</copy>
+		      </assign>
+		    </sequence>
+		  </while>
+		  <!-- - - - - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - - -   - - - - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - - - -->
+		  <if>
+		    <condition>$contadorNum_dias != $SSOCIAL_OperationOut.VidaLaboral/ns0:TotalDias</condition>
+		    <throw faultName="tns:VidaLaboralFault"/>
+		  </if>
+		  <assign>
+		    <copy>
+		      <from>count($SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo)</from>
+		      <to variable="numTrabajos"/>
+		    </copy>
+		    <copy>
+		      <from>$contador div $numTrabajos </from>
+		      <to variable="coef1"/>
+		    </copy>
+		    <copy>
+		      <from>$SSOCIAL_OperationOut.VidaLaboral/ns0:TotalDias div $_contadorDias</from>
+		      <to variable="coef2"/>
+		    </copy>
+		  </assign>
+		  <if>
+		    <condition>$coef2 &gt; 0.5</condition>
+		    <assign name="PasaUmbral">
+		      <copy>
+			<from>$coef1 * $coef2</from>
+			<to variable="LaboralEvaluacion"/>
+		      </copy>
+		    </assign>
+		    <else>
+		      <throw faultName="tns:DenegacionTrabajaPoco"/>
+		    </else>
+		  </if>
+		  <if><!-- estudio - avalista-->
+		    <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:TotalDias &lt; 180 </condition>
+		    <assign>
+		      <copy>
+			<from>true()</from>
+			<to variable="necesarioAvalista"/>
+		      </copy>
+		    </assign>
+		    <elseif>
+		      <condition> $SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$ultimoTrabajo]/ns0:Contrato = '508'</condition>
+		      <assign>
+			<copy>
+			  <from>true()</from>
+			  <to variable="necesarioAvalista"/>
+			</copy>
+		      </assign>
+		    </elseif>
+		    <elseif>
+		      <condition>$SSOCIAL_OperationOut.VidaLaboral/ns0:Trabajo[$ultimoTrabajo]/ns0:Contrato = '408'</condition>
+		      <assign>
+			<copy>
+			  <from>true()</from>
+			  <to variable="necesarioAvalista"/>
+			</copy>
+		      </assign>
+		    </elseif>
+		  </if>
+		</sequence>
+	      </if>
+	    </sequence>
+	  </scope>
+	  <!-- -1.- - - - - - - - - - - - - - - - - - - - - SCOPE Vida laboral - - - - -  - - - - - - - - - - - - - - - - - - -->
+	  <!--5 - - - -  - - - - - - - - - -  - - - - - - - - - -  - - - - - - SCOPE Situacion Personal - - - -  - - - - - - - - - -  - - - - - - -->
+	  <scope name="ScopeEvaluaSituacionPersonal">
+	    <faultHandlers>
+	      <catch faultName="tns:ErrorEstudiosFault">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>'Error Estudios :Nivel estudios no permitido.'</from>
+		      <to part="errorString" variable="error"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>				
+	      <catch faultName="tns:ErrorGrupoProfFault">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>'Error Grupo Profesion :Grupo profesion no permitido.'</from>
+		      <to part="errorString" variable="error"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+	      <catch faultName="tns:ErrorEstadCivilFault">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>'Error Estado Civil :Estado civil no permitido.'</from>
+		      <to part="errorString" variable="error"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>				
+	      <catch faultName="tns:DenegacionEvalPersonal">
+		<sequence>
+		  <assign>
+		    <copy>
+		      <from>0</from>
+		      <to part="cuota" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>false()</from>
+		      <to part="dictamen" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>'No ha pasado la evaluacion global'</from>
+		      <to part="razon" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>				
+	    </faultHandlers>
+	    <targets>
+	      <joinCondition>$LinkVidaLaboral and $LinkPropiedades</joinCondition>
+	      <target linkName="LinkVidaLaboral"/>
+	      <target linkName="LinkPropiedades"/>
+	    </targets>
+	    <variables>
+	      <variable name="ProfesionEval" type="xsd:decimal"/>
+	      <variable name="EstudiosEval" type="xsd:decimal"/>
+	      <variable name="CivilEval" type="xsd:decimal"/>
+	    </variables>
+	    <sequence>
+	      <if><!--creo que no hace falta esta parte,no estoy seguro-->
+		<condition>$evaluoAvalista = false()</condition>
+		<sequence name="sequenceNoevaluoAvalista2">
+		  <flow>
+		    <if>
+		      <condition>$datosAevaluar.datos/ns0:Estudios = 'SinEstudios'</condition>
+		      <sequence>
+			<assign name="AssignSinEstudios">
+			  <copy>
+			    <from>0.15</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </sequence>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'PrimariosNoFinalizados'</condition>
+			<assign name="AssignNoFinalizados">
+			  <copy>
+			    <from>0.29</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'PrimariosFinalizados'</condition>
+			<assign name="AssignFinalizados">
+			  <copy>
+			    <from>0.43</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'ESO'</condition>
+			<assign name="AssignESO">
+			  <copy>
+			    <from>0.57</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'BACHILLERATO'</condition>
+			<assign name="AssignBachillerato">
+			  <copy>
+			    <from>0.72</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'IngTecnica'</condition>
+			<assign name="AssignTecnica">
+			  <copy>
+			    <from>0.86</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:Estudios = 'Ingenieria'</condition>
+			<assign name="AssignSuperior">
+			  <copy>
+			    <from>1</from>
+			    <to variable="EstudiosEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <else>
+			<throw faultName="tns:ErrorEstudiosFault"/>
+		      </else>
+		    </if>
+		    <if>
+		      <condition>$datosAevaluar.datos/ns0:grupoProfesion = 'Grupo1'</condition>
+		      <sequence>
+			<assign name="AssignGrupo1">
+			  <copy>
+			    <from>-0.2</from>
+			    <to variable="ProfesionEval"/>
+			  </copy>
+			</assign>
+		      </sequence>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:grupoProfesion = 'Grupo2'</condition>
+			<assign name="AssignGrupo2">
+			  <copy>
+			    <from>-0.4</from>
+			    <to variable="ProfesionEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:grupoProfesion = 'Grupo3'</condition>
+			<assign name="AssignGrupo3">
+			  <copy>
+			    <from>-0.6</from>
+			    <to variable="ProfesionEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:grupoProfesion = 'Grupo4'</condition>
+			<assign name="AssignGrupo4">
+			  <copy>
+			    <from>-0.8</from>
+			    <to variable="ProfesionEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:grupoProfesion = 'Grupo5'</condition>
+			<assign name="AssignGrupo5">
+			  <copy>
+			    <from>-1</from>
+			    <to variable="ProfesionEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <else>
+			<throw faultName="tns:ErrorGrupoProfFault"/>
+		      </else>
+		    </if>
+		    <if>
+		      <condition>$datosAevaluar.datos/ns0:EstadoCivil = 'Soltero'</condition>
+		      <sequence>
+			<assign name="AssignSoltero">
+			  <copy>
+			    <from>0.2</from>
+			    <to variable="CivilEval"/>
+			  </copy>
+			</assign>
+		      </sequence>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:EstadoCivil = 'Viudo'</condition>
+			<assign name="Assign2">
+			  <copy>
+			    <from>0.4</from>
+			    <to variable="CivilEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:EstadoCivil = 'Divorciado'</condition>
+			<assign name="AssignDivorciado">
+			  <copy>
+			    <from>0.6</from>
+			    <to variable="CivilEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:EstadoCivil = 'Separado'</condition>
+			<assign name="AssignSeparado">
+			  <copy>
+			    <from>0.8</from>
+			    <to variable="CivilEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <elseif>
+			<condition>$datosAevaluar.datos/ns0:EstadoCivil = 'Casado'</condition>
+			<assign>
+			  <copy>
+			    <from>1</from>
+			    <to variable="CivilEval"/>
+			  </copy>
+			</assign>
+		      </elseif>
+		      <else>
+			<throw faultName="tns:ErrorEstadCivilFault"/>
+		      </else>
+		    </if>
+		    <!-- SE ANALIZA DESDE LA ENTRADA-->
+		  </flow>
+		  <assign>
+		    <copy>
+		      <from>($LaboralEvaluacion + (-1 * $ProfesionEval) + $CivilEval + $EstudiosEval) * $propiedadesEvaluacion</from>
+		      <to variable="GlobalEvaluacion"/>
+		    </copy>
+		  </assign>
+		  <if>
+		    <condition>$GlobalEvaluacion &lt; 5.01</condition>
+		    <throw faultName="tns:DenegacionEvalPersonal"/>
+		  </if>
+		</sequence>
+	      </if>
+	    </sequence>
+	  </scope>
+	  <!-- - - - -  - - - - - - - - - -  - - - - - - - - - -  - - - - - - SCOPE Situacion Personal - - - -  - - - - - - - - - -  - - - - - - -->
+	  <!-- -3.- - - - - -  - - - - - - - -  - - - - - - - -  - - scopeMorosidad - - - - - - - - - - - - - - - - -  - - - - - - - -  - - - - - - - -  - - - -->
+	  <scope name="Scopemorosidad-ASNEF">
+	    <faultHandlers>
+	      <catch faultName="tns:DenegacionMoroso">
+		<sequence>
+		  <!--<if>
+		      <condition>$evaluoAvalista = false()</condition>-->
+		  <assign>
+		    <copy>
+		      <from>'Es usted moroso'</from>
+		      <to part="razon" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+		  <!--						<else>
+		      <assign>
+		      <copy>
+		      <from>'Su aval es moroso'</from>
+		      <to variable="CLIENTE_OperationOut" part="razon"/>
+		      </copy>
+		      </assign>
+		      </else>
+		      </if>-->
+		  <assign>
+		    <copy>
+		      <from>false()</from>
+		      <to part="dictamen" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		    <copy>
+		      <from>0</from>
+		      <to part="cuota" variable="CLIENTE_OperationOut"/>
+		    </copy>
+		  </assign>
+		  <rethrow/>
+		</sequence>
+	      </catch>
+
+	    </faultHandlers>
+
+	    <variables>
+	      <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/morosidadASNEF_WSDL" messageType="tns:ASNEF_Request" name="ASNEF_OperationIn"/>
+	      <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/morosidadASNEF_WSDL" messageType="tns:ASNEF_Response" name="ASNEF_OperationOut"/>
+	    </variables>
+	    <!--secuencia  ASNEF morosidad-->
+	    <sequence>
+	      <assign>
+		<copy>
+		  <from>$datosAevaluar.datos/ns0:dni</from>
+		  <to part="dni" variable="ASNEF_OperationIn"/>
+		</copy>
+	      </assign>
+	      <invoke inputVariable="ASNEF_OperationIn" name="Task5" operation="ASNEF_Operation" outputVariable="ASNEF_OperationOut" partnerLink="PL_ASNEF" portType="ns4:morosidadASNEF_WSDLPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task3:0.5 Task4:1</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+	      <if>
+		<condition>$ASNEF_OperationOut.esMoroso = true()</condition>
+		<sequence>
+		  <if>
+		    <condition>$evaluoAvalista = false()</condition>
+		    <throw faultName="tns:DenegacionMoroso"/>
+		    <else>	<!--evaluo al avalista. APAÑO HECHO PORQUE NO SÉ PORQUE NO ME FUNCIONABA COMO ESTABA ANTES.-->			
+		      <sequence>
+			<assign>
+			  <copy>
+			    <from>true()</from>
+			    <to variable="avalMoroso"/>
+			  </copy>
+			</assign>
+		      </sequence>
+		    </else>
+		  </if>
+		</sequence>
+	      </if>
+
+	    </sequence>
+	  </scope>
+	  <!-- -3.- - - - - - - - - - - - - -  - - - - - - - -  - - scopeMorosidad - - - - - - - - - - - - - - - - -  - - - - - - - -  - - - - - - - -  - - - -->
+	</flow>
+	<!-- - - - -  - - - - - - - - - -  - - - - - - - - - - flow principal - - - -  - - - - - - - - - -  - - - - - - - - - - -->
+	<!-- si ha llegado la ejecución hasta aquí es porque pasa todos los controles. Puede que necesite aval o no(concedido).-->
+	<if>
+	  <condition>($necesarioAvalista = true()) and ($prestamoConcedido != true())</condition>
+	  <sequence>
+	    <assign>
+	      <copy>
+		<from>$CLIENTE_OperationIn.datos/ns0:dni</from>
+		<to part="dni_cliente" variable="AVAL_OperationIn"/>
+	      </copy>
+	    </assign>
+	    <invoke xmlns:tns="http://j2ee.netbeans.org/wsdl/avalistaWSDL" inputVariable="AVAL_OperationIn" name="Task6" operation="AVAL_Operation" outputVariable="AVAL_OperationOut" partnerLink="PL_AVAL" portType="tns:avalistaWSDLPortType">
+			<bpelx:toProperties>
+				<bpelx:toProperty name="probability">Task5:0.5</bpelx:toProperty>
+				<bpelx:toProperty name="paths">path1 path2 path5 path6 path9 path10</bpelx:toProperty>
+			</bpelx:toProperties>
+		</invoke>
+	    <assign>
+	      <copy>
+		<from>true()</from>
+		<to variable="evaluoAvalista"/>
+	      </copy>
+	      <copy>
+		<from>false()</from><!-- esto es por si damos la posibilidad de tener un segundo avalista si el primero no es aceptado-->
+		<to variable="necesarioAvalista"/>
+	      </copy>
+	      <copy>
+		<from part="dni_aval" variable="AVAL_OperationOut"/>
+		<to part="datos" variable="datosAevaluar"/>
+	      </copy>
+	    </assign>
+	  </sequence>
+	  <else>
+	    <sequence>
+	      <assign>
+		<copy>
+		  <from>true()</from>
+		  <to variable="prestamoConcedido"/>
+		</copy>
+	      </assign>
+	    </sequence>
+	  </else>
+	</if>
+      </sequence>
+    </while>
+    <!--asignacion aceptacion final-->
+    <if>
+      <condition>$avalMoroso = false() and $avalEmbargado = false()</condition>
+      <sequence>
+	<assign>
+	  <copy>
+	    <from>$cuota</from>
+	    <to part="cuota" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>true()</from>
+	    <to part="dictamen" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>'Cumple todos los requisitos'</from>
+	    <to part="razon" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	</assign>
+      </sequence>
+      <elseif>
+	<condition>$avalMoroso = true()</condition>
+	<assign>
+	  <copy>
+	    <from>'Su aval es moroso'</from>
+	    <to part="razon" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>false()</from>
+	    <to part="dictamen" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>0</from>
+	    <to part="cuota" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	</assign>
+      </elseif>
+      <elseif>
+	<condition>$avalEmbargado = true()</condition>
+	<assign>
+	  <copy>
+	    <from>'A su aval le ha sido embargada una propiedad'</from>
+	    <to part="razon" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>false()</from>
+	    <to part="dictamen" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	  <copy>
+	    <from>0</from>
+	    <to part="cuota" variable="CLIENTE_OperationOut"/>
+	  </copy>
+	</assign>
+      </elseif>
+    </if>		
+
+    <reply name="RespuestaCliente" operation="CLIENTE_Operation" partnerLink="PL_CLIENTE" portType="ns1:SynchronousSamplePortType" variable="CLIENTE_OperationOut"/>
+  </sequence>
+</process>

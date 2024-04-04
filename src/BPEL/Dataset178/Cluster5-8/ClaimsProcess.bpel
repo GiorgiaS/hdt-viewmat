@@ -1,0 +1,1013 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:claim="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://ClaimProcess" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/claimRequest/2010/02/ClaimRequest.wsdl" xmlns:ns11="http://docs.oasis-open.org/ns/cmis/ws/200901" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:ns6="http://docs.oasis-open.org/ns/cmis/messaging/200901" xmlns:param="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/ClaimRules/2010/02/ClaimRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="ClaimsProcess" suppressJoinFailure="yes" targetNamespace="http://ClaimProcess">
+   <bpel:documentation>After a customer submits a new insurance claim (done through the web), this process is invoked.  &#13;
+&#13;
+The Claims process basically performs the following high-level activities:&#13;
+&#13;
+1) Validates the request against rules engine (Drools)&#13;
+2) Sends acknowledgement email&#13;
+3) Allows a claims-processor to perform an initial review (deny the claim, or continue the workflow)&#13;
+4) Allows a field-examiner to enter information regarding detailed cost of repairs that are covered&#13;
+5) Allows an adjuster to determine the market-value of the automobile&#13;
+6) Notifies the claims-processor when above activities are completed so he can perform a final review &#13;
+and make a judgment on the claim&#13;
+7) The process remains running until the check is cashed - or until a timer trigger is executed which will &#13;
+notify the loan-processor to contact the customer and find out why the check hasn't been cashed.  &#13;
+&#13;
+The duration of running time before the timer trigger is executed is based on a business rule.&#13;
+</bpel:documentation>
+   <b4p:humanInteractions xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:claim="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://ClaimProcess" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/claimRequest/2010/02/ClaimRequest.wsdl" xmlns:ns11="http://docs.oasis-open.org/ns/cmis/ws/200901" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:ns6="http://docs.oasis-open.org/ns/cmis/messaging/200901" xmlns:param="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/ClaimRules/2010/02/ClaimRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <htd:logicalPeopleGroups/>
+      <htd:tasks/>
+      <htd:notifications>
+         <htd:notification name="NotifyChief">
+            <htd:interface xmlns:ns="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" operation="sendNotification" portType="ns:wshtNotifpt"/>
+            <htd:priority>0</htd:priority>
+            <htd:peopleAssignments>
+               <htd:recipients>
+                  <htd:from>
+                     <htd:literal>
+                        <ht:organizationalEntity xmlns:ht="http://www.example.org/WS-HT">
+	                                <ht:users>
+		                                  <ht:user>chief</ht:user>
+	                                </ht:users>
+                              </ht:organizationalEntity>
+                     </htd:literal>
+                  </htd:from>
+               </htd:recipients>
+            </htd:peopleAssignments>
+            <htd:presentationElements>
+               <htd:name>Notify Chief</htd:name>
+               <htd:presentationParameters>
+                  <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="refNumber" type="ns:string">$refNumber</htd:presentationParameter>
+               </htd:presentationParameters>
+               <htd:subject>The  Ref: {$refNumber} estimation process has not been completed in time.</htd:subject>
+               <htd:description>Please take action on Ref: {$refNumber}</htd:description>
+            </htd:presentationElements>
+         </htd:notification>
+      </htd:notifications>
+   </b4p:humanInteractions>
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="133001768493602387" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="133001768495702491" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="133001768495702491"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="133001768495802503" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="133001768495802503"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="133001768495902515" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="133001768495902515"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="133001768496002527" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="133001768496002527"/>
+         <bpmndi:BPMNShape aei:objectId="133001768496502577" aei:type="CORRELATION_CONTAINER" bpmnElement="133001768496502577"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {526,874}" aei:objectId="133001768496502579" aei:type="SEQUENCE" bpmnElement="133001768496502579" isHorizontal="false">
+            <dc:Bounds height="1996" width="1426" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {243,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Customer Submits a Claim" aei:objectId="133001768496602581" aei:principal="" aei:type="RECEIVE" bpmnElement="133001768496602581">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {302,56}" aei:absoluteSize="DIM {132,13}" aei:anchor.location="1" aei:anchor.objectId="133001768496602581" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768496702583" aei:relative.location="LOC {14,21}" aei:text="Customer Submits a Claim" bpmnElement="133001768496602581label">
+               <dc:Bounds height="13" width="132" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {216,110}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Validate Request Using Rules Engine" aei:objectId="133001768496802585" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001768496802585">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Prepare_Request_Validation" aei:objectId="133001768496902591" aei:type="ASSIGN" bpmnElement="133001768496902591">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$claimRequest" aei:fromType="3" aei:objectId="133001768496902593" aei:toPart="Document" aei:toQuery="claim:claimRequest" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768496902593"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,188}" aei:absoluteSize="DIM {506,691}" aei:name="Is the request valid?" aei:objectId="133001768497002595" aei:type="IF" bpmnElement="133001768497002595" isHorizontal="false">
+            <dc:Bounds height="1813" width="1406" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {294,177}" aei:absoluteSize="DIM {102,13}" aei:anchor.location="4" aei:anchor.objectId="133001768497002595" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768497002597" aei:relative.location="LOC {6,-35}" aei:text="Is the request valid?" bpmnElement="133001768497002595label">
+               <dc:Bounds height="13" width="102" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$ClaimRulesOutput/qrulesd:IsValid = 'true'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {25,248}" aei:absoluteSize="DIM {353,571}" aei:objectId="133001768497102599" aei:text="Request Valid" aei:type="ELSE_IF" bpmnElement="133001768497002595ifDef">
+            <dc:Bounds height="1693" width="1253" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {208,235}" aei:absoluteSize="DIM {56,26}" aei:anchor.location="4" aei:anchor.objectId="133001768497102599" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506303067" aei:relative.location="LOC {-3,-37}" aei:text="Request Valid" bpmnElement="133001768497002595ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {44,277}" aei:absoluteSize="DIM {315,542}" aei:objectId="133001768497102601" aei:type="SEQUENCE" bpmnElement="133001768497102601" isHorizontal="false">
+            <dc:Bounds height="1669" width="1220" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {166,287}" aei:absoluteSize="DIM {70,60}" aei:name="Reply With Claim Number" aei:objectId="133001768497402623" aei:type="REPLY" bpmnElement="133001768497402623">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {220,323}" aei:absoluteSize="DIM {129,13}" aei:anchor.location="1" aei:anchor.objectId="133001768497402623" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768497502627" aei:relative.location="LOC {9,26}" aei:text="Reply With Claim Number" bpmnElement="133001768497402623label">
+               <dc:Bounds height="13" width="129" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768497602633" aei:type="ASSIGN" bpmnElement="133001768497602633">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;claim:claimAck xmlns:claim=&quot;http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd&quot;&gt;&#10;   &lt;claim:refNumber&gt;{ $refNumber}&lt;/claim:refNumber&gt;&#10;   &lt;claim:claimDate&gt;{ current-date()}&lt;/claim:claimDate&gt;&#10;   &lt;claim:claimStatus&gt;pending&lt;/claim:claimStatus&gt;&#10;&lt;/claim:claimAck&gt;&#10;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768497602635" aei:toPart="response" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768497602635"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {54,372}" aei:absoluteSize="DIM {295,259}" aei:expandedSize="DIM {568,295}" aei:objectId="133001768497202603" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768497202603" isHorizontal="false">
+            <dc:Bounds height="188" width="295" x="0" y="85"/>
+            <bpmndi:BPMNLabel aei:absoluteSize="DIM {0,0}" aei:anchor.location="11" aei:anchor.objectId="133001768497202603" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768497402621" aei:relative.location="LOC {0,5}" bpmnElement="133001768497202603label">
+               <dc:Bounds height="13" width="0" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {64,382}" aei:absoluteSize="DIM {145,243}" aei:objectId="133001768498202667" aei:type="SEQUENCE" bpmnElement="133001768498202667" isHorizontal="false">
+            <dc:Bounds height="248" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {101,392}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768498302669" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768498302669">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {74,477}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send Ack Email and Claim ID" aei:objectId="133001768498302671" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001768498302671">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768498402677" aei:type="ASSIGN" bpmnElement="133001768498402677">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $claimRequest/claim:contact/claim:email/text()  }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;VOSton Mutual Automobile Claim Confirmation: Claim# ({ $refNumber }) received. &lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/plain&quot;&gt;Dear { $claimRequest/claim:contact/claim:name/text() },&#10;&#10;Your claim request has been received and is currently under review. &#10;   &#10;You will be contacted by a claims representative within the next 24 hours.  Please use the Claim #: {$refNumber} to check status at http://{ $runtimeParameters/param:server/text() }/AVClaimClient/claimStatus.html.&#10;&#10;Regards,&#10;&#10;VOSton Mutual.&#10;Web: http://www.vostonmutual.com&#10;Tel: +1.866.555.1212&#10;Email: {$runtimeParameters/param:emailAddress/text()}&#10;&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768498502679" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768498502679"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {101,555}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768498502681" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768498502681">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {223,396}" aei:absoluteSize="DIM {110,160}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768498102659" aei:type="CATCH_ALL" bpmnElement="133001768498102659" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="164" y="19"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {276,406}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="133001768498102659" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768498202665" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="133001768498102659label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {243,466}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768498102661" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768498102661">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {233,456}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768498202663" aei:type="Sequence" bpmnElement="133001768498102661wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {139,656}" aei:absoluteSize="DIM {125,68}" aei:expanded="false" aei:expandedSize="DIM {1195,1055}" aei:name="Process the Claim" aei:objectId="133001768499302725" aei:showEventHandler="true" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768499302725" isHorizontal="false">
+            <dc:Bounds height="1055" width="1195" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {586,14}" aei:absoluteSize="DIM {92,13}" aei:anchor.location="11" aei:anchor.objectId="133001768499302725" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768499502743" aei:relative.location="LOC {-23,4}" aei:text="Process the Claim" bpmnElement="133001768499302725label">
+               <dc:Bounds height="13" width="92" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {30,50}" aei:absoluteSize="DIM {411,831}" aei:objectId="133001768502702927" aei:type="SEQUENCE" bpmnElement="133001768502702927" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="25" y="45"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {200,60}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768502702929" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768502702929">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {173,145}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Start Auto Claims Adjudication Process" aei:objectId="133001768502802931" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001768502802931">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Prepare_Estimation" aei:objectId="133001768502902939" aei:type="ASSIGN" bpmnElement="133001768502902939">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:EstimationRequest xmlns:ns3=&quot;http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd&quot; xmlns:qrulesd=&quot;http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd&quot; xmlns:claim=&quot;http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd&quot;&gt;&#10;   &lt;claim:refNumber&gt;{ $refNumber }&lt;/claim:refNumber&gt;&#10;   &lt;claim:claimRequest&gt;&#10;      &lt;claim:contact&gt;&#10;         &lt;claim:name&gt;{ $claimRequest/claim:contact/claim:name/text() }&lt;/claim:name&gt;&#10;         &lt;claim:homephone&gt;{ $claimRequest/claim:contact/claim:homephone/text() }&lt;/claim:homephone&gt;&#10;         &lt;claim:cellphone&gt;{ $claimRequest/claim:contact/claim:cellphone/text() }&lt;/claim:cellphone&gt;&#10;         &lt;claim:email&gt;{ $claimRequest/claim:contact/claim:email/text() }&lt;/claim:email&gt;&#10;      &lt;/claim:contact&gt;&#10;      &lt;claim:address&gt;&#10;         &lt;claim:street&gt;{ $claimRequest/claim:address/claim:street/text() }&lt;/claim:street&gt;&#10;         &lt;claim:city&gt;{ $claimRequest/claim:address/claim:city/text() }&lt;/claim:city&gt;&#10;         &lt;claim:state&gt;{ $claimRequest/claim:address/claim:state/text() }&lt;/claim:state&gt;&#10;         &lt;claim:zip&gt;{ $claimRequest/claim:address/claim:zip/text() }&lt;/claim:zip&gt;&#10;      &lt;/claim:address&gt;&#10;      &lt;claim:make&gt;{ $claimRequest/claim:make/text() }&lt;/claim:make&gt;&#10;      &lt;claim:model&gt;{ $claimRequest/claim:model/text() }&lt;/claim:model&gt;&#10;      &lt;claim:style&gt;{ $claimRequest/claim:style/text() }&lt;/claim:style&gt;&#10;      &lt;claim:year&gt;{ $claimRequest/claim:year/text() }&lt;/claim:year&gt;&#10;      &lt;claim:VIN&gt;{ $claimRequest/claim:VIN/text() }&lt;/claim:VIN&gt;&#10;      &lt;claim:policyNumber&gt;{ $claimRequest/claim:policyNumber/text() }&lt;/claim:policyNumber&gt;&#10;      &lt;claim:description&gt;{ $claimRequest/claim:description/text() }&lt;/claim:description&gt;&#10;      &lt;claim:links /&gt;&#10;   &lt;/claim:claimRequest&gt;&#10;   &lt;qrulesd:ClaimRulesOutput&gt;&#10;      &lt;qrulesd:IsValid&gt;{ $ClaimRulesOutput/qrulesd:IsValid/text() }&lt;/qrulesd:IsValid&gt;&#10;      &lt;qrulesd:ReasonOfRejection&gt;{ $ClaimRulesOutput/qrulesd:ReasonOfRejection/text() }&lt;/qrulesd:ReasonOfRejection&gt;&#10;      &lt;qrulesd:TimeToLive&gt;{ $ClaimRulesOutput/qrulesd:TimeToLive/text() }&lt;/qrulesd:TimeToLive&gt;&#10;      &lt;qrulesd:AdditionalActions&gt;{ $ClaimRulesOutput/qrulesd:AdditionalActions/text() }&lt;/qrulesd:AdditionalActions&gt;&#10;   &lt;/qrulesd:ClaimRulesOutput&gt;&#10;&lt;/ns3:EstimationRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768502902941" aei:toPart="Document" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768502902941"/>
+         <bpmndi:BPMNShape aei:fromExpression="abx:copyAllAttachments(&quot;claimRequest&quot;,&quot;parameters&quot;)" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768502902943" aei:toVariable="attachmentCopyResult" aei:type="ASSIGN_COPY" bpmnElement="133001768502902943"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {173,223}" aei:absoluteSize="DIM {125,53}" aei:name="Status In Progress" aei:objectId="133001768503002945" aei:type="ASSIGN" bpmnElement="133001768503002945">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'In process'" aei:fromType="3" aei:objectId="133001768503002947" aei:toVariable="ClaimStatus" aei:type="ASSIGN_COPY" bpmnElement="133001768503002947"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {200,301}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Get Adjudication Response" aei:objectId="133001768503002949" aei:principal="" aei:type="RECEIVE" bpmnElement="133001768503002949">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {262,317}" aei:absoluteSize="DIM {77,39}" aei:anchor.location="1" aei:anchor.objectId="133001768503002949" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768503102951" aei:relative.location="LOC {17,6}" aei:text="Get Adjudication Response" bpmnElement="133001768503002949label">
+               <dc:Bounds height="35" width="77" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {40,386}" aei:absoluteSize="DIM {391,485}" aei:name="Was the claim approved?" aei:objectId="133001768505603037" aei:type="IF" bpmnElement="133001768505603037" isHorizontal="false">
+            <dc:Bounds height="392" width="267" x="0" y="14"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {258,392}" aei:absoluteSize="DIM {124,13}" aei:anchor.location="4" aei:anchor.objectId="133001768505603037" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768505703039" aei:relative.location="LOC {13,-18}" aei:text="Was the claim approved?" bpmnElement="133001768505603037label">
+               <dc:Bounds height="13" width="124" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$EstimationResponse/claim:claimStatus/text() = 'APPROVED'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {40,446}" aei:absoluteSize="DIM {183,365}" aei:objectId="133001768505703041" aei:text="Yes" aei:type="ELSE_IF" bpmnElement="133001768505603037ifDef">
+            <dc:Bounds height="272" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {143,441}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="133001768505703041" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506103055" aei:relative.location="LOC {2,-29}" aei:text="Yes" bpmnElement="133001768505603037ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {59,475}" aei:absoluteSize="DIM {145,336}" aei:objectId="133001768505703043" aei:type="SEQUENCE" bpmnElement="133001768505703043" isHorizontal="false">
+            <dc:Bounds height="248" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {69,485}" aei:absoluteSize="DIM {125,53}" aei:name="Status Approved" aei:objectId="133001768505803045" aei:type="ASSIGN" bpmnElement="133001768505803045">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'Completed'" aei:fromType="3" aei:objectId="133001768505903047" aei:toVariable="ClaimStatus" aei:type="ASSIGN_COPY" bpmnElement="133001768505903047"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {69,563}" aei:absoluteSize="DIM {125,68}" aei:expanded="false" aei:expandedSize="DIM {280,259}" aei:name="Send email to Insured" aei:objectId="133001768503102953" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768503102953" isHorizontal="false">
+            <dc:Bounds height="259" width="280" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {19,19}" aei:absoluteSize="DIM {113,13}" aei:anchor.location="11" aei:anchor.objectId="133001768503102953" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768503302971" aei:relative.location="LOC {-141,-1}" aei:text="Send email to Insured" bpmnElement="133001768503102953label">
+               <dc:Bounds height="13" width="113" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {20,20}" aei:absoluteSize="DIM {145,243}" aei:objectId="133001768503602981" aei:type="SEQUENCE" bpmnElement="133001768503602981" isHorizontal="false">
+            <dc:Bounds height="248" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,30}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768503602983" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768503602983">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {30,115}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send email to Insured" aei:objectId="133001768503702985" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001768503702985">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768503702991" aei:type="ASSIGN" bpmnElement="133001768503702991">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $claimRequest/claim:contact/claim:email/text() }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;VOSton Mutual Auto Claim #: (Ref# { $refNumber })&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/html&quot;&gt;Dear { $claimRequest/claim:contact/claim:name/text() },&#10;&lt;html&gt;&#10;&lt;body&gt;&#10;&lt;p&gt;&#10;Claim #: { $refNumber } is {$ClaimStatus}. &#10;&lt;/p&gt;&#10;&lt;p&gt;Please call us at the number below if you have any questions.&lt;/p&gt;&#10;&lt;p&gt;&#10;Thank you for insuring your automobile with VOSton Mutual.&#10;&lt;br/&gt;&#10;Regards,&#10;&lt;/p&gt;&#10;&lt;p&gt;&#10;VOSton Mutual&lt;br/&gt;&#10;Web: http://www.vostonmutual.com&lt;br/&gt;&#10;Tel: +1.866.555.1212&lt;br/&gt;&#10;Email: {$runtimeParameters/param:emailAddress/text()}&lt;/p&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;&#10;&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768503802993" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768503802993"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,193}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768503802995" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768503802995">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {173,33}" aei:absoluteSize="DIM {110,160}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768503402973" aei:type="CATCH_ALL" bpmnElement="133001768503402973" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="158" y="18"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {250,37}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="133001768503402973" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768503602979" aei:relative.location="LOC {12,-6}" aei:text="Error" bpmnElement="133001768503402973label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {193,103}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768503502975" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768503502975">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {183,93}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768503502977" aei:type="Sequence" bpmnElement="133001768503502975wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {96,656}" aei:absoluteSize="DIM {70,60}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:name="Wait for Claim Check to be Processed" aei:objectId="133001768505903049" aei:type="WAIT" aei:waitDurationValue="&quot;P3D&quot;" bpmnElement="133001768505903049">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {145,689}" aei:absoluteSize="DIM {99,47}" aei:anchor.location="1" aei:anchor.objectId="133001768505903049" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506003051" aei:relative.location="LOC {4,23}" aei:text="Wait for Claim Check to be Processed" bpmnElement="133001768505903049label">
+               <dc:Bounds height="47" width="99" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {96,741}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768506003053" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768506003053">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {248,446}" aei:absoluteSize="DIM {183,365}" aei:objectId="133001768506103057" aei:type="ELSE" bpmnElement="133001768505603037elseDef">
+            <dc:Bounds height="62" width="59" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {350,441}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="133001768506103057" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506203061" aei:relative.location="LOC {1,-29}" aei:text="Else" bpmnElement="133001768505603037elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {267,475}" aei:absoluteSize="DIM {145,336}" aei:objectId="133001768506103059" aei:type="SEQUENCE" bpmnElement="133001768506103059" isHorizontal="false">
+            <dc:Bounds height="33" width="25" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {277,485}" aei:absoluteSize="DIM {125,53}" aei:name="Status Denied" aei:objectId="133511370469213833" aei:type="ASSIGN" bpmnElement="133511370469213833">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'Denied'" aei:fromType="3" aei:objectId="133511438832114549" aei:toVariable="ClaimStatus" aei:type="ASSIGN_COPY" bpmnElement="133511438832114549"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {10,10}" aei:absoluteSize="DIM {280,259}" aei:expanded="false" aei:expandedSize="DIM {280,259}" aei:name="Send email to Insured" aei:objectId="133523372410704200" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133523372410704200" isHorizontal="false">
+            <dc:Bounds height="259" width="280" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {19,19}" aei:absoluteSize="DIM {113,13}" aei:anchor.location="11" aei:anchor.objectId="133001768503102953" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133523372410704217" aei:relative.location="LOC {-141,-1}" aei:text="Send email to Insured" bpmnElement="133523372410704200label">
+               <dc:Bounds height="13" width="113" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {20,20}" aei:absoluteSize="DIM {145,243}" aei:objectId="133523372410704205" aei:type="SEQUENCE" bpmnElement="133523372410704205" isHorizontal="false">
+            <dc:Bounds height="248" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,30}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133523372410704206" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133523372410704206">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {30,115}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send email to Insured" aei:objectId="133523372410704207" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133523372410704207">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768503702991" aei:type="ASSIGN" bpmnElement="133001768503702991">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $claimRequest/claim:contact/claim:email/text() }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;VOSton Mutual Auto Claim #: (Ref# { $refNumber })&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/html&quot;&gt;Dear { $claimRequest/claim:contact/claim:name/text() },&#10;&lt;html&gt;&#10;&lt;body&gt;&#10;&lt;p&gt;&#10;We are sorry, your claim #: { $refNumber } is {$ClaimStatus}. &#10;&lt;/p&gt;&#10;&lt;p&gt;Please call us at the number below if you have any questions.&lt;/p&gt;&#10;&lt;br/&gt;&#10;&lt;p&gt;Regards,&lt;/p&gt;&#10;&lt;p&gt;&#10;VOSton Mutual&lt;br/&gt;&#10;Web: http://www.vostonmutual.com&lt;br/&gt;&#10;Tel: +1.866.555.1212&lt;br/&gt;&#10;Email: {$runtimeParameters/param:emailAddress/text()}&lt;/p&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;&#10;&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768503802993" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768503802993"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,193}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133523372410704208" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133523372410704208">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {173,33}" aei:absoluteSize="DIM {110,160}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133523372410704210" aei:type="CATCH_ALL" bpmnElement="133523372410704210" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="158" y="18"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {250,37}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="133001768503402973" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133523372410704213" aei:relative.location="LOC {12,-6}" aei:text="Error" bpmnElement="133523372410704210label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {193,103}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133523372410704212" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133523372410704212">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {183,93}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133523372410704211" aei:type="Sequence" bpmnElement="133523372410704212wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {304,656}" aei:absoluteSize="DIM {70,60}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:name="Keep-alive for status requests" aei:objectId="133511212914706963" aei:type="WAIT" aei:waitDurationValue="&quot;P1D&quot;" bpmnElement="133511212914706963">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {354,691}" aei:absoluteSize="DIM {145,13}" aei:anchor.location="1" aei:anchor.objectId="133511212914706963" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133511212914906965" aei:relative.location="LOC {5,25}" aei:text="Keep-alive for status requests" bpmnElement="133511212914706963label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {304,741}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133510051273235717" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133510051273235717">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {458,52}" aei:absoluteSize="DIM {200,452}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768499602745" aei:type="CATCH_ALL" bpmnElement="133001768499602745" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="453" y="47"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {596,65}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="133001768499602745" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768500902823" aei:relative.location="LOC {28,3}" aei:text="Error" bpmnElement="133001768499602745label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {478,122}" aei:absoluteSize="DIM {160,352}" aei:name="Handle Fault" aei:objectId="133001768499702747" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768499702747" isHorizontal="false">
+            <dc:Bounds height="352" width="160" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {537,137}" aei:absoluteSize="DIM {63,13}" aei:anchor.location="11" aei:anchor.objectId="133001768499702747" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768499902767" aei:relative.location="LOC {-31,5}" aei:text="Handle Fault" bpmnElement="133001768499702747label">
+               <dc:Bounds height="13" width="63" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {488,132}" aei:absoluteSize="DIM {145,336}" aei:objectId="133001768500002769" aei:type="SEQUENCE" bpmnElement="133001768500002769" isHorizontal="false">
+            <dc:Bounds height="341" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {525,142}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768500102771" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768500102771">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {498,227}" aei:absoluteSize="DIM {125,53}" aei:name="Status faulted" aei:objectId="133001768500102773" aei:type="ASSIGN" bpmnElement="133001768500102773">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'Faulted'" aei:fromType="3" aei:objectId="133001768500202775" aei:toVariable="ClaimStatus" aei:type="ASSIGN_COPY" bpmnElement="133001768500202775"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {498,305}" aei:absoluteSize="DIM {125,68}" aei:expanded="false" aei:expandedSize="DIM {280,259}" aei:name="Send problem email" aei:objectId="133001768500202777" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768500202777" isHorizontal="false">
+            <dc:Bounds height="259" width="280" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {22,22}" aei:absoluteSize="DIM {98,13}" aei:anchor.location="11" aei:anchor.objectId="133001768500202777" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768500402795" aei:relative.location="LOC {-138,2}" aei:text="Send problem email" bpmnElement="133001768500202777label">
+               <dc:Bounds height="13" width="98" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {20,20}" aei:absoluteSize="DIM {145,243}" aei:objectId="133001768500602805" aei:type="SEQUENCE" bpmnElement="133001768500602805" isHorizontal="false">
+            <dc:Bounds height="248" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,30}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768500702807" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768500702807">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {30,115}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send problem email" aei:objectId="133001768500702809" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001768500702809">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768500802815" aei:type="ASSIGN" bpmnElement="133001768500802815">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;{$runtimeParameters/param:emailAddress/text()}&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $claimRequest/claim:contact/claim:email/text() }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;We encountered a problem processing your request ( {$refNumber} )&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/plain&quot;&gt;We encountered a problem processing your request for claim (reference number { $refNumber }. Please contact us directly. VOSton Mutual!).&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768500902817" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768500902817"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {57,193}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768500902819" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768500902819">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {175,43}" aei:absoluteSize="DIM {110,160}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768500502797" aei:type="CATCH_ALL" bpmnElement="133001768500502797" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="160" y="28"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {256,49}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="133001768500502797" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768500602803" aei:relative.location="LOC {16,-4}" aei:text="Error" bpmnElement="133001768500502797label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {195,113}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768500502799" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768500502799">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {185,103}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768500602801" aei:type="Sequence" bpmnElement="133001768500502799wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {525,398}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768500902821" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768500902821">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {468,112}" aei:absoluteSize="DIM {180,372}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768499702765" aei:type="Sequence" bpmnElement="133001768499702747wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="568" width="340" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {675,55}" aei:absoluteSize="DIM {125,260}" aei:attachments="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768501002825" aei:type="ON_EVENT" bpmnElement="133001768501002825" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="670" y="50"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {726,65}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="133001768501002825" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768501702869" aei:relative.location="LOC {-21,0}" aei:text="Message" bpmnElement="133001768501002825label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {685,115}" aei:absoluteSize="DIM {105,180}" aei:name="Status Request" aei:objectId="133001768501002827" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768501002827" isHorizontal="false">
+            <dc:Bounds height="180" width="105" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {709,130}" aei:absoluteSize="DIM {77,13}" aei:anchor.location="11" aei:anchor.objectId="133001768501002827" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768501302847" aei:relative.location="LOC {-38,5}" aei:text="Status Request" bpmnElement="133001768501002827label">
+               <dc:Bounds height="13" width="77" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {690,120}" aei:absoluteSize="DIM {90,165}" aei:objectId="133001768501402849" aei:type="SEQUENCE" bpmnElement="133001768501402849" isHorizontal="false">
+            <dc:Bounds height="170" width="95" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {700,130}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768501402851" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768501402851">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {700,215}" aei:absoluteSize="DIM {70,60}" aei:name="Send status" aei:objectId="133001768501402853" aei:type="REPLY" bpmnElement="133001768501402853">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {715,272}" aei:absoluteSize="DIM {60,13}" aei:anchor.location="1" aei:anchor.objectId="133001768501402853" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768501502855" aei:relative.location="LOC {-30,47}" aei:text="Send status" bpmnElement="133001768501402853label">
+               <dc:Bounds height="13" width="60" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Format_Claim_Status_Reply" aei:objectId="133001768501502861" aei:type="ASSIGN" bpmnElement="133001768501502861">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$claimInquiryRequest.request/claim:refNumber" aei:fromType="3" aei:objectId="133001768501602863" aei:toPart="response" aei:toQuery="claim:refNumber" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768501602863"/>
+         <bpmndi:BPMNShape aei:fromExpression="$ClaimStatus" aei:fromType="3" aei:objectId="133001768501602865" aei:toPart="response" aei:toQuery="claim:claimStatus" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768501602865"/>
+         <bpmndi:BPMNShape aei:fromExpression="$EstimationResponse/claim:link" aei:fromType="3" aei:objectId="133001768501602867" aei:toPart="response" aei:toQuery="claim:link" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768501602867"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {812,55}" aei:absoluteSize="DIM {381,502}" aei:alarmDurationValue="&quot;P3D&quot;" aei:alarmExpression="&quot;P3D&quot;" aei:alarmNuberOfDays="1" aei:alarmRepeatEvery="" aei:alarmRepeatEveryLang="" aei:alarmTime="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="133001768501702871" aei:type="ON_ALARM_HANDLER" bpmnElement="133001768501702871" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="807" y="50"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {999,65}" aei:absoluteSize="DIM {26,13}" aei:anchor.location="0" aei:anchor.objectId="133001768501702871" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768502702925" aei:relative.location="LOC {-13,0}" aei:text="Timer" bpmnElement="133001768501702871label">
+               <dc:Bounds height="13" width="26" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {822,115}" aei:absoluteSize="DIM {361,422}" aei:name="Timeout" aei:objectId="133001768501802873" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="133001768501802873" isHorizontal="false">
+            <dc:Bounds height="422" width="297" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {993,130}" aei:absoluteSize="DIM {38,13}" aei:anchor.location="11" aei:anchor.objectId="133001768501802873" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768502002891" aei:relative.location="LOC {-19,5}" aei:text="Timeout" bpmnElement="133001768501802873label">
+               <dc:Bounds height="13" width="38" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {827,120}" aei:absoluteSize="DIM {356,412}" aei:objectId="133001768502102893" aei:type="SEQUENCE" bpmnElement="133001768502102893" isHorizontal="false">
+            <dc:Bounds height="412" width="287" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {970,130}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768502202895" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768502202895">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {837,215}" aei:absoluteSize="DIM {336,307}" aei:name="Has the Claim Check been Processed?" aei:objectId="133001768502202897" aei:type="IF" bpmnElement="133001768502202897" isHorizontal="false">
+            <dc:Bounds height="307" width="267" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1013,194}" aei:absoluteSize="DIM {98,41}" aei:anchor.location="4" aei:anchor.objectId="133001768502202897" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768502202899" aei:relative.location="LOC {-2,-45}" aei:text="Has the Claim Check been Processed?" bpmnElement="133001768502202897label">
+               <dc:Bounds height="41" width="98" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$ClaimStatus != 'Completed'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {837,275}" aei:absoluteSize="DIM {183,187}" aei:objectId="133001768502202901" aei:text="Yes" aei:type="ELSE_IF" bpmnElement="133001768502202897ifDef">
+            <dc:Bounds height="187" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {936,268}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="133001768502202901" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768502602917" aei:relative.location="LOC {-2,-31}" aei:text="Yes" bpmnElement="133001768502202897ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {856,304}" aei:absoluteSize="DIM {145,158}" aei:objectId="133001768502302903" aei:type="SEQUENCE" bpmnElement="133001768502302903" isHorizontal="false">
+            <dc:Bounds height="163" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {866,314}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Notify Loan Processor" aei:objectId="133001768502302905" aei:paSimulationFaultName="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="133001768502302905">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001768502502911" aei:type="ASSIGN" bpmnElement="133001768502502911">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;avc:sendNotification xmlns:avc=&quot;http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/&quot;&gt;&#10;   &lt;avc:processIdRef&gt;{$refNumber}&lt;/avc:processIdRef&gt;&#10;   &lt;avc:notifText&gt;Please review ASAP process {$refNumber} &lt;/avc:notifText&gt;&#10;&lt;/avc:sendNotification&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001768502502913" aei:toPart="parameters" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768502502913"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {893,392}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768502502915" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768502502915">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1045,275}" aei:absoluteSize="DIM {128,187}" aei:objectId="133001768502602919" aei:type="ELSE" bpmnElement="133001768502202897elseDef">
+            <dc:Bounds height="62" width="59" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1110,286}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="133001768502602919" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768502702923" aei:relative.location="LOC {-9,-13}" aei:text="Else" bpmnElement="133001768502202897elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1074,314}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133510052292835823" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133510052292835823">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:BPELDocumentation="[----][----][--The claim is complete.  No reminder necessary.--]" aei:absoluteLocation="LOC {1064,304}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768502602921" aei:type="Sequence" bpmnElement="133510052292835823wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="33" width="25" x="0" y="0"/>
+            <aei:Attribute name="WSBPEL_ExtensionAttributes">
+               <extensionAttributes>
+                  <extensionAttribute namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable" qualifiedName="aei:implicit" value="yes"/>
+               </extensionAttributes>
+            </aei:Attribute>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {166,749}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133001768506203063" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133001768506203063">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {403,248}" aei:absoluteSize="DIM {128,571}" aei:objectId="133001768506303069" aei:text="Request Invalid" aei:type="ELSE" bpmnElement="133001768497002595elseDef">
+            <dc:Bounds height="194" width="128" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {471,235}" aei:absoluteSize="DIM {71,36}" aei:anchor.location="4" aei:anchor.objectId="133001768506303069" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506803089" aei:relative.location="LOC {-6,-37}" aei:text="Request Invalid" bpmnElement="133001768497002595elseDeflabel">
+               <dc:Bounds height="36" width="71" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {432,287}" aei:absoluteSize="DIM {70,60}" aei:name="Request Input of Corrections" aei:objectId="133001768506503073" aei:type="REPLY" bpmnElement="133001768506503073">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {487,322}" aei:absoluteSize="DIM {149,13}" aei:anchor.location="1" aei:anchor.objectId="133001768506503073" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001768506603075" aei:relative.location="LOC {10,25}" aei:text="Request Input of Corrections" bpmnElement="133001768506503073label">
+               <dc:Bounds height="13" width="149" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Prepare_Fault" aei:objectId="133001768506603081" aei:type="ASSIGN" bpmnElement="133001768506603081">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="abx:getProcessId()" aei:fromType="3" aei:objectId="133001768506703083" aei:toPart="fault" aei:toQuery="claim:refNumber" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768506703083"/>
+         <bpmndi:BPMNShape aei:fromExpression="$ClaimRulesOutput/qrulesd:ReasonOfRejection" aei:fromType="3" aei:objectId="133001768506703085" aei:toPart="fault" aei:toQuery="claim:reason" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001768506703085"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {422,277}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001768506403071" aei:type="Sequence" bpmnElement="133001768506503073wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="170" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/BPEL4People"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/WS-HT"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/ClaimRequest.wsdl" namespace="http://docs.active-endpoints.com/activebpel/demo/claimRequest/2010/02/ClaimRequest.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/ClaimRequest.xsd" namespace="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/ClaimRules.wsdl" namespace="http://www.active-endpoints.com/demo/wsdl/ClaimRules/2010/02/ClaimRules.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/ClaimRules.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Estimation.wsdl" namespace="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/Estimation.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" namespace="http://schemas.active-endpoints.com/email/2007/01/email.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/NotificationInterface.wsdl" namespace="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/ClaimsProcess.private.wsdl" namespace="http://ClaimProcess"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/RuntimeParameters.xsd" namespace="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="133001768495702491" myRole="claim" name="Customer" partnerLinkType="ns1:ClaimRequestPLT">
+         <bpel:documentation>This is the person requesting the estimate.  They will have provided an email address as part of their original request.&#13;
+</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="133001768495802503" name="Rules_Service" partnerLinkType="qrules:ClaimRulesPLT" partnerRole="BusinessRulesService">
+         <bpel:documentation>Rules service implemented with DRools that will check that the estimate has been correctly filled out and also determine&#13;
+how long the estimate will be good for.</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="133001768495902515" myRole="EstimationRequestInitiator" name="Estimation_Subprocess" partnerLinkType="ns2:EstimationPLT" partnerRole="estimator">
+         <bpel:documentation>This is the process that determines the various experts that will be involved in the estimation process and the forms&#13;
+they will use.</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="133001768496002527" name="Email_Service" partnerLinkType="ns4:emailPLT" partnerRole="sender">
+         <bpel:documentation>This is the email service that will be used to communicate with the customer.</bpel:documentation>
+      </bpel:partnerLink>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable name="ClaimStatus" type="xsd:string"/>
+      <bpel:variable element="claim:claimRequest" name="claimRequest"/>
+      <bpel:variable element="qrulesd:ClaimRulesOutput" name="ClaimRulesOutput"/>
+      <bpel:variable element="ns3:EstimationResponse" name="EstimationResponse">
+         <bpel:from>
+            <bpel:literal>
+               <ns3:EstimationResponse>
+                  <claim:refNumber/>
+                  <claim:claimStatus/>
+                  <ns3:WorkCompletionDate>2099-01-01</ns3:WorkCompletionDate>
+                  <ns3:TotalCost/>
+                  <claim:link>
+                     <claim:URL/>
+                     <claim:description/>
+                  </claim:link>
+                  <ns3:Workflow_Flag/>
+                  <ns3:PartList/>
+               </ns3:EstimationResponse>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+      <bpel:variable element="ns3:EstimationRequestAck" name="EstimationAck"/>
+      <bpel:variable element="ns4:resultElement" name="emailResult"/>
+      <bpel:variable element="param:runtimeParameters" name="runtimeParameters">
+         <bpel:from>abx:getCatalogResource("project:/ClaimProcessing/support/runtimeParameters.xml")</bpel:from>
+      </bpel:variable>
+      <bpel:variable name="refNumber" type="xsd:string">
+         <bpel:from>abx:getProcessId()</bpel:from>
+      </bpel:variable>
+   </bpel:variables>
+   <bpel:correlationSets>
+      <bpel:correlationSet aei:id="133001768496502577" name="CS1" properties="ns1:ClaimRefId"/>
+   </bpel:correlationSets>
+   <bpel:sequence aei:id="133001768496502579">
+      <bpel:receive aei:id="133001768496602581" createInstance="yes" name="Customer_Submits_a_Claim" operation="ClaimRequestOperation" partnerLink="Customer" variable="claimRequest">
+         <bpel:documentation>Receive the initial request for an estimate from the presentation tier of the application.&#13;
+</bpel:documentation>
+      </bpel:receive>
+      <bpel:scope aei:implicit="true" name="Validate_Request_Using_Rules_Engine">
+         <bpel:variables>
+            <bpel:variable messageType="qrules:InvokeClaimRulesRequest" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="133001768496902591" name="Prepare_Request_Validation">
+               <bpel:copy aei:id="133001768496902593">
+                  <bpel:from>$claimRequest</bpel:from>
+                  <bpel:to part="Document" variable="parameters">
+                     <bpel:query>claim:claimRequest</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:invoke aei:id="133001768496802585" inputVariable="parameters" name="Task1" operation="InvokeClaimRules" outputVariable="ClaimRulesOutput" partnerLink="Rules_Service">
+               <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path1 path2 path3 path4 path5</bpelx:toProperty>
+               </bpelx:toProperties>
+      		</bpel:invoke>
+         </bpel:sequence>
+      </bpel:scope>
+      <bpel:if aei:id="133001768497002595" name="Is_the_request_valid">
+         <bpel:documentation>Did the rules service determine that the claim request is valid?</bpel:documentation>
+         <bpel:condition>$ClaimRulesOutput/qrulesd:IsValid = 'true'</bpel:condition>
+         <bpel:sequence aei:id="133001768497102601">
+            <bpel:scope aei:implicit="true" name="Reply_With_Claim_Number">
+               <bpel:variables>
+                  <bpel:variable messageType="ns1:ClaimResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="133001768497602633">
+                     <bpel:copy aei:id="133001768497602635">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<claim:claimAck xmlns:claim="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd">
+   <claim:refNumber>{ $refNumber}</claim:refNumber>
+   <claim:claimDate>{ current-date()}</claim:claimDate>
+   <claim:claimStatus>pending</claim:claimStatus>
+</claim:claimAck>
+]]></bpel:from>
+                        <bpel:to part="response" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="133001768497402623" name="Reply_With_Claim_Number" operation="ClaimRequestOperation" partnerLink="Customer" variable="parameters">
+                     <bpel:correlations>
+                        <bpel:correlation initiate="yes" set="CS1"/>
+                     </bpel:correlations>
+                  </bpel:reply>
+               </bpel:sequence>
+            </bpel:scope>
+            <bpel:scope aei:id="133001768497202603">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="133001768498102659">
+                     <bpel:empty aei:id="133001768498102661"/>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:sequence aei:id="133001768498202667">
+                  <bpel:empty aei:id="133001768498302669"/>
+                  <bpel:scope aei:implicit="true" name="Send_Ack_Email_and_Claim_ID">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="133001768498402677">
+                           <bpel:copy aei:id="133001768498502679">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>{$runtimeParameters/param:emailAddress/text()}</aem:from>
+   <aem:replyTo>{$runtimeParameters/param:emailAddress/text()}</aem:replyTo>
+   <aem:to>{ $claimRequest/claim:contact/claim:email/text()  }</aem:to>
+   <aem:subject>VOSton Mutual Automobile Claim Confirmation: Claim# ({ $refNumber }) received. </aem:subject>
+   <aem:body mimeType="text/plain">Dear { $claimRequest/claim:contact/claim:name/text() },
+
+Your claim request has been received and is currently under review. 
+   
+You will be contacted by a claims representative within the next 24 hours.  Please use the Claim #: {$refNumber} to check status at http://{ $runtimeParameters/param:server/text() }/AVClaimClient/claimStatus.html.
+
+Regards,
+
+VOSton Mutual.
+Web: http://www.vostonmutual.com
+Tel: +1.866.555.1212
+Email: {$runtimeParameters/param:emailAddress/text()}
+</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                              <bpel:to part="emailPart" variable="parameters"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:invoke aei:id="133001768498302671" inputVariable="parameters" name="Task2" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path2 path3 path4 path5</bpelx:toProperty>
+                           </bpelx:toProperties>
+                        </bpel:invoke>
+                     </bpel:sequence>
+                  </bpel:scope>
+                  <bpel:empty aei:id="133001768498502681"/>
+               </bpel:sequence>
+            </bpel:scope>
+            <bpel:scope aei:id="133001768499302725" name="Process_the_Claim">
+               <bpel:documentation>Scope that will control the call to the subprocess for generating the claim.</bpel:documentation>
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="133001768499602745">
+                     <bpel:documentation>Catch any problems that may occur either in this process or its subprocess.</bpel:documentation>
+                     <bpel:scope aei:id="133001768499702747" name="Handle_Fault">
+                        <bpel:sequence aei:id="133001768500002769">
+                           <bpel:empty aei:id="133001768500102771"/>
+                           <bpel:assign aei:id="133001768500102773" name="Status_faulted">
+                              <bpel:documentation>Set Status to "Faulted"</bpel:documentation>
+                              <bpel:copy aei:id="133001768500202775">
+                                 <bpel:from>'Faulted'</bpel:from>
+                                 <bpel:to variable="ClaimStatus"/>
+                              </bpel:copy>
+                           </bpel:assign>
+                           <bpel:scope aei:id="133001768500202777" name="Send_problem_email">
+                              <bpel:faultHandlers>
+                                 <bpel:catchAll aei:id="133001768500502797">
+                                    <bpel:empty aei:id="133001768500502799"/>
+                                 </bpel:catchAll>
+                              </bpel:faultHandlers>
+                              <bpel:sequence aei:id="133001768500602805">
+                                 <bpel:empty aei:id="133001768500702807"/>
+                                 <bpel:scope aei:implicit="true" name="Send_problem_email">
+                                    <bpel:variables>
+                                       <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                                    </bpel:variables>
+                                    <bpel:sequence>
+                                       <bpel:assign aei:id="133001768500802815">
+                                          <bpel:copy aei:id="133001768500902817">
+                                             <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>{$runtimeParameters/param:emailAddress/text()}</aem:from>
+   <aem:replyTo>{$runtimeParameters/param:emailAddress/text()}</aem:replyTo>
+   <aem:to>{ $claimRequest/claim:contact/claim:email/text() }</aem:to>
+   <aem:subject>We encountered a problem processing your request ( {$refNumber} )</aem:subject>
+   <aem:body mimeType="text/plain">We encountered a problem processing your request for claim (reference number { $refNumber }. Please contact us directly. VOSton Mutual!).</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                                             <bpel:to part="emailPart" variable="parameters"/>
+                                          </bpel:copy>
+                                       </bpel:assign>
+                                       <bpel:invoke aei:id="133001768500702809" inputVariable="parameters" name="Task6" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task4:0.5 Task5:0.5</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path3 path5</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </bpel:invoke>
+                                    </bpel:sequence>
+                                 </bpel:scope>
+                                 <bpel:empty aei:id="133001768500902819"/>
+                              </bpel:sequence>
+                           </bpel:scope>
+                           <bpel:empty aei:id="133001768500902821"/>
+                        </bpel:sequence>
+                     </bpel:scope>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:eventHandlers>
+                  <bpel:onEvent aei:id="133001768501002825" messageType="ns1:ClaimInquiryRequest" operation="ClaimInquiryOperation" partnerLink="Customer" variable="claimInquiryRequest">
+                     <bpel:correlations>
+                        <bpel:correlation initiate="no" set="CS1"/>
+                     </bpel:correlations>
+                     <bpel:scope aei:id="133001768501002827" name="Status_Request">
+                        <bpel:sequence aei:id="133001768501402849">
+                           <bpel:empty aei:id="133001768501402851"/>
+                           <bpel:scope aei:implicit="true" name="Send_status">
+                              <bpel:variables>
+                                 <bpel:variable messageType="ns1:ClaimInquiryResponse" name="parameters"/>
+                              </bpel:variables>
+                              <bpel:sequence>
+                                 <bpel:assign aei:id="133001768501502861" name="Format_Claim_Status_Reply">
+                                    <bpel:copy aei:id="133001768501602863">
+                                       <bpel:from>$claimInquiryRequest.request/claim:refNumber</bpel:from>
+                                       <bpel:to part="response" variable="parameters">
+                                          <bpel:query>claim:refNumber</bpel:query>
+                                       </bpel:to>
+                                    </bpel:copy>
+                                    <bpel:copy aei:id="133001768501602865">
+                                       <bpel:from>$ClaimStatus</bpel:from>
+                                       <bpel:to part="response" variable="parameters">
+                                          <bpel:query>claim:claimStatus</bpel:query>
+                                       </bpel:to>
+                                    </bpel:copy>
+                                    <bpel:copy aei:id="133001768501602867">
+                                       <bpel:from>$EstimationResponse/claim:link</bpel:from>
+                                       <bpel:to part="response" variable="parameters">
+                                          <bpel:query>claim:link</bpel:query>
+                                       </bpel:to>
+                                    </bpel:copy>
+                                 </bpel:assign>
+                                 <bpel:reply aei:id="133001768501402853" name="Send_status" operation="ClaimInquiryOperation" partnerLink="Customer" variable="parameters"/>
+                              </bpel:sequence>
+                           </bpel:scope>
+                        </bpel:sequence>
+                     </bpel:scope>
+                  </bpel:onEvent>
+                  <bpel:onAlarm aei:id="133001768501702871">
+                     <bpel:documentation>If the check hasn't been cashed in 15 days (default from rules system), this block of code will be triggered and send a notification to the loan-processor so he or she can issue a new check if needed.</bpel:documentation>
+                     <bpel:for>"P3D"</bpel:for>
+                     <bpel:scope aei:id="133001768501802873" name="Timeout">
+                        <bpel:sequence aei:id="133001768502102893">
+                           <bpel:empty aei:id="133001768502202895"/>
+                           <bpel:if aei:id="133001768502202897" name="Has_the_Claim_Check_been_Processed">
+                              <bpel:documentation>Create a task for the loan processor to determine why the check has not been cashed.</bpel:documentation>
+                              <bpel:condition>$ClaimStatus != 'Completed'</bpel:condition>
+                              <bpel:sequence aei:id="133001768502302903">
+                                 <bpel:scope aei:implicit="true" name="Notify_Loan_Processor">
+                                    <bpel:variables>
+                                       <bpel:variable messageType="avc:sendNotificationRequest" name="parameters"/>
+                                    </bpel:variables>
+                                    <bpel:sequence>
+                                       <bpel:assign aei:id="133001768502502911">
+                                          <bpel:copy aei:id="133001768502502913">
+                                             <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<avc:sendNotification xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/">
+   <avc:processIdRef>{$refNumber}</avc:processIdRef>
+   <avc:notifText>Please review ASAP process {$refNumber} </avc:notifText>
+</avc:sendNotification>]]></bpel:from>
+                                             <bpel:to part="parameters" variable="parameters"/>
+                                          </bpel:copy>
+                                       </bpel:assign>
+                                       <bpel:extensionActivity>
+                                          <b4p:peopleActivity aei:id="133001768502302905" inputVariable="parameters" name="Notify_Loan_Processor">
+                                             <b4p:localNotification reference="NotifyChief" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:claim="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://ClaimProcess" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/claimRequest/2010/02/ClaimRequest.wsdl" xmlns:ns11="http://docs.oasis-open.org/ns/cmis/ws/200901" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:ns6="http://docs.oasis-open.org/ns/cmis/messaging/200901" xmlns:param="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/ClaimRules/2010/02/ClaimRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                                                <htd:peopleAssignments/>
+                                             </b4p:localNotification>
+                                          </b4p:peopleActivity>
+                                       </bpel:extensionActivity>
+                                    </bpel:sequence>
+                                 </bpel:scope>
+                                 <bpel:empty aei:id="133001768502502915"/>
+                              </bpel:sequence>
+                              <bpel:else aei:id="133001768502602919">
+                                 <bpel:empty aei:id="133510052292835823"/>
+                              </bpel:else>
+                           </bpel:if>
+                        </bpel:sequence>
+                     </bpel:scope>
+                  </bpel:onAlarm>
+               </bpel:eventHandlers>
+               <bpel:sequence aei:id="133001768502702927">
+                  <bpel:documentation>Update unternal status to 'approved'</bpel:documentation>
+                  <bpel:empty aei:id="133001768502702929"/>
+                  <bpel:scope aei:implicit="true" name="Start_Auto_Claims_Adjudication_Process">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns2:InvokeEstimationRequest" name="parameters"/>
+                        <bpel:variable name="attachmentCopyResult" type="xsd:string"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="133001768502902939" name="Prepare_Estimation">
+                           <bpel:copy aei:id="133001768502902941">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:EstimationRequest xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/ClaimRules/2010/02/ClaimRules.xsd" xmlns:claim="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd">
+   <claim:refNumber>{ $refNumber }</claim:refNumber>
+   <claim:claimRequest>
+      <claim:contact>
+         <claim:name>{ $claimRequest/claim:contact/claim:name/text() }</claim:name>
+         <claim:homephone>{ $claimRequest/claim:contact/claim:homephone/text() }</claim:homephone>
+         <claim:cellphone>{ $claimRequest/claim:contact/claim:cellphone/text() }</claim:cellphone>
+         <claim:email>{ $claimRequest/claim:contact/claim:email/text() }</claim:email>
+      </claim:contact>
+      <claim:address>
+         <claim:street>{ $claimRequest/claim:address/claim:street/text() }</claim:street>
+         <claim:city>{ $claimRequest/claim:address/claim:city/text() }</claim:city>
+         <claim:state>{ $claimRequest/claim:address/claim:state/text() }</claim:state>
+         <claim:zip>{ $claimRequest/claim:address/claim:zip/text() }</claim:zip>
+      </claim:address>
+      <claim:make>{ $claimRequest/claim:make/text() }</claim:make>
+      <claim:model>{ $claimRequest/claim:model/text() }</claim:model>
+      <claim:style>{ $claimRequest/claim:style/text() }</claim:style>
+      <claim:year>{ $claimRequest/claim:year/text() }</claim:year>
+      <claim:VIN>{ $claimRequest/claim:VIN/text() }</claim:VIN>
+      <claim:policyNumber>{ $claimRequest/claim:policyNumber/text() }</claim:policyNumber>
+      <claim:description>{ $claimRequest/claim:description/text() }</claim:description>
+      <claim:links />
+   </claim:claimRequest>
+   <qrulesd:ClaimRulesOutput>
+      <qrulesd:IsValid>{ $ClaimRulesOutput/qrulesd:IsValid/text() }</qrulesd:IsValid>
+      <qrulesd:ReasonOfRejection>{ $ClaimRulesOutput/qrulesd:ReasonOfRejection/text() }</qrulesd:ReasonOfRejection>
+      <qrulesd:TimeToLive>{ $ClaimRulesOutput/qrulesd:TimeToLive/text() }</qrulesd:TimeToLive>
+      <qrulesd:AdditionalActions>{ $ClaimRulesOutput/qrulesd:AdditionalActions/text() }</qrulesd:AdditionalActions>
+   </qrulesd:ClaimRulesOutput>
+</ns3:EstimationRequest>]]></bpel:from>
+                              <bpel:to part="Document" variable="parameters"/>
+                           </bpel:copy>
+                           <bpel:copy aei:id="133001768502902943">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[abx:copyAllAttachments("claimRequest","parameters")]]></bpel:from>
+                              <bpel:to variable="attachmentCopyResult"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:invoke aei:id="133001768502802931" inputVariable="parameters" name="Task3" operation="InvokeEstimation" outputVariable="EstimationAck" partnerLink="Estimation_Subprocess">
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task2:1</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path2 path3 path4 path5</bpelx:toProperty>
+                           </bpelx:toProperties>
+                        </bpel:invoke>
+                     </bpel:sequence>
+                  </bpel:scope>
+                  <bpel:assign aei:id="133001768503002945" name="Status_In_Progress">
+                     <bpel:documentation>Set Status to "In progress"</bpel:documentation>
+                     <bpel:copy aei:id="133001768503002947">
+                        <bpel:from>'In process'</bpel:from>
+                        <bpel:to variable="ClaimStatus"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:receive aei:id="133001768503002949" name="Get_Adjudication_Response" operation="SendEstimationResult" partnerLink="Estimation_Subprocess" variable="EstimationResponse">
+                     <bpel:documentation>Receive the response from the subprocess.</bpel:documentation>
+                     <bpel:correlations>
+                        <bpel:correlation initiate="no" set="CS1"/>
+                     </bpel:correlations>
+                  </bpel:receive>
+                  <bpel:if aei:id="133001768505603037" name="Was_the_claim_approved">
+                     <bpel:documentation>If the claim was denied, the process ends.&#13;
+&#13;
+If the claim was approved, it's assumed that a check was issued to the customer (or directly to the repair shop doing the work).  The process will remain in a 'running' state until either the check is cashed, or the time-limit is reached at which time the check has expired.  If the check has expired, a timer trigger will automatically notify the loan-processor so he can investigate why the check has not cleared and issue a new check if needed.</bpel:documentation>
+                     <bpel:condition>$EstimationResponse/claim:claimStatus/text() = 'APPROVED'</bpel:condition>
+                     <bpel:sequence aei:id="133001768505703043">
+                        <bpel:assign aei:id="133001768505803045" name="Status_Approved">
+                           <bpel:documentation>Set Status to "Completed"</bpel:documentation>
+                           <bpel:copy aei:id="133001768505903047">
+                              <bpel:from>'Completed'</bpel:from>
+                              <bpel:to variable="ClaimStatus"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:id="133001768503102953" name="Send_email_to_Insured">
+                           <bpel:documentation>send final claim response to the customer.</bpel:documentation>
+                           <bpel:faultHandlers>
+                              <bpel:catchAll aei:id="133001768503402973">
+                                 <bpel:empty aei:id="133001768503502975"/>
+                              </bpel:catchAll>
+                           </bpel:faultHandlers>
+                           <bpel:sequence aei:id="133001768503602981">
+                              <bpel:empty aei:id="133001768503602983"/>
+                              <bpel:scope aei:implicit="true" name="Send_email_to_Insured">
+                                 <bpel:variables>
+                                    <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                                 </bpel:variables>
+                                 <bpel:sequence>
+                                    <bpel:assign aei:id="133001768503702991">
+                                       <bpel:copy aei:id="133001768503802993">
+                                          <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>{$runtimeParameters/param:emailAddress/text()}</aem:from>
+   <aem:replyTo>{$runtimeParameters/param:emailAddress/text()}</aem:replyTo>
+   <aem:to>{ $claimRequest/claim:contact/claim:email/text() }</aem:to>
+   <aem:subject>VOSton Mutual Auto Claim #: (Ref# { $refNumber })</aem:subject>
+   <aem:body mimeType="text/html">Dear { $claimRequest/claim:contact/claim:name/text() },
+<html>
+<body>
+<p>
+Claim #: { $refNumber } is {$ClaimStatus}. 
+</p>
+<p>Please call us at the number below if you have any questions.</p>
+<p>
+Thank you for insuring your automobile with VOSton Mutual.
+<br/>
+Regards,
+</p>
+<p>
+VOSton Mutual<br/>
+Web: http://www.vostonmutual.com<br/>
+Tel: +1.866.555.1212<br/>
+Email: {$runtimeParameters/param:emailAddress/text()}</p>
+</body>
+</html>
+</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                                          <bpel:to part="emailPart" variable="parameters"/>
+                                       </bpel:copy>
+                                    </bpel:assign>
+                                    <bpel:invoke aei:id="133001768503702985" inputVariable="parameters" name="Task4" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                                       <bpelx:toProperties>
+                                          <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+                                          <bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+                                       </bpelx:toProperties>
+                                    </bpel:invoke>
+                                 </bpel:sequence>
+                              </bpel:scope>
+                              <bpel:empty aei:id="133001768503802995"/>
+                           </bpel:sequence>
+                        </bpel:scope>
+                        <bpel:wait aei:id="133001768505903049" name="Wait_for_Claim_Check_to_be_Processed">
+                           <bpel:documentation>Wait for a period of time (determined by the rules engine) for the check to be cashed - &#13;
+at which time the process will be completed.  If the check has expired, a timer trigger will &#13;
+notify the loan-processor that the check was not cashed so he can contact the customer &#13;
+and issue a new check if needed.</bpel:documentation>
+                           <bpel:for>"P3D"</bpel:for>
+                        </bpel:wait>
+                        <bpel:empty aei:id="133001768506003053"/>
+                     </bpel:sequence>
+                     <bpel:else aei:id="133001768506103057">
+                        <bpel:sequence aei:id="133001768506103059" aei:implicit="yes">
+                           <bpel:assign aei:id="133511370469213833" name="Status_Denied">
+                              <bpel:copy aei:id="133511438832114549">
+                                 <bpel:from>'Denied'</bpel:from>
+                                 <bpel:to variable="ClaimStatus"/>
+                              </bpel:copy>
+                           </bpel:assign>
+                           <bpel:scope aei:id="133523372410704200" name="Send_email_to_Insured">
+                              <bpel:documentation>send final claim response to the customer.</bpel:documentation>
+                              <bpel:faultHandlers>
+                                 <bpel:catchAll aei:id="133523372410704210">
+                                    <bpel:empty aei:id="133523372410704212"/>
+                                 </bpel:catchAll>
+                              </bpel:faultHandlers>
+                              <bpel:sequence aei:id="133523372410704205">
+                                 <bpel:empty aei:id="133523372410704206"/>
+                                 <bpel:scope aei:implicit="true" name="Send_email_to_Insured">
+                                    <bpel:variables>
+                                       <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                                    </bpel:variables>
+                                    <bpel:sequence>
+                                       <bpel:assign aei:id="133001768503702991">
+                                          <bpel:copy aei:id="133001768503802993">
+                                             <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>{$runtimeParameters/param:emailAddress/text()}</aem:from>
+   <aem:replyTo>{$runtimeParameters/param:emailAddress/text()}</aem:replyTo>
+   <aem:to>{ $claimRequest/claim:contact/claim:email/text() }</aem:to>
+   <aem:subject>VOSton Mutual Auto Claim #: (Ref# { $refNumber })</aem:subject>
+   <aem:body mimeType="text/html">Dear { $claimRequest/claim:contact/claim:name/text() },
+<html>
+<body>
+<p>
+We are sorry, your claim #: { $refNumber } is {$ClaimStatus}. 
+</p>
+<p>Please call us at the number below if you have any questions.</p>
+<br/>
+<p>Regards,</p>
+<p>
+VOSton Mutual<br/>
+Web: http://www.vostonmutual.com<br/>
+Tel: +1.866.555.1212<br/>
+Email: {$runtimeParameters/param:emailAddress/text()}</p>
+</body>
+</html>
+</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                                             <bpel:to part="emailPart" variable="parameters"/>
+                                          </bpel:copy>
+                                       </bpel:assign>
+                                       <bpel:invoke aei:id="133523372410704207" inputVariable="parameters" name="Task5" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path4 path5</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </bpel:invoke>
+                                    </bpel:sequence>
+                                 </bpel:scope>
+                                 <bpel:empty aei:id="133523372410704208"/>
+                              </bpel:sequence>
+                           </bpel:scope>
+                           <bpel:wait aei:id="133511212914706963" name="Keep-alive_for_status_requests">
+                              <bpel:documentation>Wait 1 day allowing a customer to check status.</bpel:documentation>
+                              <bpel:for>"P1D"</bpel:for>
+                           </bpel:wait>
+                           <bpel:empty aei:id="133510051273235717"/>
+                        </bpel:sequence>
+                     </bpel:else>
+                  </bpel:if>
+               </bpel:sequence>
+            </bpel:scope>
+            <bpel:empty aei:id="133001768506203063"/>
+         </bpel:sequence>
+         <bpel:else aei:id="133001768506303069">
+            <bpel:documentation>No, the claim isn't valid.</bpel:documentation>
+            <bpel:scope aei:implicit="true" name="Request_Input_of_Corrections">
+               <bpel:variables>
+                  <bpel:variable messageType="ns1:ClaimFault" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="133001768506603081" name="Prepare_Fault">
+                     <bpel:copy aei:id="133001768506703083">
+                        <bpel:from>abx:getProcessId()</bpel:from>
+                        <bpel:to part="fault" variable="parameters">
+                           <bpel:query>claim:refNumber</bpel:query>
+                        </bpel:to>
+                     </bpel:copy>
+                     <bpel:copy aei:id="133001768506703085">
+                        <bpel:from>$ClaimRulesOutput/qrulesd:ReasonOfRejection</bpel:from>
+                        <bpel:to part="fault" variable="parameters">
+                           <bpel:query>claim:reason</bpel:query>
+                        </bpel:to>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="133001768506503073" faultName="ns1:ClaimRequestFault" name="Request_Input_of_Corrections" operation="ClaimRequestOperation" partnerLink="Customer" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:else>
+      </bpel:if>
+   </bpel:sequence>
+</bpel:process>

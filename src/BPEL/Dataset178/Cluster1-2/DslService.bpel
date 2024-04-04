@@ -1,0 +1,150 @@
+<process name="dslservice" 
+         suppressJoinFailure="yes"
+         
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         targetNamespace="urn:dslservice:DSLService"
+         xmlns:tns="urn:dslservice:DSLService"
+         xmlns:zip2geo="http://ws.cdyne.com"
+        xmlns:bpelx="http://schemas.oracle.com/bpel/extension" 
+	 xmlns:addressbook="http://wsifservice.addressbook/"
+	 xmlns:serviceavailability="http://xml.apache.org/axis/wsif/samples/jms/ServiceAvailability">
+
+  <variables>
+    <!-- user name and user address store the name and address of the user respectively -->
+    <variable name="userName" messageType="addressbook:GetAddressFromNameRequestMessage"/>
+    <variable name="userAddress" messageType="addressbook:GetAddressFromNameResponseMessage"/>
+    <variable name="userNameWithAddress" messageType="addressbook:AddEntryWholeNameRequestMessage"/>
+    <!-- zip is the zip code of the address (extracted from the user address) -->
+    <variable name="zipRename" messageType="zip2geo:GetLatLongHttpGetIn"/>
+    <!-- zip information is the information on the user's zip code, returned -->
+    <!-- by the Zip2Geo service -->
+    <variable name="zipInformation" messageType="zip2geo:GetLatLongSoapOut"/>
+    <!-- if the address city doesn't match the expected one, we have an error -->
+    <!-- address error stores the error msg -->
+    <variable name="addressError" messageType="tns:invalidAddress"/>
+    <!-- if we are trying to look up information about an unknown user -->
+    <!-- we have an error; user error stores the error msg -->
+    <variable name="userError" messageType="tns:userUnknown"/>
+    <!-- zipOnly is the zip code of the address (as reqd by service availability service) -->
+    <variable name="zipOnly" messageType="serviceavailability:checkAvailabilityRequest"/>
+    <!-- service availability variable stores available/not available response -->
+    <!-- from service availability service -->
+    <variable name="serviceAvailability" messageType="serviceavailability:checkAvailabilityResponse"/>
+  </variables>
+
+  <partnerLinks>
+    <partnerLink name="User" partnerLinkType="tns:UserPLT" myRole="dslserviceProvider"/>
+    <partnerLink name="Zip2Geo" partnerLinkType="tns:Zip2GeoPLT" partnerRole="zip2geoProvider"/>
+    <partnerLink name="AddressBook" partnerLinkType="tns:AddressBookPLT" partnerRole="addressbookProvider"/>
+    <partnerLink name="ServiceAvailability" partnerLinkType="tns:ServiceAvailabilityPLT" partnerRole="serviceavailabilityProvider"/>
+  </partnerLinks>
+
+  <faultHandlers>
+    <catch faultName="tns:invalidAddress" faultVariable="addressError">
+      <reply name="addressFaultReply"
+             partnerLink="User" portType="tns:DSLServicePT" operation="isServiceAvailable"
+             variable="addressError" faultName="tns:invalidAddress">
+      </reply>
+    </catch>
+  </faultHandlers>
+
+  <!-- this process either adds an address or looks up the service availability -->
+  <pick createInstance="yes">
+    <onMessage name="addUserMsg" partnerLink="User" portType="tns:DSLServicePT"
+               operation="addUserInfo" variable="userNameWithAddress">
+      <!-- add it to our address store using address book service -->
+      <invoke name="Task1" partnerLink="AddressBook" 
+              portType="addressbook:AddressBook" operation="addEntry" inputVariable="userNameWithAddress">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+    
+      <!-- we are done handling this message -->
+    </onMessage>
+    <onMessage name="lookupServiceMsg" partnerLink="User" portType="tns:DSLServicePT"
+               operation="isServiceAvailable" variable="userName">
+      <sequence name="lookupServiceAvailabilitySequence">
+        <!-- look up this user's information -->
+        <invoke name="Task2" partnerLink="AddressBook" 
+                portType="addressbook:AddressBook" operation="getAddressFromName" 
+                inputVariable="userName" outputVariable="userAddress">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+	<!-- verify address is correct -->
+        <!-- copy zip code from address to reqd variable -->
+	<!-- make empty entry for license key -->
+        <assign>
+          <copy>
+              <from variable="userAddress" part="address" query="//zip"/>
+              <to variable="zipRename" part="zipcode"/>
+          </copy>
+          <copy>
+              <from expression="''"/>
+              <to variable="zipRename" part="LicenseKey"/>
+          </copy>
+        </assign>
+        <flow>
+          <links>
+            <link name="errorLink"/>
+          </links>
+          <!-- invoke the Zip2Geo service on the zip code -->
+          <!-- extract the city name from the zip information and compare it with the one -->
+          <!-- the user provided, if it doesn't match throw a fault -->
+          <invoke name="Task3" partnerLink="Zip2Geo" portType="zip2geo:Zip2GeoSoap"
+                  operation="GetLatLong" inputVariable="zipRename" outputVariable="zipInformation">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task2:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>                  
+<sources>
+                  <source linkName="errorLink" 
+                          transitionCondition="bpws:getVariableData('userAddress','address','//city/')!=bpws:getVariableData('zipInformation','GetLatLongResult','//*[local-name()=&quot;City&quot;]')"/>
+</sources>
+          <!-- here is the activity that throws the fault -->
+          <!-- we copy the error msg to the reqd variable, throw the fault, then terminate the -->
+          <!-- process -->
+          <sequence name="addressFaultSequence">
+            <assign>
+              <targets>
+            <target linkName="errorLink"/>
+          </targets>
+
+              <copy>
+                <from expression="addressError+concat('The zip code you provided matches city ',bpws:getVariableData('zipInformation','GetLatLongResult','//*[local-name()=&quot;City&quot;]'),' not city ',bpws:getVariableData('userAddress','address','//city/'))"/>
+                <to variable="addressError" part="message"/>
+              </copy>
+            </assign>
+            <throw faultName="tns:invalidAddress" faultVariable="addressError"/>
+             <terminate/>
+          </sequence>
+        </flow>
+        <!-- copy the zip code from the user's address to the appropriate variable -->
+        <assign>
+          <copy>
+              <from variable="userAddress" part="address" query="//zip/"/>
+              <to variable="zipOnly" part="zipCode"/>
+          </copy>
+        </assign>
+        <!-- invoke the service availability service -->
+        <invoke name="Task4" partnerLink="ServiceAvailability" 
+                portType="serviceavailability:CheckAvailabilityPortType" operation="checkAvailability" 
+                inputVariable="zipOnly" outputVariable="serviceAvailability">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task3:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+	<!-- reply to the user with the service availability output -->
+        <reply name="sendReply" partnerLink="User" portType="tns:DSLServicePT"
+               operation="isServiceAvailable" variable="serviceAvailability"/>
+      </sequence>
+      <!-- we are done handling this message -->
+    </onMessage>
+  </pick>
+</process>

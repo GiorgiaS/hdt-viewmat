@@ -1,0 +1,742 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="ASTROBookStore"
+    targetNamespace="http://enterprise.netbeans.org/bpel/ASTROBookStore/ASTROBookStore"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/ASTROBookStore/ASTROBookStore"
+   xmlns:ns1="http://j2ee.netbeans.org/wsdl/ASTROBookStore/ASTROBookStore"
+    xmlns:ns0="http://xml.netbeans.org/schema/ASTROCartSCHEMA"
+    xmlns:ns2="http://xml.netbeans.org/schema/ASTROSearchSCHEMA"
+    xmlns:bankJPG="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank"
+    xmlns:ASTROBookCart="http://j2ee.netbeans.org/wsdl/ASTROBookCart"
+    xmlns:ASTROBookSearch="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookStore/ASTROBookStore" location="ASTROBookStore.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://xml.netbeans.org/schema/ASTROCartSCHEMA" location="ASTROCartSCHEMA.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+    <import namespace="http://xml.netbeans.org/schema/ASTROSearchSCHEMA" location="ASTROSearchSCHEMA.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank" location="ASTROBookBank.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookCart" location="ASTROBookCart.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch" location="ASTROBookSearch.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+      <partnerLink myRole="bankJPG_Customer" name="bankJPG_PLT" partnerLinkType="bankJPG:bankJPG_PLT" partnerRole="bankJPG_Service"/>
+      <partnerLink myRole="ASTROBookCart_Customer" name="ASTROBookCart_PLT" partnerLinkType="ASTROBookCart:ASTROBookCart_PLT" partnerRole="ASTROBookCart_Service"/>
+      <partnerLink myRole="ASTROBookSearch_Customer" name="ASTROBookSearch_PLT" partnerLinkType="ASTROBookSearch:ASTROBookSearch_PLT" partnerRole="ASTROBookSearch_Service"/>
+      <partnerLink myRole="ASTROBookStore_Service" name="ASTROBookStore_PLT" partnerLinkType="ns1:ASTROBookStore_PLT" partnerRole="ASTROBookStore_Customer"/>
+   </partnerLinks>
+   <variables>
+      <variable messageType="ASTROBookSearch:loginMsg" name="_ASTROBookSearch_login"/>
+      <variable messageType="ns1:loginErrorMsg" name="_ASTROBookStore_loginError"/>
+      <variable messageType="ASTROBookSearch:loginErrMsg" name="_ASTROBookSearch_loginErr"/>
+      <variable messageType="ns1:loginAckMsg" name="_ASTROBookStore_loginAck"/>
+      <variable messageType="ASTROBookCart:cartCreateMsg" name="_ASTROBookCart_cartCreate"/>
+      <variable messageType="ASTROBookCart:cartCreateErrMsg" name="_ASTROBookCart_cartCreateErr"/>
+      <variable messageType="ASTROBookSearch:itemSearchRequestMsg" name="_ASTROBookSearch_itemSearchRequest"/>
+      <variable messageType="ns1:searchErrorMsg" name="_ASTROBookStore_searchError"/>
+      <variable messageType="ASTROBookSearch:itemSearchErrMsg" name="_ASTROBookSearch_itemSearchErr"/>
+      <variable messageType="ns1:searchResultMsg" name="_ASTROBookStore_searchResult"/>
+      <variable messageType="ASTROBookCart:cartAddMsg" name="_ASTROBookCart_cartAdd"/>
+      <variable messageType="ns1:addErrorMsg" name="_ASTROBookStore_addError"/>
+      <variable messageType="ASTROBookCart:cartAddErrMsg" name="_ASTROBookCart_cartAddErr"/>
+      <variable messageType="ns1:addAckMsg" name="_ASTROBookStore_addAck"/>
+      <variable messageType="ns1:logoutMsg" name="_ASTROBookStore_logout"/>
+      <variable messageType="ASTROBookCart:cartGetMsg" name="_ASTROBookCart_cartGet"/>
+      <variable messageType="bankJPG:startTransactionMsg" name="_bankJPG_startTransaction"/>
+      <variable messageType="ns1:checkoutAckMsg" name="_ASTROBookStore_checkoutAck"/>
+      <variable messageType="bankJPG:requestSubmittedMsg" name="_bankJPG_requestSubmitted"/>
+      <variable messageType="bankJPG:requestNotAvailableMsg" name="_bankJPG_requestNotAvailable"/>
+      <variable messageType="bankJPG:confirmMsg" name="_bankJPG_confirm"/>
+      <variable messageType="bankJPG:requestAvailableAckMsg" name="_bankJPG_requestAvailableAck"/>
+      <variable messageType="ASTROBookCart:clearMsg" name="_ASTROBookCart_clear"/>
+      <variable messageType="ns1:sentMsg" name="_ASTROBookStore_sent"/>
+      <variable messageType="bankJPG:confirmAckMsg" name="_bankJPG_confirmAck"/>
+      <variable messageType="ns1:confirmErrorMsg" name="_ASTROBookStore_confirmError"/>
+      <variable messageType="bankJPG:confirmErrMsg" name="_bankJPG_confirmErr"/>
+      <variable messageType="bankJPG:requestAvailableMsg" name="_bankJPG_requestAvailable"/>
+      <variable messageType="ns1:requestSubmittedMsg" name="_ASTROBookStore_requestSubmitted"/>
+      <variable messageType="bankJPG:startTransactionAckMsg" name="_bankJPG_startTransactionAck"/>
+      <variable messageType="ASTROBookCart:nopMsg" name="_ASTROBookCart_nop"/>
+      <variable messageType="bankJPG:startTransactionErrMsg" name="_bankJPG_startTransactionErr"/>
+      <variable messageType="ASTROBookCart:cartGetResponseMsg" name="_ASTROBookCart_cartGetResponse"/>
+      <variable messageType="ASTROBookSearch:logoutMsg" name="_ASTROBookSearch_logout"/>
+      <variable messageType="ns1:checkoutErrorMsg" name="_ASTROBookStore_checkoutError"/>
+      <variable messageType="ASTROBookCart:cartGetErrMsg" name="_ASTROBookCart_cartGetErr"/>
+      <variable messageType="ns1:checkoutMsg" name="_ASTROBookStore_checkout"/>
+      <variable messageType="ASTROBookCart:cartAddResponseMsg" name="_ASTROBookCart_cartAddResponse"/>
+      <variable messageType="ASTROBookCart:cartCreateResponseMsg" name="_ASTROBookCart_cartCreateResponse"/>
+      <variable messageType="ns1:addMsg" name="_ASTROBookStore_add"/>
+      <variable messageType="ASTROBookSearch:itemSearchResponseMsg" name="_ASTROBookSearch_itemSearchResponse"/>
+      <variable messageType="ns1:searchMsg" name="_ASTROBookStore_search"/>
+      <variable messageType="ASTROBookSearch:loginAckMsg" name="_ASTROBookSearch_loginAck"/>
+      <variable messageType="ns1:loginMsg" name="_ASTROBookStore_login"/>
+      <variable name="_local1_ASTROBookStore_add_quantity" type="xsd:positiveInteger"/>
+      <variable name="_local1_ASTROBookStore_add_ASIN" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_addError_error" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_addAck_SubTotal" type="xsd:string"/>
+      <variable element="ns2:ItemSearchResponse" name="_local1_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local2_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local4_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local3_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local5_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local7_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local8_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local6_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable name="_local2_ASTROBookStore_add_quantity" type="xsd:positiveInteger"/>
+      <variable name="_local2_ASTROBookStore_add_ASIN" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_addError_error" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_addAck_SubTotal" type="xsd:string"/>
+      <variable name="_local_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_checkoutError_error" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_checkoutError_error" type="xsd:string"/>
+      <variable name="key" type="xsd:string"/>
+      <variable messageType="ns1:searchMsg" name="searchMsg"/>
+      <variable messageType="ns1:searchResultMsg" name="searchResultMsg"/>
+      <variable messageType="ns1:searchErrorMsg" name="searchErrorMsg"/>
+      <variable messageType="ns1:checkoutMsg" name="checkoutMsg"/>
+      <variable messageType="ns1:checkoutAckMsg" name="checkoutAckMsg"/>
+      <variable messageType="ns1:requestSubmittedMsg" name="requestSubmittedMsg"/>
+      <variable messageType="ns1:sentMsg" name="sentMsg"/>
+      <variable messageType="ns1:confirmErrorMsg" name="confirmErrorMsg"/>
+      <variable messageType="ns1:checkoutErrorMsg" name="checkoutErrorMsg"/>
+      <variable messageType="ns1:addMsg" name="addMsg"/>
+      <variable messageType="ns1:addAckMsg" name="addAckMsg"/>
+      <variable messageType="ns1:addErrorMsg" name="addErrorMsg"/>
+      <variable messageType="ns1:logoutMsg" name="logoutMsg"/>
+      <variable name="numBusquedas" type="xsd:positiveInteger"/>
+      <variable name="numArticulos" type="xsd:positiveInteger"/>
+	
+   </variables>
+   <correlationSets>
+      <correlationSet name="_CS_bankJPG_PLT" properties="bankJPG:key"/>
+      <correlationSet name="_CS_ASTROBookCart_PLT" properties="ASTROBookCart:key"/>
+      <correlationSet name="_CS_ASTROBookSearch_PLT" properties="ASTROBookSearch:key"/>
+      <correlationSet name="_CS_ASTROBookStore_PLT" properties="ns1:key"/>
+      <correlationSet name="bookstore" properties="ns1:key"/>
+   </correlationSets>
+   <sequence>
+      <invoke inputVariable="_ASTROBookSearch_login" name="Task1" operation="login" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+         <correlations>
+            <correlation pattern="request" initiate="yes" set="_CS_ASTROBookSearch_PLT"/>
+         </correlations>
+         <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path32 path33 path34 path35 path36 path37 path38 path39 path40 path41 path42 path43 path44 path45</bpelx:toProperty>
+         </bpelx:toProperties>
+   </invoke>
+   <pick>
+       <onMessage operation="loginErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_loginErr">
+            <correlations>
+               <correlation set="_CS_ASTROBookSearch_PLT"/>
+            </correlations>
+            <sequence>
+              <invoke inputVariable="_ASTROBookStore_loginError" name="Task2" operation="loginError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                  </correlations>
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path1</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </invoke>
+            </sequence>
+         </onMessage>
+        
+
+        <onMessage operation="loginAck" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_loginAck">
+            <correlations>
+               <correlation set="_CS_ASTROBookSearch_PLT"/>
+            </correlations>
+          <sequence>
+              
+               <invoke inputVariable="_ASTROBookStore_loginAck" name="Task3" operation="loginAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                  </correlations>
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path32 path33 path34 path35 path36 path37 path38 path39 path40 path41 path42 path43 path44 path45</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </invoke>
+               <while> 
+                  <condition>($numBusquedas) &lt; 1</condition>
+                   <sequence>
+                  <sequence>
+                     <pick name="Pick">
+                        <onMessage operation="search" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="searchMsg">
+                           <correlations>
+                              <correlation initiate="yes" set="bookstore"/>
+                           </correlations>
+                           <sequence>
+                              <invoke inputVariable="_ASTROBookSearch_itemSearchRequest" name="Task4" operation="itemSearchRequest" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                 <correlations>
+                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                 </correlations>
+                                 <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task3:0.33</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path3 path4 path7 path8 path9 path10 path13 path14 path15 path16 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path33 path34</bpelx:toProperty>
+                                 </bpelx:toProperties>
+                              </invoke>
+                              <pick>
+                                 <onMessage operation="itemSearchErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchErr">
+                                    <correlations>
+                                       <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                    </correlations>
+                                    <sequence>
+                                     <invoke inputVariable="_ASTROBookStore_searchError" name="Task6" operation="searchError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                          </correlations>
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path3 path7 path8 path13 path14 path22 path23 path24 path25 path26 path33</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </invoke>
+                                    </sequence>
+                                 </onMessage>
+                                 <onMessage operation="itemSearchResponse" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchResponse">
+                                    <correlations>
+                                       <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                    </correlations>
+                                    <sequence>
+                                       <invoke inputVariable="_ASTROBookStore_searchResult" name="Task7" operation="searchResult" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                          </correlations>
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path4 path9 path10 path15 path16 path27 path28 path29 path30 path31 path34</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </invoke>
+                                    </sequence>
+                                 </onMessage>
+                              </pick>
+                           </sequence>
+                        </onMessage>
+                        <onMessage operation="logout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="logoutMsg">
+                           <correlations>
+                              <correlation initiate="yes" set="bookstore"/>
+                           </correlations>
+                           <sequence>
+                              <invoke inputVariable="_ASTROBookSearch_logout" name="Task5" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                 <correlations>
+                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                 </correlations>
+                                 <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task3:0.33</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path2 path5 path6 path11 path12 path17 path18 path19 path20 path21 path32</bpelx:toProperty>
+                                 </bpelx:toProperties>
+                              </invoke>
+                           </sequence>
+                        </onMessage>
+                     </pick>
+                  </sequence>
+		</sequence>
+               </while>
+               <sequence>
+                  <invoke inputVariable="_ASTROBookCart_cartCreate" name="Task8" operation="cartCreate" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                     <correlations>
+                        <correlation initiate="yes" pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                     </correlations>
+                     <bpelx:toProperties>
+                        <bpelx:toProperty name="probability">Task3:0.34 Task5:1 Task6:1 Task7:1</bpelx:toProperty>
+                        <bpelx:toProperty name="paths">path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path32 path33 path34 path35 path36 path37 path38 path39 path40 path41 path42 path43 path44 path45</bpelx:toProperty>
+                     </bpelx:toProperties>
+                  </invoke>
+                 <pick name="Pick_gross">
+                     <onMessage operation="cartCreateErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartCreateErr">
+                        <correlations>
+                           <correlation set="_CS_ASTROBookCart_PLT"/>
+                        </correlations>
+                        <sequence>
+                          <invoke inputVariable="_ASTROBookSearch_logout" name="Task9" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                              </correlations>
+                              <bpelx:toProperties>
+                                 <bpelx:toProperty name="probability">Task8:0.5</bpelx:toProperty>
+                                 <bpelx:toProperty name="paths">path2 path3 path4 path35</bpelx:toProperty>
+                              </bpelx:toProperties>
+                           </invoke>
+                          <invoke inputVariable="_ASTROBookStore_addError" name="Task10" operation="addError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                              </correlations>
+                              <bpelx:toProperties>
+                                 <bpelx:toProperty name="probability">Task9:1</bpelx:toProperty>
+                                 <bpelx:toProperty name="paths">path2 path3 path4 path35</bpelx:toProperty>
+                              </bpelx:toProperties>
+                           </invoke>
+                         </sequence>
+                     </onMessage>
+                 <onMessage operation="cartCreateResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartCreateResponse">
+                        <correlations>
+                           <correlation set="_CS_ASTROBookCart_PLT"/>
+                        </correlations>
+                        <sequence>
+                         <invoke inputVariable="_ASTROBookStore_addAck" name="Task11" operation="addAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                              </correlations>
+                              <bpelx:toProperties>
+                                 <bpelx:toProperty name="probability">Task8:0.5</bpelx:toProperty>
+                                 <bpelx:toProperty name="paths">path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path32 path33 path34 path36 path37 path38 path39 path40 path41 path42 path43 path44 path45</bpelx:toProperty>
+                              </bpelx:toProperties>
+                           </invoke>
+                           <while>
+                               <condition>($numArticulos) &lt; 1</condition>
+                               <sequence>
+                              <sequence>
+                                 <pick name="Pick">
+                                    <onMessage operation="search" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="searchMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <invoke inputVariable="_ASTROBookSearch_itemSearchRequest" name="Task12" operation="itemSearchRequest" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task11:0.25</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path5 path6 path7 path8 path9 path10 path36 path37</bpelx:toProperty>
+                                             </bpelx:toProperties>   
+                                          </invoke>
+                                         <pick>
+                                             <onMessage operation="itemSearchErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_ASTROBookStore_searchError" name="Task13" operation="searchError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task12:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path5 path7 path9</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="itemSearchResponse" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_ASTROBookStore_searchResult" name="Task14" operation="searchResult" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task12:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path6 path8 path10 path37</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick>
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="add" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="addMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <invoke inputVariable="_ASTROBookCart_cartAdd" name="Task15" operation="cartAdd" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task11:0.25</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path11 path12 path13 path14 path15 path16 path38 path39</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke>
+                                          <pick>
+                                             <onMessage operation="cartAddErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartAddErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_ASTROBookCart_nop" name="Task16" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task15:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path11 path13 path15 path38</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                   <invoke inputVariable="_ASTROBookCart_nop" name="Task17" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task16:1</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path11 path13 path15 path38</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                   <invoke inputVariable="_ASTROBookSearch_logout" name="Task18" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                      <correlations>
+                                                         <correlation  pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task17:1</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path11 path13 path15 path38</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                   <invoke inputVariable="_ASTROBookStore_addError" name="Task19" operation="addError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task18:1</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path11 path13 path15 path38</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="cartAddResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartAddResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/> 
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_ASTROBookStore_addAck" name="Task20" operation="addAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task15:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path12 path14 path16 path40</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick> 
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="checkout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="checkoutMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="Task21" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task11:0.25</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path40 path41 path42 path43 path44</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke>
+                                          <invoke inputVariable="_ASTROBookCart_cartGet" name="Task22" operation="cartGet" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task21:1</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path17 path18 path19 path20 path21 path22 path23 path24 path25 path26 path27 path28 path29 path30 path31 path40 path41 path42 path43 path44</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke> 
+                                          <pick>
+                                             <onMessage operation="cartGetResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartGetResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_bankJPG_startTransaction" name="Task23" operation="startTransaction" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" initiate="yes" set="_CS_bankJPG_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task22:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path17 path18 path19 path20 path22 path23 path24 path25 path27 path28 path29 path30 path40 path41 path42 path43</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                   <pick>
+                                                      <onMessage operation="startTransactionAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_startTransactionAck">
+                                                         <correlations>
+                                                            <correlation set="_CS_bankJPG_PLT"/>
+                                                         </correlations>
+                                                         <sequence>
+                                                           <invoke inputVariable="_ASTROBookStore_checkoutAck"
+                                                                   name="Task24" operation="checkoutAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                               </correlations>
+                                                               <bpelx:toProperties>
+                                                                  <bpelx:toProperty name="probability">Task23:0.5</bpelx:toProperty>
+                                                                  <bpelx:toProperty name="paths">path17 path18 path19 path22 path23 path24 path27 path28 path29 path40 path41 path42</bpelx:toProperty>
+                                                               </bpelx:toProperties>
+                                                            </invoke>
+                                                            <invoke inputVariable="_bankJPG_requestSubmitted"
+                                                                    name="Task25" operation="requestSubmitted" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                               </correlations>
+                                                               <bpelx:toProperties>
+                                                                  <bpelx:toProperty name="probability">Task24:1</bpelx:toProperty>
+                                                                  <bpelx:toProperty name="paths">path17 path18 path19 path22 path23 path24 path27 path28 path29 path40 path41 path42</bpelx:toProperty>
+                                                               </bpelx:toProperties>
+                                                            </invoke>
+                                                            <pick>
+                                                               <onMessage operation="requestNotAvailable" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_requestNotAvailable">
+                                                                  <correlations>
+                                                                     <correlation set="_CS_bankJPG_PLT"/>
+                                                                  </correlations>
+                                                                  <sequence>
+                                                                     <invoke inputVariable="_ASTROBookCart_nop"
+                                                                             name="Task26" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                        </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task25:0.5</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path17 path22 path27 path40</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                                     </invoke>
+                                                                     <invoke inputVariable="_ASTROBookSearch_logout"
+                                                                             name="Task27" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                        </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task26:1</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path17 path22 path27 path40</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                                     </invoke>
+                                                                     <invoke inputVariable="_ASTROBookStore_confirmError"
+                                                                             name="Task28" operation="confirmError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                        </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task27:1</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path17 path22 path27 path40</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                                     </invoke>
+                                                                  </sequence>
+                                                               </onMessage>
+                                                              <onMessage operation="requestAvailable" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_requestAvailable">
+                                                                  <correlations>
+                                                                     <correlation set="_CS_bankJPG_PLT"/>
+                                                                  </correlations>
+                                                                  <sequence>
+                                                                     <invoke inputVariable="_bankJPG_confirm"
+                                                                             name="Task29" operation="confirm" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                                        </correlations> 
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task25:0.5</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path18 path19 path23 path24 path28 path29 path41 path42</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                                     </invoke>
+                                                                    <pick>
+                                                                        <onMessage operation="confirmAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_confirmAck">
+                                                                           <correlations>
+                                                                              <correlation set="_CS_bankJPG_PLT"/>
+                                                                           </correlations>
+                                                                           <sequence>
+                                                                               <invoke inputVariable="_bankJPG_requestAvailableAck"
+                                                                                       name="Task30" operation="requestAvailableAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                                                 </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task29:0.5</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path18 path23 path28 path41</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                                              </invoke>
+                                                                              <invoke inputVariable="_ASTROBookCart_clear"
+                                                                                      name="Task31" operation="clear" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                                 </correlations>
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task30:1</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path18 path23 path28 path41</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                              <invoke inputVariable="_ASTROBookSearch_logout"
+                                                                                      name="Task32" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                                 </correlations>
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task31:1</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path18 path23 path28 path41</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                              <invoke inputVariable="_ASTROBookStore_sent"
+                                                                                      name="Task33" operation="sent" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                                 </correlations>
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task32:1</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path18 path23 path28 path41</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                             
+                                                                           </sequence>
+                                                                        </onMessage>
+                                                                        <onMessage operation="confirmErr" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_confirmErr">
+                                                                           <correlations>
+                                                                              <correlation set="_CS_bankJPG_PLT"/>
+                                                                           </correlations>
+                                                                           <sequence>
+                                                                              <invoke inputVariable="_ASTROBookCart_nop"
+                                                                                      name="Task34" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                                 </correlations>
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task29:0.5</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path19 path24 path29 path42</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                              <invoke inputVariable="_ASTROBookSearch_logout"
+                                                                                      name="Task35" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                                 </correlations> 
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task34:1</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path19 path24 path29 path42</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                              <invoke inputVariable="_ASTROBookStore_confirmError"
+                                                                                      name="Task36" operation="confirmError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                                 </correlations>
+                                                                                 <bpelx:toProperties>
+                                                                                    <bpelx:toProperty name="probability">Task35:1</bpelx:toProperty>
+                                                                                    <bpelx:toProperty name="paths">path19 path24 path29 path42</bpelx:toProperty>
+                                                                                 </bpelx:toProperties>
+                                                                              </invoke>
+                                                                           </sequence>
+                                                                        </onMessage>
+                                                                     </pick>
+                                                                  </sequence>
+                                                               </onMessage>
+                                                            </pick>
+                                                         </sequence>
+                                                      </onMessage>
+                                                      <onMessage operation="startTransactionErr" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_startTransactionErr">
+                                                         <correlations>
+                                                            <correlation set="_CS_bankJPG_PLT"/>
+                                                         </correlations>
+                                                         <sequence>
+                                                            <invoke inputVariable="_ASTROBookCart_nop" name="Task37" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                               </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task23:0.5</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path20 path25 path30 path43</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                            </invoke>
+                                                           <invoke inputVariable="_ASTROBookSearch_logout" name="Task38" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                               </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task37:1</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path20 path25 path30 path43</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                            </invoke>
+                                                             <invoke inputVariable="_ASTROBookStore_checkoutError"
+                                                                     name="Task39" operation="checkoutError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                               </correlations>
+                                                                        <bpelx:toProperties>
+                                                                           <bpelx:toProperty name="probability">Task38:0.5</bpelx:toProperty>
+                                                                           <bpelx:toProperty name="paths">path20 path25 path30 path43</bpelx:toProperty>
+                                                                        </bpelx:toProperties>
+                                                            </invoke>
+                                                         </sequence>
+                                                      </onMessage>
+                                                   </pick>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="cartGetErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartGetErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <invoke inputVariable="_ASTROBookSearch_logout" name="Task40" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task22:0.5</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path21 path26 path31 path44</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                   <invoke inputVariable="_ASTROBookStore_checkoutError" name="Task41" operation="checkoutError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                      <bpelx:toProperties>
+                                                         <bpelx:toProperty name="probability">Task40:1</bpelx:toProperty>
+                                                         <bpelx:toProperty name="paths">path21 path26 path31 path44</bpelx:toProperty>
+                                                      </bpelx:toProperties>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick> 
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="logout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="logoutMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="Task42" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task11:0.25</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path32 path33 path34 path45</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="Task43" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task42:1</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path32 path33 path34 path45</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke>
+                                          <invoke inputVariable="_ASTROBookSearch_logout" name="Task44" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                             </correlations>
+                                             <bpelx:toProperties>
+                                                <bpelx:toProperty name="probability">Task43:1</bpelx:toProperty>
+                                                <bpelx:toProperty name="paths">path32 path33 path34 path44</bpelx:toProperty>
+                                             </bpelx:toProperties>
+                                          </invoke>
+                                       </sequence>
+                                    </onMessage>
+                                 </pick>
+                              </sequence>
+                            </sequence>
+                           </while>
+                        </sequence>
+                     </onMessage>
+                  </pick>
+               </sequence>
+            </sequence>
+         </onMessage> 
+      </pick>
+   </sequence>
+
+</process>

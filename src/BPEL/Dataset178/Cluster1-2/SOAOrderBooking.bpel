@@ -1,0 +1,789 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Apr 03 23:42:30 PDT 2009
+  Author:  robinzim
+  Purpose: Empty BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="SOAOrderBooking"
+         targetNamespace="http://www.globalcompany.com/ns/OrderBooking"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:wfcommon="http://xmlns.oracle.com/bpel/workflow/common"
+         xmlns:ns4="http://www.globalcompany.com/ns/order"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns16="http://www.globalcompany.com/ns/selectservice"
+         xmlns:ns5="http://www.globalcompany.com/ns/customer"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:taskservice="http://xmlns.oracle.com/bpel/workflow/taskService"
+         xmlns:ns9="http://www.oracle.com/XSL/Transform/java/oracle.tip.esb.server.headers.ESBHeaderFunctions"
+         xmlns:ns17="http://www.globalcompany.com/ns/rapidservice"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/Order/"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/OrderSequence/"
+         xmlns:ns15="http://xmlns.oracle.com/bpel"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"
+         xmlns:ns10="http://www.oracle.com/XSL/Transform/java/oracle.tip.xref.xpath.XRefXPathFunctions"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:ns20="http://xmlns.oracle.com/pcbpel/adapter/db/OrderStatus/"
+         xmlns:ns13="http://www.globalcompany.com/ns/OrderBooking/DecisionService"
+         xmlns:ns7="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow"
+         xmlns:ns12="http://www.globalcompany.com/ns/credit.xsd"
+         xmlns:ns18="http://rapidservice.soademo.org/types/"
+         xmlns:client="http://www.globalcompany.com/ns/OrderBooking"
+         xmlns:ns6="http://www.oracle.com/webservices/internal/literal"
+         xmlns:ns22="http://xmlns.oracle.com/ias/pcbpel/NotificationService"
+         xmlns:ns11="http://www.globalcompany.com/ns/credit"
+         xmlns:ns19="http://www.globalcompany.com/ns/Fulfillment"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/db/OrderSequence"
+         xmlns:ns14="http://www.globalcompany.com/ns/OrderBooking/rules"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:task="http://xmlns.oracle.com/bpel/workflow/task"
+         xmlns:ns21="http://xmlns.oracle.com/pcbpel/adapter/db/top/OrderStatus"
+         xmlns:ns8="http://xmlns.oracle.com/bpel/services/IdentityService/xpath">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <partnerLink myRole="SOAOrderBookingProvider" name="client"
+                 partnerRole="SOAOrderBookingRequester"
+                 partnerLinkType="client:SOAOrderBooking"/>
+    <partnerLink name="Order" partnerRole="Order_role"
+                 partnerLinkType="ns1:Order_plt"/>
+    <partnerLink name="OrderSequence" partnerRole="OrderSequence_role"
+                 partnerLinkType="ns2:OrderSequence_plt"/>
+    <partnerLink name="CustomerService" partnerRole="CustomerService_Role"
+                 partnerLinkType="ns5:CustomerService_PL"/>
+    <partnerLink name="CreditValidatingService"
+                 partnerRole="ValidateCreditCard_Role"
+                 partnerLinkType="ns11:ValidateCreditCard_PL"/>
+    <partnerLink name="DecisionServicePL" partnerRole="IDecisionService_Role"
+                 partnerLinkType="ns13:IDecisionService_PL"/>
+    <partnerLink myRole="TaskServiceCallbackListener" name="TaskService"
+                 partnerRole="TaskService"
+                 partnerLinkType="taskservice:TaskService"/>
+    <partnerLink myRole="SelectServiceRequester" name="SelectService"
+                 partnerRole="SelectServiceProvider"
+                 partnerLinkType="ns16:SelectService_PL"/>
+    <partnerLink name="RapidService" partnerRole="RapidQuote_Role"
+                 partnerLinkType="ns17:RapidQuote_PL"/>
+    <partnerLink name="OrderFulfillment" partnerRole="execute_pptProvider"
+                 partnerLinkType="ns19:execute_pptLT"/>
+    <partnerLink name="OrderStatus" partnerRole="OrderStatus_role"
+                 partnerLinkType="ns20:OrderStatus_plt"/>
+    <partnerLink name="NotificationService"
+                 partnerRole="NotificationServiceProvider"
+                 partnerLinkType="ns22:NotificationServiceLink"/>
+  </partnerLinks>
+  <variables>
+    <variable name="inputVariable"
+              messageType="client:SOAOrderBookingRequestMessage"/>
+    <variable name="outputVariable"
+              messageType="client:SOAOrderBookingResponseMessage"/>
+    <variable name="customerServiceResponse"
+              messageType="ns5:CustomerService_findCustomerByIdResponse"/>
+    <variable name="OrderBookingFault"
+              messageType="client:SOAOrderBookingFaultMessage"/>
+    <variable name="requiresApproval" type="xsd:boolean"/>
+    <variable name="ApproveOrder_1_globalVariable"
+              messageType="taskservice:taskMessage"/>
+    <variable name="orderFulfillmentRequest"
+              messageType="ns19:PurchaseOrder_request"/>
+  </variables>
+  <faultHandlers>
+    <catch faultName="client:OrderBookingFault"
+           faultVariable="OrderBookingFault">
+      <sequence name="Sequence_13">
+        <scope name="SetOrderStatus">
+          <variables>
+            <variable name="orderStatusRequest"
+                      messageType="ns20:OrdersCollection_msg"/>
+          </variables>
+          <sequence name="Sequence_14">
+            <assign name="assignOrderStatus">
+              <copy>
+                <from variable="inputVariable" part="payload"
+                      query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ID"/>
+                <to variable="orderStatusRequest" part="OrdersCollection"
+                    query="/ns21:OrdersCollection/ns21:Orders/ns21:ordid"/>
+              </copy>
+              <copy>
+                <from expression="'canceled'"/>
+                <to variable="orderStatusRequest" part="OrdersCollection"
+                    query="/ns21:OrdersCollection/ns21:Orders/ns21:status"/>
+              </copy>
+              <copy>
+                <from variable="OrderBookingFault" part="payload"
+                      query="/client:SOAOrderBookingProcessFault/client:status"/>
+                <to variable="orderStatusRequest" part="OrdersCollection"
+                    query="/ns21:OrdersCollection/ns21:Orders/ns21:comments"/>
+              </copy>
+            </assign>
+            <invoke name="Task13" partnerLink="OrderStatus"
+                    portType="ns20:OrderStatus_ptt" operation="update"
+                    inputVariable="orderStatusRequest">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task12:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+          </sequence>
+        </scope>
+      </sequence>
+    </catch>
+  </faultHandlers>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:SOAOrderBooking" operation="initiate"
+             variable="inputVariable" createInstance="yes"/>
+    <scope name="InsertOrderIntoDB">
+      <variables>
+        <variable name="orderRequest" messageType="ns1:OrdersCollection_msg"/>
+        <variable name="orderSequenceInput"
+                  messageType="ns2:OrderSequenceInput_msg"/>
+        <variable name="orderSequenceOuput"
+                  messageType="ns2:OrderSequenceOutputCollection_msg"/>
+      </variables>
+      <sequence name="Sequence_1">
+        <invoke name="Task1" partnerLink="OrderSequence"
+                portType="ns2:OrderSequence_ptt" operation="OrderSequence"
+                inputVariable="orderSequenceInput"
+                outputVariable="orderSequenceOuput">
+          <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>        
+        </invoke>
+        <assign name="AssignOrderStatus2">
+          <copy>
+            <from expression="string(bpws:getVariableData('orderSequenceOuput','OrderSequenceOutputCollection','/ns3:OrderSequenceOutputCollection/ns3:OrderSequenceOutput/ns3:NEXTVAL'))"/>
+            <to variable="inputVariable" part="payload"
+                query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ID"/>
+          </copy>
+          <copy>
+            <from expression='"pending"'/>
+            <to variable="inputVariable" part="payload"
+                query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:OrderInfo/ns4:OrderStatus"/>
+          </copy>
+        </assign>
+        <assign name="TransformOrder">
+          <bpelx:annotation>
+            <bpelx:pattern>transformation</bpelx:pattern>
+          </bpelx:annotation>
+          <copy>
+            <from expression="ora:processXSLT('TransformOrder.xsl',bpws:getVariableData('inputVariable','payload'))"/>
+            <to variable="orderRequest" part="OrdersCollection"/>
+          </copy>
+        </assign>
+        <invoke name="Task2" partnerLink="Order" portType="ns1:Order_ptt"
+                operation="merge" inputVariable="orderRequest">
+          <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task1:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </sequence>
+    </scope>
+    <scope name="CustomerService">
+      <variables>
+        <variable name="customerServiceRequest"
+                  messageType="ns5:CustomerService_findCustomerById"/>
+      </variables>
+      <sequence name="Sequence_2">
+        <assign name="AssignRequest">
+          <copy>
+            <from variable="inputVariable" part="payload"
+                  query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:CustID"/>
+            <to variable="customerServiceRequest" part="parameters"
+                query="/ns5:findCustomerById/ns5:custid"/>
+          </copy>
+        </assign>
+        <invoke name="Task3" partnerLink="CustomerService"
+                portType="ns5:CustomerService" operation="findCustomerById"
+                inputVariable="customerServiceRequest"
+                outputVariable="customerServiceResponse">
+          <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task2:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+        <assign name="AssignInitialCustomerResponse">
+          <bpelx:append>
+            <bpelx:from>
+              <ns4:ShipTo xmlns:ns4="http://www.globalcompany.com/ns/order">
+                <ns4:Name>
+                  <ns4:First/>
+                  <ns4:Last/>
+                </ns4:Name>
+              </ns4:ShipTo>
+            </bpelx:from>
+            <bpelx:to variable="inputVariable" part="payload"
+                      query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder"/>
+          </bpelx:append>
+        </assign>
+        <assign name="AssignCustomerResponse">
+          <copy>
+            <from variable="customerServiceResponse" part="parameters"
+                  query="/ns5:findCustomerByIdResponse/ns5:return/ns5:fname"/>
+            <to variable="inputVariable" part="payload"
+                query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ShipTo/ns4:Name/ns4:First"/>
+          </copy>
+          <copy>
+            <from variable="customerServiceResponse" part="parameters"
+                  query="/ns5:findCustomerByIdResponse/ns5:return/ns5:lname"/>
+            <to variable="inputVariable" part="payload"
+                query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ShipTo/ns4:Name/ns4:Last"/>
+          </copy>
+        </assign>
+      </sequence>
+    </scope>
+    <scope name="CreditService">
+      <variables>
+        <variable name="validateRequest"
+                  messageType="ns11:CreditCardValidationRequestMessage"/>
+        <variable name="validateResponse"
+                  messageType="ns11:CreditCardValidationResponseMessage"/>
+      </variables>
+      <sequence name="Sequence_3">
+        <assign name="InitializeRequest">
+          <copy>
+            <from variable="customerServiceResponse" part="parameters"
+                  query="/ns5:findCustomerByIdResponse/ns5:return/ns5:creditcardtype"/>
+            <to variable="validateRequest" part="CreditCard"
+                query="/ns12:CreditCard/ccType"/>
+          </copy>
+          <copy>
+            <from variable="customerServiceResponse" part="parameters"
+                  query="/ns5:findCustomerByIdResponse/ns5:return/ns5:creditcardnumber"/>
+            <to variable="validateRequest" part="CreditCard"
+                query="/ns12:CreditCard/ccNum"/>
+          </copy>
+        </assign>
+        <invoke name="Task4" partnerLink="CreditValidatingService"
+                portType="ns11:ValidateCreditCard" operation="VerifyCC"
+                inputVariable="validateRequest"
+                outputVariable="validateResponse">
+          <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task3:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+        <switch name="Switch_1">
+          <case condition="bpws:getVariableData('validateResponse','valid','/ns12:valid')='false'">
+            <sequence name="Sequence_4">
+              <assign name="AssignFault">
+                <copy>
+                  <from expression="'credit problem'"/>
+                  <to variable="OrderBookingFault" part="payload"
+                      query="/client:SOAOrderBookingProcessFault/client:status"/>
+                </copy>
+              </assign>
+              <throw name="ThrowCreditFault"
+                     faultName="client:OrderBookingFault"
+                     faultVariable="OrderBookingFault"/>
+            </sequence>
+          </case>
+        </switch>
+      </sequence>
+    </scope>
+    <scope name="RequiresManualApproval">
+      <bpelx:annotation>
+        <bpelx:pattern patternName="bpelx:decide"></bpelx:pattern>
+      </bpelx:annotation>
+      <variables>
+        <variable name="com_oracle_demos_orderbooking_Approve_i"
+                  element="ns14:approve"/>
+        <variable name="com_oracle_demos_orderbooking_Approve_o"
+                  element="ns14:approve"/>
+        <variable name="dsIn"
+                  messageType="ns13:assertExecuteWatchStatefulMessage"/>
+        <variable name="dsOut"
+                  messageType="ns13:assertExecuteWatchStatefulDecisionMessage"/>
+      </variables>
+      <sequence name="Sequence_5">
+        <assign name="BPEL_Var_To_Rule_Facts">
+          <copy>
+            <from expression="number(bpws:getVariableData('inputVariable','payload','/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:OrderInfo/ns4:OrderPrice'))"/>
+            <to variable="com_oracle_demos_orderbooking_Approve_i"
+                query="/ns14:approve/ns14:price"/>
+          </copy>
+          <copy>
+            <from variable="customerServiceResponse" part="parameters"
+                  query="/ns5:findCustomerByIdResponse/ns5:return/ns5:status"/>
+            <to variable="com_oracle_demos_orderbooking_Approve_i"
+                query="/ns14:approve/ns14:status"/>
+          </copy>
+        </assign>
+        <assign name="Facts_To_Rule_Service">
+          <copy>
+            <from variable="com_oracle_demos_orderbooking_Approve_i"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:assertList/ns14:approve"/>
+          </copy>
+        </assign>
+        <assign name="BPEL_Header">
+          <copy>
+            <from expression="'DecisionService'"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/@name"/>
+          </copy>
+          <copy>
+            <from expression="concat(ora:getProcessURL(), '/decisionservices.decs')"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:configURL"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessId()"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:bpelInstance/ns15:processId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessVersion()"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:bpelInstance/ns15:processVersion"/>
+          </copy>
+          <copy>
+            <from expression="ora:getDomainId()"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:bpelInstance/ns15:domainId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessURL()"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:bpelInstance/ns15:processURL"/>
+          </copy>
+          <copy>
+            <from expression="ora:getInstanceId()"/>
+            <to variable="dsIn" part="payload"
+                query="/ns13:assertExecuteWatchStateful/ns13:bpelInstance/ns15:instanceId"/>
+          </copy>
+        </assign>
+        <invoke name="Task5" partnerLink="DecisionServicePL"
+                portType="ns13:IDecisionService"
+                operation="assertExecuteWatchStateful" inputVariable="dsIn"
+                outputVariable="dsOut">
+          <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task4:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+        <assign name="Rule_Service_To_Facts">
+          <copy>
+            <from variable="dsOut" part="payload"
+                  query="/ns13:assertExecuteWatchStatefulDecision/ns13:resultList/ns14:approve"/>
+            <to variable="com_oracle_demos_orderbooking_Approve_o"/>
+          </copy>
+        </assign>
+        <assign name="Facts_To_BPEL_Var">
+          <copy>
+            <from variable="com_oracle_demos_orderbooking_Approve_o"
+                  query="/ns14:approve/ns14:approvalRequired"/>
+            <to variable="requiresApproval"/>
+          </copy>
+        </assign>
+      </sequence>
+    </scope>
+    <switch name="requiresApproval">
+      <case condition="bpws:getVariableData('requiresApproval') = 'true'">
+        <sequence name="Sequence_6">
+          <sequence name="Sequence_7">
+            <scope name="ApproveOrder"
+                   xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow"
+                   wf:key="ApproveOrder_1_globalVariable">
+              <bpelx:annotation>
+                <bpelx:pattern patternName="bpelx:workflow"></bpelx:pattern>
+              </bpelx:annotation>
+              <variables>
+                <variable name="initiateTaskInput"
+                          messageType="taskservice:initiateTaskMessage"/>
+                <variable name="initiateTaskResponseMessage"
+                          messageType="taskservice:initiateTaskResponseMessage"/>
+              </variables>
+              <correlationSets>
+                <correlationSet name="WorkflowTaskIdCor"
+                                properties="taskservice:taskId"/>
+              </correlationSets>
+              <sequence>
+                <assign name="ApproveOrder_1_AssignTaskAttributes">
+                  <copy>
+                    <from expression="concat(ora:getProcessURL(), string('/ApproveOrder/ApproveOrder.task'))"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:taskDefinitionURI"/>
+                  </copy>
+                  <copy>
+                    <from expression="number(3)"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:priority"/>
+                  </copy>
+                  <copy>
+                    <from>
+                      <payload xmlns="http://xmlns.oracle.com/bpel/workflow/task">
+                        <PurchaseOrder xmlns="http://www.globalcompany.com/ns/order"/>
+                      </payload>
+                    </from>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:payload"/>
+                  </copy>
+                  <copy>
+                    <from expression="string('Approve Order')"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:title"/>
+                  </copy>
+                  <copy>
+                    <from variable="inputVariable" part="payload"
+                          query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:payload/ns4:PurchaseOrder"/>
+                  </copy>
+                </assign>
+                <assign name="ApproveOrder_1_AssignSystemTaskAttributes">
+                  <copy>
+                    <from expression="ora:getInstanceId()"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:instanceId"/>
+                  </copy>
+                  <copy>
+                    <from expression="ora:getProcessId()"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:processName"/>
+                  </copy>
+                  <copy>
+                    <from expression="ora:getProcessId()"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:processId"/>
+                  </copy>
+                  <copy>
+                    <from expression="ora:getProcessVersion()"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:processVersion"/>
+                  </copy>
+                  <copy>
+                    <from expression="ora:getDomainId()"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:domainId"/>
+                  </copy>
+                  <copy>
+                    <from expression="string('BPEL')"/>
+                    <to variable="initiateTaskInput" part="payload"
+                        query="/taskservice:initiateTask/task:task/task:processInfo/task:processType"/>
+                  </copy>
+                </assign>
+                <invoke name="Task6"
+                        partnerLink="TaskService"
+                        portType="taskservice:TaskService"
+                        operation="initiateTask"
+                        inputVariable="initiateTaskInput"
+                        outputVariable="initiateTaskResponseMessage">
+                  <correlations>
+                    <correlation initiate="yes" set="WorkflowTaskIdCor"
+                                 pattern="in"/>
+                  </correlations>
+                  <bpelx:toProperties>
+                      <bpelx:toProperty name="probability">Task5:0.5</bpelx:toProperty>
+                      <bpelx:toProperty name="paths">path1 path3</bpelx:toProperty>
+                  </bpelx:toProperties>
+                </invoke>
+                <receive name="receiveCompletedTask_ApproveOrder_1"
+                         partnerLink="TaskService"
+                         portType="taskservice:TaskServiceCallback"
+                         operation="onTaskCompleted"
+                         variable="ApproveOrder_1_globalVariable"
+                         createInstance="no">
+                  <correlations>
+                    <correlation initiate="no" set="WorkflowTaskIdCor"/>
+                  </correlations>
+                </receive>
+              </sequence>
+            </scope>
+            <switch name="taskSwitch">
+              <case condition="bpws:getVariableData('ApproveOrder_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('ApproveOrder_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'REJECT'">
+                <bpelx:annotation>
+                  <bpelx:pattern patternName="case">Task outcome is REJECT</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                  <assign name="assignRejectMessage">
+                    <copy>
+                      <from expression="'Order has been rejected by manager'"/>
+                      <to variable="OrderBookingFault" part="payload"
+                          query="/client:SOAOrderBookingProcessFault/client:status"/>
+                    </copy>
+                  </assign>
+                  <throw name="Throw_1" faultName="client:OrderBookingFault"
+                         faultVariable="OrderBookingFault"/>
+                </sequence>
+              </case>
+              <case condition="bpws:getVariableData('ApproveOrder_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('ApproveOrder_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'APPROVE'">
+                <bpelx:annotation>
+                  <bpelx:pattern patternName="case">Task outcome is APPROVE</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                  <empty name="orderApproved"/>
+                </sequence>
+              </case>
+              <otherwise>
+                <bpelx:annotation>
+                  <bpelx:pattern>Task is outcome is EXPIRED, STALE, WITHDRAWN or ERRORED</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                  <empty name="ApprovalExpired"/>
+                </sequence>
+              </otherwise>
+            </switch>
+             <empty name="add" />
+          </sequence>
+        </sequence>
+      </case>
+    </switch>
+
+    <scope name="SelectSupplier">
+      <variables>
+        <variable name="selectManufacturerResponse"
+                  messageType="ns16:RequestQuote_processRequestQuoteResponse"/>
+        <variable name="rapidManufacturerResponse"
+                  messageType="ns17:RequestQuotePortType_POItemsQuoteResponse"/>
+        <variable name="selectManufacturerRequest"
+                  messageType="ns16:RequestQuote_processRequestQuote"/>
+        <variable name="rapidManufacturerRequest"
+                  messageType="ns17:RequestQuotePortType_POItemsQuote"/>
+      </variables>
+      <sequence name="Sequence_9">
+        
+        <flow name="CallManufacturers">
+          <sequence name="Sequence_8">
+            <assign name="TransformRapidRequest">
+              <bpelx:annotation>
+                <bpelx:pattern>transformation</bpelx:pattern>
+              </bpelx:annotation>
+              <copy>
+                <from expression="ora:processXSLT('RapidTransformation.xsl',bpws:getVariableData('inputVariable','payload'))"/>
+                <to variable="rapidManufacturerRequest" part="parameters"/>
+              </copy>
+            </assign>
+            <invoke name="Task7" partnerLink="RapidService"
+                    portType="ns17:RequestQuote" operation="POItemsQuote"
+                    inputVariable="rapidManufacturerRequest"
+                    outputVariable="rapidManufacturerResponse">
+              <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task5:0.5 Task6:1</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </sequence>
+          <sequence name="Sequence_8">
+            <assign name="TransformSelectRequest">
+              <bpelx:annotation>
+                <bpelx:pattern>transformation</bpelx:pattern>
+              </bpelx:annotation>
+              <copy>
+                <from expression="ora:processXSLT('SelectTransformation.xsl',bpws:getVariableData('inputVariable','payload'))"/>
+                <to variable="selectManufacturerRequest" part="parameters"/>
+              </copy>
+            </assign>
+            <invoke name="Task8" partnerLink="SelectService"
+                    portType="ns16:SelectService"
+                    operation="processRequestQuote"
+                    inputVariable="selectManufacturerRequest">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task7:1</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+            <receive name="ReceiveSelectManufacturer"
+                     partnerLink="SelectService"
+                     portType="ns16:SelectServiceCallback"
+                     operation="processRequestQuoteResponse"
+                     variable="selectManufacturerResponse" createInstance="no"/>
+          </sequence>
+        </flow>
+        <switch name="SelectByPrice">
+          <case condition="number(bpws:getVariableData('selectManufacturerResponse','parameters','/ns16:processRequestQuoteResponseElement/ns16:return/ns16:supplierPrice')) &lt; number(bpws:getVariableData('rapidManufacturerResponse','parameters','/ns17:POItemsQuoteResponse/ns18:return/ns18:supplierPrice'))">
+            <assign name="AssignSelectManufacturer">
+              <copy>
+                <from expression="number(bpws:getVariableData('selectManufacturerResponse','parameters','/ns16:processRequestQuoteResponseElement/ns16:return/ns16:supplierPrice'))"/>
+                <to variable="inputVariable" part="payload"
+                    query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:SupplierInfo/ns4:SupplierPrice"/>
+              </copy>
+              <copy>
+                <from variable="selectManufacturerResponse" part="parameters"
+                      query="/ns16:processRequestQuoteResponseElement/ns16:return/ns16:supplierName"/>
+                <to variable="inputVariable" part="payload"
+                    query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:SupplierInfo/ns4:SupplierName"/>
+              </copy>
+            </assign>
+          </case>
+          <otherwise>
+            <assign name="AssignRapidDistributor">
+              <copy>
+                <from expression="number(bpws:getVariableData('rapidManufacturerResponse','parameters','/ns17:POItemsQuoteResponse/ns18:return/ns18:supplierPrice'))"/>
+                <to variable="inputVariable" part="payload"
+                    query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:SupplierInfo/ns4:SupplierPrice"/>
+              </copy>
+              <copy>
+                <from variable="rapidManufacturerResponse" part="parameters"
+                      query="/ns17:POItemsQuoteResponse/ns18:return/ns18:supplierName"/>
+                <to variable="inputVariable" part="payload"
+                    query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:SupplierInfo/ns4:SupplierName"/>
+              </copy>
+            </assign>
+          </otherwise>
+        </switch>
+      </sequence>
+    </scope>
+    <scope name="PostFulfillmentReq">
+      <faultHandlers>
+        <catchAll>
+          <empty name="Empty_1"/>
+        </catchAll>
+      </faultHandlers>
+      <sequence name="Sequence_10">
+        <assign name="initializeRequest2">
+          <copy>
+            <from variable="inputVariable" part="payload"
+                  query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder"/>
+            <to variable="orderFulfillmentRequest" part="PurchaseOrder"
+                query="/ns4:PurchaseOrder"/>
+          </copy>
+        </assign>
+        <invoke name="Task9" partnerLink="OrderFulfillment"
+                portType="ns19:execute_ppt" operation="execute"
+                inputVariable="orderFulfillmentRequest">
+                <bpelx:toProperties>
+                    <bpelx:toProperty name="probability">Task8:1</bpelx:toProperty>
+                    <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+                </bpelx:toProperties>
+        </invoke>
+      </sequence>
+    </scope>
+    <scope name="SetFinalOrderStatus">
+      <variables>
+        <variable name="orderStatusRequest"
+                  messageType="ns20:OrdersCollection_msg"/>
+      </variables>
+      <sequence name="Sequence_11">
+        <assign name="AssignOrderStatus3">
+          <copy>
+            <from variable="inputVariable" part="payload"
+                  query="/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ID"/>
+            <to variable="orderStatusRequest" part="OrdersCollection"
+                query="/ns21:OrdersCollection/ns21:Orders/ns21:ordid"/>
+          </copy>
+          <copy>
+            <from expression="'completed'"/>
+            <to variable="orderStatusRequest" part="OrdersCollection"
+                query="/ns21:OrdersCollection/ns21:Orders/ns21:status"/>
+          </copy>
+        </assign>
+        <invoke name="Task10" partnerLink="OrderStatus"
+                portType="ns20:OrderStatus_ptt" operation="update"
+                inputVariable="orderStatusRequest">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task9:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </sequence>
+    </scope>
+    <scope name="NotifyCustomer">
+      <bpelx:annotation>
+        <bpelx:pattern patternName="bpelx:email"></bpelx:pattern>
+      </bpelx:annotation>
+      <variables>
+        <variable name="varNotificationReq"
+                  messageType="ns22:EmailNotificationRequest"/>
+        <variable name="varNotificationResponse"
+                  messageType="ns22:ArrayOfResponse"/>
+        <variable name="NotificationServiceFaultVariable"
+                  messageType="ns22:NotificationServiceErrorMessage"/>
+      </variables>
+      <sequence name="Sequence_15">
+        <assign name="EmailParamsAssign">
+          <copy>
+            <from expression="string('Default')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:FromAccountName"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:Bcc"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:Cc"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:ReplyToAddress"/>
+          </copy>
+          <copy>
+            <from expression="string('Your order has been shipped')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:Subject"/>
+          </copy>
+          <copy>
+            <from expression="bpws:getVariableData('inputVariable','payload','/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:UserContact/ns4:EmailAddress')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:To"/>
+          </copy>
+          <copy>
+            <from expression="concat('Hi ', bpws:getVariableData('inputVariable','payload','/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ShipTo/ns4:Name/ns4:First'), '.
+            
+            This is to inform you that your order number ', bpws:getVariableData('inputVariable','payload','/client:SOAOrderBookingProcessRequest/ns4:PurchaseOrder/ns4:ID'), ' has been shipped. If you have a question about your order please contact customer service or send an email to customerservice@globalcompany.com.
+            
+            Thank you for doing business with Global Company. We appreciate yourbusiness!
+            
+            Global Company Customer Service')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:Content/ns22:ContentBody"/>
+          </copy>
+          <copy>
+            <from expression="string('text/html; charset=UTF-8')"/>
+            <to variable="varNotificationReq" part="EmailPayload"
+                query="/EmailPayload/ns22:Content/ns22:MimeType"/>
+          </copy>
+        </assign>
+        <invoke name="Task11"
+                partnerLink="NotificationService"
+                portType="ns22:NotificationService"
+                operation="sendEmailNotification"
+                inputVariable="varNotificationReq"
+                outputVariable="varNotificationResponse">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task10:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </sequence>
+    </scope>
+    <invoke name="Task12" partnerLink="client"
+            portType="client:SOAOrderBookingCallback" operation="onResult"
+            inputVariable="outputVariable">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task11:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2 path3 path4</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+  </sequence>
+</process>

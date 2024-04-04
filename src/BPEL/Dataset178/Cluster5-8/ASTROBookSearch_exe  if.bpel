@@ -1,0 +1,869 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="ASTROBookSearch_exe"
+    targetNamespace="http://enterprise.netbeans.org/bpel/ASTROSearch/ASTROBookSearch_exe"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:sxat="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Attachment"
+    xmlns:sxeh="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/ErrorHandling"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/ASTROSearch/ASTROBookSearch_exe"
+
+    xmlns:ns0="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch"
+    xmlns:ns1="http://xml.netbeans.org/schema/ASTROSearchSCHEMA"
+   
+    xmlns:ns3="http://xml.netbeans.org/schema/AMAZON_SCHEMA"
+    xmlns:ns4="http://j2ee.netbeans.org/wsdl/ASTROSearch_exe/AMAZON_wsdl"
+    >
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch" location="ASTROBookSearch.wsdl"
+    importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://xml.netbeans.org/schema/ASTROSearchSCHEMA" location="ASTROSearchSCHEMA.xsd"
+    importType="http://www.w3.org/2001/XMLSchema"/>
+
+    <import namespace="http://xml.netbeans.org/schema/AMAZON_SCHEMA" location="AMAZON_SCHEMA.xsd"
+    importType="http://www.w3.org/2001/XMLSchema"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROSearch_exe/AMAZON_wsdl" location="AMAZON_wsdl.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+      <partnerLink myRole="ASTROBookSearch_Service" name="ASTROBookSearch_PLT" 
+      partnerLinkType="ns0:ASTROBookSearch_PLT" partnerRole="ASTROBookSearch_Customer"/>
+      <partnerLink name="Amazon_PLT" partnerLinkType="ns4:Amazon_PLT" partnerRole="Amazon_Service"/>
+   </partnerLinks>
+   <variables>
+      <variable messageType="ns0:itemSearchRequestMsg" name="searchMsg"/>
+      <variable messageType="ns0:loginMsg" name="loginMsg"/>
+      <variable messageType="ns0:loginErrMsg" name="loginErrorMsg"/>
+      <variable messageType="ns0:loginAckMsg" name="loginAckMsg"/>
+      <variable messageType="ns0:itemSearchResponseMsg" name="searchResultMsg"/>
+      <variable messageType="ns0:itemSearchErrMsg" name="searchErrorMsg"/>
+      <variable messageType="ns0:logoutMsg" name="logoutMsg"/>
+
+     <variable messageType="ns4:ItemSearchRequestMsg" name="ItemSearchRequestMsg"/> <!--AMAZON_PLT-->
+      <variable messageType="ns4:ItemSearchResponseMsg" name="ItemSearchResponseMsg"/>
+
+      <variable name="temp" type="xsd:string"/>
+      <variable name="temp_int" type="xsd:nonNegativeInteger"/>
+	<variable name="numBusqueda" type="xsd:positiveInteger"/>
+   </variables>
+   <correlationSets>
+      <correlationSet name="booksearch" properties="ns0:key"/>
+   </correlationSets>
+   <sequence>
+      <receive createInstance="yes" name="login" operation="login" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_PT" variable="loginMsg">
+         <correlations>
+            <correlation initiate="yes" set="booksearch"/>
+         </correlations>
+      </receive>
+		<assign>
+		<copy>
+		  <from>0</from>
+	        <to variable="numBusqueda"/>
+		</copy>
+		</assign>
+     <if>
+         <condition>contains($loginMsg.customerId ,'ASTRO')</condition>
+            <sequence>
+               <assign>
+                  <copy>
+                     <from part="key" variable="loginMsg"/>
+                     <to part="key" variable="loginAckMsg"/>
+                  </copy>
+               </assign>
+               <invoke inputVariable="loginAckMsg" name="Task1" operation="loginAck" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="booksearch"/>
+                  </correlations>
+				  <bpelx:toProperties>
+					 <bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+					 <bpelx:toProperty name="paths">path1 path2 path3</bpelx:toProperty>
+				  </bpelx:toProperties>
+			   </invoke> 
+               <while>
+                   <condition>($numBusqueda) &lt; 1 </condition>
+			<sequence>
+			<assign>
+			<copy>  
+			<from>$numBusqueda + 1</from>
+			<to variable="numBusqueda"/>
+			</copy>
+			</assign>
+			<pick name="search-logout">
+			  <onMessage operation="itemSearchRequest" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_PT" variable="searchMsg">
+                            <correlations>
+                              <correlation set="booksearch"/>
+                            </correlations>
+                            <sequence>
+			      <empty/>
+                              <assign>
+				<copy> 
+				  <from><literal>
+				      <ns3:ItemSearch>
+					<ns3:AWSAccessKeyId>1JCNA3F1DE5FAWXC06G2</ns3:AWSAccessKeyId>
+					<ns3:Request>
+					  <ns3:Availability/>
+					  <ns3:Author/>
+					  <ns3:Condition/>
+					  <ns3:Keywords/>
+					  <ns3:MerchantId/>
+					  <ns3:Publisher/>
+					  <ns3:ResponseGroup/>
+					  <ns3:SearchIndex/>
+					  <ns3:Title/>
+					</ns3:Request>
+				      </ns3:ItemSearch>
+				  </literal></from>
+				  <to variable="ItemSearchRequestMsg" part="body"/>
+				</copy>						   
+				<copy>
+                                  <from>"1JCNA3F1DE5FAWXC06G2"</from>
+                                  <to part="body" variable="ItemSearchRequestMsg">
+                                    <query>/ns3:ItemSearch/ns3:AWSAccessKeyId</query>
+                                  </to>
+				</copy>
+				<copy> 
+				  <from><literal>
+				      <ns3:ItemSearch>
+					<ns3:AWSAccessKeyId/>
+					<ns3:Request>
+					  <ns3:Availability/>
+					  <ns3:Author/>
+					  <ns3:Condition/>
+					  <ns3:Keywords/>
+					  <ns3:MerchantId/>
+					  <ns3:Publisher/>
+					  <ns3:ResponseGroup/>
+					  <ns3:SearchIndex/>
+					  <ns3:Title/>
+					</ns3:Request>
+				      </ns3:ItemSearch>
+				  </literal></from>
+				  <to variable="ItemSearchRequestMsg" part="body"/>
+				</copy>							  
+				<copy>
+                                  <from>"Available"</from>
+                                  <to part="body" variable="ItemSearchRequestMsg">
+                                    <query>/ns3:ItemSearch/ns3:Request/ns3:Availability</query>
+                                  </to>
+				</copy>
+				<copy> 
+				  <from><literal>
+				      <ns3:ItemSearch>
+					<ns3:AWSAccessKeyId/>
+					<ns3:Request>
+					  <ns3:Availability/>
+					  <ns3:Author/>
+					  <ns3:Condition/>
+					  <ns3:Keywords/>
+					  <ns3:MerchantId/>
+					  <ns3:Publisher/>
+					  <ns3:ResponseGroup/>
+					  <ns3:SearchIndex/>
+					  <ns3:Title/>
+					</ns3:Request>
+				      </ns3:ItemSearch>
+				  </literal></from>
+				  <to variable="ItemSearchRequestMsg" part="body"/>
+				</copy>							  
+                              <copy>
+                                 <from part="body" variable="searchMsg">
+                                     <query>/ns1:ItemSearch[1]/ns1:Request/ns1:Author</query>
+                                 </from>
+                                 <to part="body" variable="ItemSearchRequestMsg">
+                                 <query>/ns3:ItemSearch/ns3:Request/ns3:Author</query>
+                                 </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>							  
+                              <copy>
+                                <from>"All"</from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:Condition</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>
+                              <copy>
+                                <from part="body" variable="searchMsg">
+                                  <query>/ns1:ItemSearch[1]/ns1:Request/ns1:Keywords</query>
+                                </from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:Keywords</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>
+                              <copy>
+                                <from>"Amazon"</from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:MerchantId</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>							  
+                              <copy>
+                                <from part="body" variable="searchMsg">
+                                  <query>/ns1:ItemSearch[1]/ns1:Request/ns1:Publisher</query>
+                                </from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:Publisher</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>							  
+                              <copy>
+                                <from>"Medium"</from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:ResponseGroup</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>							  
+                              <copy>
+                                <from part="body" variable="searchMsg">
+                                  <query>/ns1:ItemSearch[1]/ns1:Request/ns1:Title</query>
+                                </from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:Title</query>
+                                </to>
+                              </copy>
+			      <copy> 
+				<from><literal>
+				    <ns3:ItemSearch>
+				      <ns3:AWSAccessKeyId/>
+				      <ns3:Request>
+					<ns3:Availability/>
+					<ns3:Author/>
+					<ns3:Condition/>
+					<ns3:Keywords/>
+					<ns3:MerchantId/>
+					<ns3:Publisher/>
+					<ns3:ResponseGroup/>
+					<ns3:SearchIndex/>
+					<ns3:Title/>
+				      </ns3:Request>
+				    </ns3:ItemSearch>
+				</literal></from>
+				<to variable="ItemSearchRequestMsg" part="body"/>
+			      </copy>							  
+                              <copy>
+                                <from>"Books"</from>
+                                <to part="body" variable="ItemSearchRequestMsg">
+                                  <query>/ns3:ItemSearch/ns3:Request/ns3:SearchIndex</query>
+                                </to>
+                              </copy>
+                              </assign>
+                              <invoke inputVariable="ItemSearchRequestMsg" name="Task3" operation="ItemSearch" outputVariable="ItemSearchResponseMsg" partnerLink="Amazon_PLT" portType="ns4:AWSECommerceServicePortType">
+								<bpelx:toProperties>
+								   <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+								   <bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+								</bpelx:toProperties>
+							 </invoke> 
+
+                           <if>
+                              <condition> 
+$ItemSearchResponseMsg.body/ns3:Items/ns3:Request/ns3:IsValid='true'
+			     </condition>
+                                 <sequence>
+                                    <assign>
+                                       <copy>
+                                          <from part="key" variable="searchMsg"/>
+                                          <to part="key" variable="searchResultMsg"/>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse[1]/ns3:Items/ns3:TotalResults</query>
+                                          </from>
+                                          <to variable="temp_int"/>
+                                       </copy> 
+					<copy> 
+						<from><literal>
+						<ns1:ItemSearchResponse>
+						<ns1:Items>
+						<ns1:Request>
+							<ns1:IsValid/>
+							<ns1:Errors>
+								<ns1:Error>
+								<ns1:Code/>
+								<ns1:Message/>
+								</ns1:Error>
+							</ns1:Errors>
+						</ns1:Request>
+						<ns1:TotalResults>5</ns1:TotalResults>
+						<ns1:TotalPages>30</ns1:TotalPages>
+						<ns1:Item>
+							<ns1:ASIN/>
+							<ns1:DetailPageURL/>
+							<ns1:ItemAttributes>
+								<ns1:Author/>
+								<ns1:ISBN/>
+								<ns1:ListPrice>
+								<ns1:FormattedPrice/>
+								</ns1:ListPrice>
+								<ns1:Publisher/>
+								<ns1:Title/>
+
+							</ns1:ItemAttributes>
+						</ns1:Item>
+						</ns1:Items>
+						</ns1:ItemSearchResponse>
+						</literal></from>
+						<to variable="searchResultMsg" part="body"/>
+						</copy>									   
+						
+						<copy>
+                                          	<from variable="temp_int"/>
+                                          	<to part="body" variable="searchResultMsg">
+                                              	<query>/ns1:ItemSearchResponse/ns1:Items/ns1:TotalResults</query>
+                                          	</to>
+                                       		</copy>
+                                       		
+						<copy>
+                                         	<from part="body" variable="ItemSearchResponseMsg">
+                                              	<query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:ASIN</query>
+                                          	</from>
+                                          	<to variable="temp"/>
+                                       		</copy>
+						
+						<copy> 
+						<from><literal>
+						<ns1:ItemSearchResponse>
+						<ns1:Items>
+						<ns1:Request>
+							<ns1:IsValid/>
+							<ns1:Errors>
+							<ns1:Error>
+								<ns1:Code/>
+								<ns1:Message/>
+							</ns1:Error>
+							</ns1:Errors>
+						</ns1:Request>
+						<ns1:TotalResults>5</ns1:TotalResults>
+						<ns1:TotalPages>30</ns1:TotalPages>
+						<ns1:Item>
+							<ns1:ASIN/>
+							<ns1:DetailPageURL/>
+							<ns1:ItemAttributes>
+								<ns1:Author/>
+								<ns1:ISBN/>
+								<ns1:ListPrice>
+								<ns1:FormattedPrice/>
+								</ns1:ListPrice>
+								<ns1:Publisher/>
+								<ns1:Title/>
+							</ns1:ItemAttributes>
+						</ns1:Item>
+						</ns1:Items>
+						</ns1:ItemSearchResponse>
+	                    			</literal></from>
+					        <to variable="searchResultMsg" part="body"/>
+						</copy>									   
+                                       <copy>
+                                       <from variable="temp"/>
+                                       <to part="body" variable="searchResultMsg">
+                                       <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ASIN</query>
+                                       </to>
+                                       </copy>
+                                       
+				       <copy>
+                                       <from part="body" variable="ItemSearchResponseMsg">
+                                       <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:DetailPageURL</query>
+                                       </from>
+                                       <to variable="temp"/>
+                                       </copy>
+				       
+				       <copy> 
+				       <from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+						<ns1:Request>
+							<ns1:IsValid/>
+							<ns1:Errors>
+							<ns1:Error>
+								<ns1:Code/>
+								<ns1:Message/>
+							</ns1:Error>
+							</ns1:Errors>
+						</ns1:Request>
+						<ns1:TotalResults>5</ns1:TotalResults>
+						<ns1:TotalPages>30</ns1:TotalPages>
+						<ns1:Item>
+							<ns1:ASIN/>
+							<ns1:DetailPageURL/>
+							<ns1:ItemAttributes>
+								<ns1:Author/>
+								<ns1:ISBN/>
+								<ns1:ListPrice>
+								<ns1:FormattedPrice/>
+								</ns1:ListPrice>
+								<ns1:Publisher/>
+								<ns1:Title/>
+
+							</ns1:ItemAttributes>
+						</ns1:Item>
+						</ns1:Items>
+						</ns1:ItemSearchResponse>
+  					  </literal></from>
+					<to variable="searchResultMsg" part="body"/>
+					</copy>									   
+                                       <copy>
+                                          <from variable="temp"/>
+                                          <to part="body" variable="searchResultMsg">
+                                              <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:DetailPageURL</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:ItemAttributes/ns3:Author[1]</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+					
+					<copy> 
+					<from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+						<ns1:Request>
+							<ns1:IsValid/>
+							<ns1:Errors>
+							<ns1:Error>
+								<ns1:Code/>
+								<ns1:Message/>
+							</ns1:Error>
+							</ns1:Errors>
+						</ns1:Request>
+						<ns1:TotalResults>5</ns1:TotalResults>
+						<ns1:TotalPages>30</ns1:TotalPages>
+						<ns1:Item>
+						<ns1:ASIN/>
+						<ns1:DetailPageURL/>
+						<ns1:ItemAttributes>
+							<ns1:Author/>
+							<ns1:ISBN/>
+							<ns1:ListPrice>
+								<ns1:FormattedPrice/>
+							</ns1:ListPrice>
+							<ns1:Publisher/>
+							<ns1:Title/>
+
+						</ns1:ItemAttributes>
+						</ns1:Item>
+					</ns1:Items>
+					</ns1:ItemSearchResponse>
+					 </literal></from>
+					 <to variable="searchResultMsg" part="body"/>
+					</copy>									   
+
+                                       <copy>
+                                          <from variable="temp"/>
+                                          <to part="body" variable="searchResultMsg">
+                                              <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ItemAttributes/ns1:Author</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:ItemAttributes/ns3:ISBN</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+					
+					<copy> 
+					<from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+					<ns1:Request>
+						<ns1:IsValid/>
+						<ns1:Errors>
+						<ns1:Error>
+							<ns1:Code/>
+							<ns1:Message/>
+						</ns1:Error>
+						</ns1:Errors>
+					</ns1:Request>
+					<ns1:TotalResults>5</ns1:TotalResults>
+					<ns1:TotalPages>30</ns1:TotalPages>
+					<ns1:Item>
+						<ns1:ASIN/>
+						<ns1:DetailPageURL/>
+						<ns1:ItemAttributes>
+							<ns1:Author/>
+							<ns1:ISBN/>
+							<ns1:ListPrice>
+								<ns1:FormattedPrice/>
+							</ns1:ListPrice>
+							<ns1:Publisher/>
+							<ns1:Title/>
+						</ns1:ItemAttributes>
+					</ns1:Item>
+					</ns1:Items>
+					</ns1:ItemSearchResponse>
+					</literal></from>
+					<to variable="searchResultMsg" part="body"/>
+					</copy>									   
+                                       
+					<copy>
+                                          <from variable="temp"/>
+                                          <to part="body" variable="searchResultMsg">
+                                              <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ItemAttributes/ns1:ISBN</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                         <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:OfferSummary/ns3:LowestNewPrice/ns3:FormattedPrice[1]</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+				       <copy>
+					<from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+					<ns1:Request>
+						<ns1:IsValid/>
+						<ns1:Errors>
+						<ns1:Error>
+							<ns1:Code/>
+							<ns1:Message/>
+						</ns1:Error>
+						</ns1:Errors>
+					</ns1:Request>
+					<ns1:TotalResults>5</ns1:TotalResults>
+					<ns1:TotalPages>30</ns1:TotalPages>
+					<ns1:Item>
+					<ns1:ASIN/>
+					<ns1:DetailPageURL/>
+					<ns1:ItemAttributes>
+						<ns1:Author/>
+						<ns1:ISBN/>
+						<ns1:ListPrice>
+							<ns1:FormattedPrice/>
+						</ns1:ListPrice>
+						<ns1:Publisher/>
+						<ns1:Title/>
+
+					</ns1:ItemAttributes>
+					</ns1:Item>
+					</ns1:Items>
+					</ns1:ItemSearchResponse>
+					</literal></from>
+					<to variable="searchResultMsg" part="body"/>
+					</copy>									   
+                                       
+					<copy>
+                                        <from variable="temp"/>
+                                        <to part="body" variable="searchResultMsg">
+                                        <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ItemAttributes/ns1:ListPrice/ns1:FormattedPrice</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:ItemAttributes/ns3:Publisher</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+					<copy>
+					<from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+					<ns1:Request>
+						<ns1:IsValid/>
+						<ns1:Errors>
+						<ns1:Error>
+							<ns1:Code/>
+							<ns1:Message/>
+						</ns1:Error>
+						</ns1:Errors>
+					</ns1:Request>
+					<ns1:TotalResults>5</ns1:TotalResults>
+					<ns1:TotalPages>30</ns1:TotalPages>
+					<ns1:Item>
+					<ns1:ASIN/>
+					<ns1:DetailPageURL/>
+					<ns1:ItemAttributes>
+						<ns1:Author/>
+						<ns1:ISBN/>
+						<ns1:ListPrice>
+							<ns1:FormattedPrice/>
+						</ns1:ListPrice>
+						<ns1:Publisher/>
+						<ns1:Title/>
+
+					</ns1:ItemAttributes>
+					</ns1:Item>
+
+					</ns1:Items>
+					</ns1:ItemSearchResponse>
+					</literal></from>
+					<to variable="searchResultMsg" part="body"/>
+					</copy>									   
+                                       <copy>
+                                          <from variable="temp"/>
+                                          <to part="body" variable="searchResultMsg">
+                                              <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ItemAttributes/ns1:Publisher</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Item[1]/ns3:ItemAttributes/ns3:Title</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+				       <copy> 
+				       <from><literal>
+					<ns1:ItemSearchResponse>
+					<ns1:Items>
+					<ns1:Request>
+						<ns1:IsValid/>
+						<ns1:Errors>
+						<ns1:Error>
+							<ns1:Code/>
+							<ns1:Message/>
+						</ns1:Error>
+						</ns1:Errors>
+					</ns1:Request>
+					<ns1:TotalResults>5</ns1:TotalResults>
+					<ns1:TotalPages>30</ns1:TotalPages>
+					<ns1:Item>
+						<ns1:ASIN/>
+						<ns1:DetailPageURL/>
+						<ns1:ItemAttributes>
+							<ns1:Author/>
+							<ns1:ISBN/>
+							<ns1:ListPrice>
+								<ns1:FormattedPrice>12</ns1:FormattedPrice>
+							</ns1:ListPrice>
+							<ns1:Publisher/>
+							<ns1:Title>Platero</ns1:Title>
+
+						</ns1:ItemAttributes>
+					</ns1:Item>
+
+					</ns1:Items>
+					</ns1:ItemSearchResponse>
+					 </literal></from>
+					 <to variable="searchResultMsg" part="body"/>
+					</copy>									   
+                                       <copy>
+                                          <from variable="temp"/>
+                                          <to part="body" variable="searchResultMsg">
+                                              <query>/ns1:ItemSearchResponse/ns1:Items/ns1:Item[1]/ns1:ItemAttributes/ns1:Title</query>
+                                          </to>
+                                       </copy>
+                                    </assign>
+                                    <invoke inputVariable="searchResultMsg" name="Task4" operation="itemSearchResponse" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_CallbackPT">
+                                       <correlations>
+                                          <correlation pattern="request" set="booksearch"/> 
+                                       </correlations>
+									   <bpelx:toProperties>
+										  <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+										  <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+									   </bpelx:toProperties>
+									</invoke> 
+                                 </sequence>
+                              <else>
+                              
+                                 <sequence>
+                                    <assign>
+                                       <copy>
+                                          <from part="key" variable="searchMsg"/>
+                                          <to part="key" variable="searchErrorMsg"/>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                               <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Request/ns3:Errors/ns3:Error/ns3:Code</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+					 <copy>
+					  <from><literal>
+						<ns1:Errors>
+						<ns1:Error>
+							<ns1:Code/>
+							<ns1:Message/>
+						</ns1:Error>
+						</ns1:Errors>
+					   </literal></from>
+					   <to variable="searchErrorMsg" part="error"/>
+					 </copy>									   
+					<copy>
+                                          <from variable="temp"/>
+                                          <to part="error" variable="searchErrorMsg">
+                                              <query>/ns1:Errors/ns1:Error/ns1:Code</query>
+                                          </to>
+                                       </copy>
+                                       <copy>
+                                          <from part="body" variable="ItemSearchResponseMsg">
+                                              <query>/ns3:ItemSearchResponse/ns3:Items/ns3:Request/ns3:Errors/ns3:Error/ns3:Message</query>
+                                          </from>
+                                          <to variable="temp"/>
+                                       </copy>
+				       <copy> 
+					<from><literal>
+					<ns1:Errors>
+					<ns1:Error>
+						<ns1:Code/>
+						<ns1:Message/>
+					</ns1:Error>
+					</ns1:Errors>
+					</literal></from>
+					<to variable="searchErrorMsg" part="error"/>
+					</copy>									   
+                                       <copy>
+                                          <from variable="temp"/>
+                                          <to part="error" variable="searchErrorMsg">
+                                              <query>/ns1:Errors/ns1:Error/ns1:Message</query>
+                                          </to>
+                                       </copy>
+                                    </assign>
+                                    <invoke inputVariable="searchErrorMsg" name="Task5" operation="itemSearchErr" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_CallbackPT">
+                                       <correlations>
+                                          <correlation pattern="request" set="booksearch"/>
+                                       </correlations>
+									   <bpelx:toProperties>
+										  <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+										  <bpelx:toProperty name="paths">path3</bpelx:toProperty>
+									   </bpelx:toProperties>
+									</invoke> 
+                                 </sequence>
+                              </else>
+                           </if>
+
+                        </sequence>
+                     </onMessage>
+                     <onMessage operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_PT" variable="logoutMsg">
+                        <correlations>
+                           <correlation set="booksearch"/>
+                        </correlations>
+                      
+                             <empty name="SALE_SESION"/> 
+                     </onMessage>
+                  </pick>
+		</sequence>
+               </while>
+               <empty name="SUCC"/>
+            </sequence>
+         <else>
+            <sequence>
+               <assign>
+                  <copy>
+                     <from part="key" variable="loginMsg"/>
+                     <to part="key" variable="loginErrorMsg"/>
+                  </copy>
+               </assign>
+               <invoke inputVariable="loginErrorMsg" name="Task2" operation="loginErr" partnerLink="ASTROBookSearch_PLT" portType="ns0:ASTROBookSearch_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="booksearch"/> 
+                  </correlations>
+				  <bpelx:toProperties>
+					 <bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+					 <bpelx:toProperty name="paths">path4</bpelx:toProperty>
+				  </bpelx:toProperties>
+			   </invoke> 
+               <empty name="FAIL"/>
+            </sequence>
+         </else>
+      </if> 
+     
+   </sequence>
+</process>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   This sample is based on the sample LoanApproval composition in the
+   OASIS WS-BPEL 2.0 standard. The copyright notice is as follows:
+
+     Copyright © OASIS® 1993-2007. All Rights Reserved. OASIS
+     trademark, IPR and other policies apply.
+
+     This document and translations of it may be copied and furnished
+     to others, and derivative works that comment on or otherwise
+     explain it or assist in its implementation may be prepared,
+     copied, published and distributed, in whole or in part, without
+     restriction of any kind, provided that the above copyright notice
+     and this paragraph are included on all such copies and derivative
+     works. However, this document itself may not be modified in any
+     way, such as by removing the copyright notice or references to
+     OASIS, except as needed for the purpose of developing OASIS
+     specifications, in which case the procedures for copyrights
+     defined in the OASIS Intellectual Property Rights document must
+     be followed, or as required to translate it into languages other
+     than English.
+
+   In addition, this particular derivative work is licensed under the GPLv3:
+
+     Copyright (C) 2008-2009 Antonio García Domínguez
+
+     This file is part of the LoanApprovalRPC composition in the
+     UCASE WS-BPEL composition repositor.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License as
+     published by the Free Software Foundation, either version 3 of
+     the License, or (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<process
+    name="loanApprovalProcess"
+    targetNamespace="http://enterprise.netbeans.org/bpel/LoanApproval_V2/loanApprovalProcess"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpelx="http://schemas.oracle.com/bpel/extension" 
+    xmlns:tns="http://enterprise.netbeans.org/bpel/LoanApproval_V2/loanApprovalProcess" xmlns:ns1="http://j2ee.netbeans.org/wsdl/loanServicePT">
+   <import namespace="http://j2ee.netbeans.org/wsdl/loanServicePT" location="loanServicePT.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+   <import namespace="http://j2ee.netbeans.org/wsdl/ConcreteAssessorService" location="AssessorService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+   <import namespace="http://j2ee.netbeans.org/wsdl/ConcreteLoanService" location="LoanService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+   <import namespace="http://j2ee.netbeans.org/wsdl/ApprovalService" location="ApprovalService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+   <partnerLinks>
+      <partnerLink name="approver" xmlns:tns="http://j2ee.netbeans.org/wsdl/ApprovalService" partnerLinkType="tns:approvalServicePLT" partnerRole="approvalServiceRole"/>
+      <partnerLink name="assessor" xmlns:tns="http://j2ee.netbeans.org/wsdl/ConcreteAssessorService" partnerLinkType="tns:riskAssessmentPLT" partnerRole="riskAssessmentRole"/>
+      <partnerLink name="customer" xmlns:tns="http://j2ee.netbeans.org/wsdl/ConcreteLoanService" partnerLinkType="tns:loanServicePLT" myRole="loanServiceRoleType"/>
+   </partnerLinks>
+   <variables>
+      <variable name="risk" messageType="ns1:riskAssessmentMessage"/>
+      <variable name="approval" messageType="ns1:approvalMessage"/>
+      <variable name="request" xmlns:tns="http://j2ee.netbeans.org/wsdl/loanServicePT" messageType="tns:creditInformationMessage"/>
+   </variables>
+   <faultHandlers>
+      <catch faultName="ns1:loanProcessFault" faultVariable="error" faultMessageType="ns1:errorMessage">
+         <reply name="Reply1" partnerLink="customer" operation="request" portType="ns1:loanServicePT" faultName="ns1:unableToHandleRequest" variable="error"/>
+      </catch>
+   </faultHandlers>
+   <sequence>
+      <receive name="ReceiveRequest" createInstance="yes" partnerLink="customer" operation="request" xmlns:tns="http://j2ee.netbeans.org/wsdl/loanServicePT" portType="tns:loanServicePT" variable="request"/>
+      <if name="IfSmallAmount">
+         <condition>           ( $request.amount &lt;= 10000 )           </condition>
+         <sequence name="SmallAmount">
+            <invoke name="Task1" partnerLink="assessor" operation="check" portType="ns1:riskAssessmentPT" inputVariable="request" outputVariable="risk">
+               <bpelx:toProperties>
+						<bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+						<bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+					</bpelx:toProperties>
+				</invoke>
+            <if name="IfLowRisk">
+               <condition>       ( $risk.level = 'low' )       </condition>
+               <assign name="ApproveLowRiskSmallAmountLoans">
+                  <copy>
+                     <from>true()</from>
+                     <to part="accept" variable="approval"/>
+                  </copy>
+               </assign>
+               <else>
+                  <invoke name="Task3" partnerLink="approver" operation="approve" portType="ns1:loanApprovalPT" inputVariable="request" outputVariable="approval">
+               <bpelx:toProperties>
+						<bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+						<bpelx:toProperty name="paths">path2</bpelx:toProperty>
+					</bpelx:toProperties>
+				</invoke>
+               </else>
+            </if>
+         </sequence>
+         <else>
+            <invoke name="Task2" partnerLink="approver" operation="approve" portType="ns1:loanApprovalPT" inputVariable="request" outputVariable="approval">
+               <bpelx:toProperties>
+						<bpelx:toProperty name="probability">Task0:0.5</bpelx:toProperty>
+						<bpelx:toProperty name="paths">path3</bpelx:toProperty>
+					</bpelx:toProperties>
+				</invoke>
+         </else>
+      </if>
+      <reply name="ReportApproval" partnerLink="customer" operation="request" portType="ns1:loanServicePT" variable="approval"/>
+   </sequence>
+</process>

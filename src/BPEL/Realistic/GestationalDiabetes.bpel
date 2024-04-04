@@ -1,0 +1,147 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Wed Dec 06 15:51:10 CET 2023
+  Author:  giorg
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="GestionalDiabetesProcess"
+               targetNamespace="http://xmlns.oracle.com/Workflow/GestionalDiabetes/GestionalDiabetesProcess"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/Workflow/GestionalDiabetes/GestionalDiabetesProcess"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+
+    <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/Workflow/GestionalDiabetes/GestionalDiabetesProcess" location="../WSDLs/GestionalDiabetesProcess.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="gestionaldiabetesprocess_client" partnerLinkType="client:GestionalDiabetesProcess" myRole="GestionalDiabetesProcessProvider"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:GestionalDiabetesProcessRequestMessage"/>
+
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable" messageType="client:GestionalDiabetesProcessResponseMessage"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in GestionalDiabetesProcess.wsdl) -->
+    <receive name="receiveInput" partnerLink="gestionaldiabetesprocess_client" portType="client:GestionalDiabetesProcess" operation="process" variable="inputVariable" createInstance="yes"/>
+    <invoke name="Task1" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+      inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+      </bpelx:toProperties>
+    </invoke>
+    <if name="If1">
+      <sequence name="Sequence1">
+       <invoke name="Task2" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+          <bpelx:toProperties>
+            <bpelx:toProperty name="probability">Task1:0.33</bpelx:toProperty>
+            <bpelx:toProperty name="paths">path2 path3 path4 path5 path6 path7</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </sequence>
+    </if>
+    <if name="If2">
+      <sequence name="Sequence2">
+        <invoke name="Task4" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+      inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task1:0.34 Task2:0.5</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+      </bpelx:toProperties>
+       </invoke>
+        <if name="If3">
+          <sequence name="Sequence3">
+            <invoke name="Task5" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+              inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path4 path5 path6 path7 path9 path10 path11 path12</bpelx:toProperty>
+              </bpelx:toProperties>
+               </invoke>
+            <if name="If4">
+              <invoke name="Task6" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+                <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task5:0.33</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path5 path6 path10 path11</bpelx:toProperty>
+                </bpelx:toProperties>
+                 </invoke>
+            </if>
+            <if name="If6">
+              <invoke name="Task8" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                      inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+                <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task5:0.33 Task6:1</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path6 path7 path11 path12</bpelx:toProperty>
+                </bpelx:toProperties>
+              </invoke>
+            </if>
+          </sequence>
+        </if>
+        <if name="If5">
+          <invoke name="Task7" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task4:0.5 Task5:0.34 Task6:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path3 path4 path5 path8 path9 path10</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+        </if>
+      </sequence>
+      <else>
+        <invoke name="Task3" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+          inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+          <bpelx:toProperties>
+            <bpelx:toProperty name="probability">Task1:0.33 Task2:0.5</bpelx:toProperty>
+            <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+          </bpelx:toProperties>
+           </invoke>
+      </else>
+    </if>
+    <invoke name="Task9" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+      inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task3:1 Task7:1 Task8:1</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12</bpelx:toProperty>
+      </bpelx:toProperties>
+       </invoke>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="gestionaldiabetesprocess_client" portType="client:GestionalDiabetesProcess" operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

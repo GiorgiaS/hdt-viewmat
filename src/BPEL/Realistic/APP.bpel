@@ -1,0 +1,175 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Mon Dec 04 10:29:17 CET 2023
+  Author:  giorgia
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="Process_Realistic_AdvancedPracticePhysiotherapist"
+         targetNamespace="http://xmlns.oracle.com/MyFirstApplication/Realistic_AdvancedPracticePhysiotherapist/Process_Realistic_AdvancedPracticePhysiotherapist"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:client="http://xmlns.oracle.com/MyFirstApplication/Realistic_AdvancedPracticePhysiotherapist/Process_Realistic_AdvancedPracticePhysiotherapist"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ui="http://xmlns.oracle.com/soa/designer"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+  <import ui:processWSDL="true"
+          namespace="http://xmlns.oracle.com/MyFirstApplication/Realistic_AdvancedPracticePhysiotherapist/Process_Realistic_AdvancedPracticePhysiotherapist"
+          location="../WSDLs/Process_Realistic_AdvancedPracticePhysiotherapist.wsdl"
+          importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="process_realistic_advancedpracticephysiotherapist_client"
+                 partnerLinkType="client:Process_Realistic_AdvancedPracticePhysiotherapist"
+                 myRole="Process_Realistic_AdvancedPracticePhysiotherapistProvider"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable"
+              messageType="client:Process_Realistic_AdvancedPracticePhysiotherapistRequestMessage"/>
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable"
+              messageType="client:Process_Realistic_AdvancedPracticePhysiotherapistResponseMessage"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <!-- Receive input from requestor. (Note: This maps to operation defined in Process_Realistic_AdvancedPracticePhysiotherapist.wsdl) -->
+    <receive name="receiveInput" partnerLink="process_realistic_advancedpracticephysiotherapist_client"
+             portType="client:Process_Realistic_AdvancedPracticePhysiotherapist" operation="process"
+             variable="inputVariable" createInstance="yes"/>
+    <if name="If1">
+      <invoke name="Task1" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+              inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+        <bpelx:toProperties>
+          <bpelx:toProperty name="probability">Task0:0.34</bpelx:toProperty>
+          <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7</bpelx:toProperty>
+        </bpelx:toProperties>
+      </invoke>
+      <elseif></elseif>
+      <else>
+        <invoke name="Task2" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+          <bpelx:toProperties>
+            <bpelx:toProperty name="probability">Task0:0.33</bpelx:toProperty>
+            <bpelx:toProperty name="paths">path15 path16 path17 path18 path19 path20 path21</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </else>
+    </if>
+    <invoke name="Task3" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+            inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task0:0.33 Task1:1 Task2:1</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21</bpelx:toProperty>
+      </bpelx:toProperties>
+    </invoke>
+    <if name="If3">
+      <sequence>
+        <if name="If2">
+          <sequence name="Sequence1">
+            <invoke name="Task5" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                    inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task3:0.1667</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path1 path8 path15</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+            <invoke name="Task9" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                    inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task5:1</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path1 path8 path15</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </sequence>
+          <else>
+            <invoke name="Task6" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                    inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task3:0.1667</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path2 path9 path16</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </else>
+        </if>
+        <invoke name="Task10" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+          <bpelx:toProperties>
+            <bpelx:toProperty name="probability">Task6:1 Task9:1</bpelx:toProperty>
+            <bpelx:toProperty name="paths">path1 path2 path8 path9 path15 path16</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </sequence>
+      <elseif>
+        <invoke name="Task7" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+          <bpelx:toProperties>
+            <bpelx:toProperty name="probability">Task3:0.1667</bpelx:toProperty>
+            <bpelx:toProperty name="paths">path3 path10 path17</bpelx:toProperty>
+          </bpelx:toProperties>
+        </invoke>
+      </elseif>
+      <elseif>
+      </elseif>
+      <else>
+        <sequence name="Sequence2">
+          <if name="If4">
+            <invoke name="Task4" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                    operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                    bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task3:0.1667</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path6 path7 path13 path14 path20 path21</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </if>
+          <if name="If5">
+            <invoke name="Task8" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                    inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task3:0.1667 Task4:0.5</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path5 path6 path12 path13 path19 path20</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </if>
+        </sequence>
+      </else>
+    </if>
+    <invoke name="Task11" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+            inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task3:0.1667 Task4:0.5 Task7:1 Task8:1 Task10:1</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21</bpelx:toProperty>
+      </bpelx:toProperties>
+    </invoke>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="process_realistic_advancedpracticephysiotherapist_client"
+           portType="client:Process_Realistic_AdvancedPracticePhysiotherapist" operation="process"
+           variable="outputVariable"/>
+  </sequence>
+</process>

@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/quoteRequest/2008/06/QuoteRequest.wsdl" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2008/06/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2008/06/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:param="http://schemas.active-endpoints.com/sample/QuoteRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/QuoteRules/2008/06/QuoteRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/QuoteRules/2008/06/QuoteRules.xsd" xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="QuoteProcess" suppressJoinFailure="yes" targetNamespace="http://QuoteProcess">
+   <bpel:documentation>This process is for generating estimates for reconditioning the client's car.  It uses a subprocess for the work &#13;
+done by the various experts that will be involved in the estimate.  It also allows for the client to check on the&#13;
+status of their estimation request.</bpel:documentation>
+   <b4p:humanInteractions xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/quoteRequest/2008/06/QuoteRequest.wsdl" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2008/06/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2008/06/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:param="http://schemas.active-endpoints.com/sample/QuoteRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/QuoteRules/2008/06/QuoteRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/QuoteRules/2008/06/QuoteRules.xsd" xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <htd:logicalPeopleGroups/>
+      <htd:tasks/>
+      <htd:notifications>
+         <htd:notification name="NotifyChief">
+            <htd:interface xmlns:ns="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" operation="sendNotification" portType="ns:wshtNotifpt"/>
+            <htd:priority>0</htd:priority>
+            <htd:peopleAssignments>
+               <htd:recipients>
+                  <htd:from>
+                     <htd:literal>
+                        <ht:organizationalEntity xmlns:ht="http://www.example.org/WS-HT">
+	                                <ht:users>
+		                                  <ht:user>chief</ht:user>
+	                                </ht:users>
+                              </ht:organizationalEntity>
+                     </htd:literal>
+                  </htd:from>
+               </htd:recipients>
+            </htd:peopleAssignments>
+            <htd:presentationElements>
+               <htd:name>Notify Chief</htd:name>
+               <htd:presentationParameters>
+                  <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="refNumber" type="ns:string">$refNumber</htd:presentationParameter>
+               </htd:presentationParameters>
+               <htd:subject>The  Ref: {$refNumber} estimation process has not been completed in time.</htd:subject>
+               <htd:description>Please take action on Ref: {$refNumber}</htd:description>
+            </htd:presentationElements>
+         </htd:notification>
+      </htd:notifications>
+   </b4p:humanInteractions>
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="125053343143707215" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="125053343150007299" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="125053343150007299"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="125053343150007311" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="125053343150007311"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="125053343150007323" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="125053343150007323"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="125053343150007335" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="125053343150007335"/>
+         <bpmndi:BPMNShape aei:objectId="125053343150007371" aei:type="CORRELATION_CONTAINER" bpmnElement="125053343150007371"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {60,30}" aei:absoluteSize="DIM {116,19}" aei:font="FONT {Tahoma,12,1}" aei:objectId="1250536081781167461" aei:parentElement="process" aei:text="Quote Process" aei:type="LABEL" bpmnElement="1250536081781167461">
+            <dc:Bounds height="19" width="116" x="50" y="20"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:objectId="125189654295702775" aei:type="FLOW" bpmnElement="125189654295702775">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {300,15}" aei:absoluteSize="DIM {426,896}" aei:objectId="125053343150007373" aei:type="SEQUENCE" bpmnElement="125053343150007373" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="290" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {478,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Receive quote request" aei:objectId="125053343150007375" aei:principal="" aei:type="RECEIVE" bpmnElement="125053343150007375">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {526,66}" aei:absoluteSize="DIM {109,13}" aei:anchor.location="0" aei:anchor.objectId="125053343150007375" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607623" aei:relative.location="LOC {3,31}" aei:text="Receive quote request" bpmnElement="125053343150007375label">
+               <dc:Bounds height="13" width="109" x="361" y="71"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {451,110}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Validate Request with Rules" aei:objectId="127317243492944035" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="127317243492944035">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:imageLocation="icons/activity/large/paletteAssignLarge.png" aei:implicitScopeIO="INPUT" aei:objectId="127317256837544063" aei:type="ASSIGN" bpmnElement="127317256837544063">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$quoteRequest" aei:fromType="3" aei:objectId="127317257074844095" aei:toPart="Document" aei:toQuery="quote:quoteRequest" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="127317257074844095"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {310,188}" aei:absoluteSize="DIM {406,713}" aei:name="Is quote valid?" aei:objectId="125053343151507387" aei:type="IF" bpmnElement="125053343151507387" isHorizontal="false">
+            <dc:Bounds height="713" width="406" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {522,194}" aei:absoluteSize="DIM {70,13}" aei:anchor.location="4" aei:anchor.objectId="125053343151507387" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607635" aei:relative.location="LOC {-1,-18}" aei:text="Is quote valid?" bpmnElement="125053343151507387label">
+               <dc:Bounds height="13" width="70" x="353" y="186"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$QuoteRulesOutput/qrulesd:IsValid = 'true'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {310,248}" aei:absoluteSize="DIM {253,593}" aei:objectId="125053343151507389" aei:text="yes" aei:type="ELSE_IF" bpmnElement="125053343151507387ifDef">
+            <dc:Bounds height="593" width="253" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {445,230}" aei:absoluteSize="DIM {17,13}" aei:anchor.location="4" aei:anchor.objectId="125053343151507389" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607627" aei:relative.location="LOC {-1,-42}" aei:text="yes" aei:textAlignment="32" bpmnElement="125053343151507387ifDeflabel">
+               <dc:Bounds height="13" width="17" x="256" y="244"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {329,277}" aei:absoluteSize="DIM {215,564}" aei:objectId="125053343151507391" aei:type="SEQUENCE" bpmnElement="125053343151507391" isHorizontal="false">
+            <dc:Bounds height="569" width="220" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {401,287}" aei:absoluteSize="DIM {70,60}" aei:name="Reply with ref num" aei:objectId="125053343151507393" aei:type="REPLY" bpmnElement="125053343151507393">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {451,324}" aei:absoluteSize="DIM {90,13}" aei:anchor.location="0" aei:anchor.objectId="125053343151507393" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607625" aei:relative.location="LOC {5,27}" aei:text="Reply with ref num" bpmnElement="125053343151507393label">
+               <dc:Bounds height="13" width="90" x="279" y="322"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="125053343151507399" aei:type="ASSIGN" bpmnElement="125053343151507399">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;quote:quoteAck xmlns:quote=&quot;http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd&quot;&gt;&#10;   &lt;quote:refNumber&gt;{ $refNumber}&lt;/quote:refNumber&gt;&#10;   &lt;quote:quoteDate&gt;{ current-date()}&lt;/quote:quoteDate&gt;&#10;   &lt;quote:quoteStatus&gt;pending&lt;/quote:quoteStatus&gt;&#10;&lt;/quote:quoteAck&gt;&#10;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="125053343151507401" aei:toPart="response" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343151507401"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {374,372}" aei:absoluteSize="DIM {125,68}" aei:expanded="false" aei:expandedSize="DIM {375,192}" aei:name="Send customer email with ref num" aei:objectId="126892945628617625" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="126892945628617625" isHorizontal="false">
+            <dc:Bounds height="192" width="375" x="1" y="6"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {63,23}" aei:absoluteSize="DIM {161,13}" aei:anchor.location="11" aei:anchor.objectId="126892945628617625" aei:backgroundColor="RGB {255,255,255}" aei:objectId="131904052173113835" aei:relative.location="LOC {-144,3}" aei:text="Send customer email with ref num" bpmnElement="126892945628617625label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {30,67}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send customer email and Ref ID" aei:objectId="125129517511003397" aei:subprocessPath="" aei:text="send" aei:type="INVOKE" bpmnElement="125129517511003397">
+            <dc:Bounds height="53" width="125" x="249" y="388"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:font="FONT {Segoe UI,9,0}" aei:imageLocation="icons/activity/large/paletteAssignLarge.png" aei:implicitScopeIO="INPUT" aei:objectId="125129521907403693" aei:type="ASSIGN" bpmnElement="125129521907403693">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;reply-to@gmail.com&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;reply-to@gmail.com&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $quoteRequest/quote:contact/quote:email/text()  }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;Confirmation: Request for quote Reference Number ({ $refNumber }) received. Thank you.&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/plain&quot;&gt;Dear { $quoteRequest/quote:contact/quote:name/text() },&#10;&#10;Your request for a quote has been received and is pending review from our team of specialists. &#10;   &#10;We will be back to you shortly. Please use the Reference Number {$refNumber} to check status at http://{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html.&#10;&#10;We welcome your business,&#10;&#10;Vintage Old Stock.&#10;Web: http://www.vintageoldstock.com&#10;Tel: +1.866.555.1212&#10;Email: {$runtimeParameters/param:emailAddress/text()}&#10;&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="125129522359603879" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125129522359603879"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {20,57}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:gap="50" aei:joinConditionComp="" aei:objectId="126892945629117643" aei:type="Sequence" bpmnElement="125129517511003397wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="42"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {199,68}" aei:absoluteSize="DIM {165,153}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="126892946496217773" aei:text="Catch All" aei:type="CATCH_ALL" bpmnElement="126892946496217773" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="184" y="53"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {291,72}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="7" aei:anchor.objectId="126892946496217773" aei:backgroundColor="RGB {255,255,255}" aei:objectId="126892946496417775" aei:relative.location="LOC {0,-6}" aei:text="Catch All" bpmnElement="126892946496217773label">
+               <dc:Bounds height="13" width="42" x="601" y="39"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {219,138}" aei:absoluteSize="DIM {125,53}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="EmptyTask" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="126892946718517911" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="126892946718517911">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {209,128}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:gap="50" aei:joinConditionComp="" aei:objectId="126892946719017913" aei:type="Sequence" bpmnElement="126892946718517911wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteSize="DIM {1026,530}" aei:drilldownLocation="LOC {35,5}" aei:expanded="false" aei:expandedSize="DIM {548,565}" aei:name="Generate Quote" aei:objectId="125053343153107431" aei:showEventHandler="true" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:sizeToFit="true" aei:type="SCOPE" bpmnElement="125053343153107431" isHorizontal="false">
+            <dc:Bounds height="565" width="548" x="35" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {217,24}" aei:absoluteSize="DIM {78,13}" aei:anchor.location="11" aei:anchor.objectId="125053343153107431" aei:backgroundColor="RGB {255,255,255}" aei:objectId="131904052173613839" aei:relative.location="LOC {-77,-1}" aei:text="Generate Quote" bpmnElement="125053343153107431label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {339,487}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:boundaryEvent="true" aei:constraint="1,22" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:imageLocation="icons/bpmn/boundaryevents/non-interrupting-message.png" aei:objectId="133028523594205201" aei:text="Status?" aei:type="ON_EVENT" bpmnElement="133028523594205201" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteSize="DIM {0,0}" aei:anchor.location="0" aei:anchor.objectId="133028523594205201" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133028523595905221" aei:relative.location="LOC {-64,4}" aei:text="Status?" bpmnElement="133028523594205201label">
+               <dc:Bounds height="13" width="36" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {255,255,255}" aei:borderColor="RGB {128,128,128}" aei:objectId="133624115254210653" aei:showTerminationHandler="false" aei:textAlignment="1" aei:textFormat="1" aei:transparent="false" aei:type="SCOPE" bpmnElement="133624115254210653" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="11" aei:anchor.objectId="133624115254210653" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133624115254410671" aei:text="Embedded Subprocess" bpmnElement="133624115254210653label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {185,550}" aei:absoluteSize="DIM {70,60}" aei:name="Send Status" aei:objectId="133028518469901785" aei:type="REPLY" bpmnElement="133028518469901785">
+            <dc:Bounds height="60" width="70" x="68" y="396"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {143,558}" aei:absoluteSize="DIM {58,13}" aei:anchor.location="1" aei:anchor.objectId="133028518469901785" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133028518470201787" aei:relative.location="LOC {-87,-2}" aei:text="Send Status" bpmnElement="133028518469901785label">
+               <dc:Bounds height="13" width="58" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:implicitScopeIO="INPUT" aei:objectId="133028519786701959" aei:type="ASSIGN" bpmnElement="133028519786701959">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;quote:quoteInquiryResponse xmlns:quote=&quot;http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd&quot;&gt;&#10;   &lt;quote:refNumber&gt;{ $refNumber }&lt;/quote:refNumber&gt;&#10;   &lt;quote:quoteStatus&gt;{ $QuoteStatus }&lt;/quote:quoteStatus&gt;&#10;   &lt;quote:link&gt;&#10;      &lt;quote:URL&gt;{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html&lt;/quote:URL&gt;&#10;      &lt;quote:description&gt;Response to $StatusRequest/quote:refNumber/text()&lt;/quote:description&gt;&#10;   &lt;/quote:link&gt;&#10;&lt;/quote:quoteInquiryResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133028520020001981" aei:toPart="response" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133028520020001981"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {175,540}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133028518596901789" aei:type="Sequence" bpmnElement="133028518469901785wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="165" y="530"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:linkName="L1" aei:linkSimState="0" aei:objectId="133028861922744969" aei:showLabel="false" aei:sourceTerminal="SV" bpmnElement="133028523594205201To133028518469901785">
+            <aei:Attribute name="xtnConditionComp">
+               <aeds:expression xmlns:aeds="urn:active-endpoints:dataSpec">
+                  <aeds:value/>
+                  <aeds:language/>
+               </aeds:expression>
+            </aei:Attribute>
+            <di:waypoint weight="0.5" x="220" y="517"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {339,525}" aei:absoluteSize="DIM {70,60}" aei:alarmDurationValue="" aei:alarmExpression="'P2D'" aei:alarmExpressionLang="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0" aei:alarmNuberOfDays="1" aei:alarmRepeatEvery="" aei:alarmRepeatEveryLang="" aei:alarmTime="" aei:alarmType="1" aei:boundaryEvent="true" aei:constraint="1,60" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:imageLocation="icons/bpmn/boundaryevents/non-interrupting-timer.png" aei:objectId="128267823002811948" aei:text="48 Hours" aei:type="ON_ALARM_HANDLER" bpmnElement="128267823002811948" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteSize="DIM {0,0}" aei:anchor.location="7" aei:anchor.objectId="128267823002811948" aei:backgroundColor="RGB {255,255,255}" aei:objectId="128267823002811950" aei:relative.location="LOC {-71,3}" aei:text="48 Hours" bpmnElement="128267823002811948label">
+               <dc:Bounds height="15" width="44" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {255,255,255}" aei:borderColor="RGB {128,128,128}" aei:objectId="133624115254710675" aei:showTerminationHandler="false" aei:textAlignment="1" aei:textFormat="1" aei:transparent="false" aei:type="SCOPE" bpmnElement="133624115254710675" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="11" aei:anchor.objectId="133624115254710675" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133624115254910693" aei:text="Embedded Subprocess" bpmnElement="133624115254710675label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {147,645}" aei:absoluteSize="DIM {145,158}" aei:objectId="133028853684844715" aei:type="SEQUENCE" bpmnElement="133028853684844715" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="137" y="635"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {157,655}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Notify Chief" aei:objectId="128267829790412747" aei:paSimulationFaultName="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="128267829790412747">
+            <dc:Bounds height="53" width="125" x="20" y="760"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:imageLocation="icons/activity/large/paletteAssignLarge.png" aei:implicitScopeIO="INPUT" aei:objectId="125227455631229023" aei:type="ASSIGN" bpmnElement="125227455631229023">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;avc:sendNotification xmlns:avc=&quot;http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/&quot;&gt;&#10;   &lt;avc:processIdRef&gt;{$refNumber}&lt;/avc:processIdRef&gt;&#10;   &lt;avc:notifText&gt;Please review ASAP process {$refNumber} &lt;/avc:notifText&gt;&#10;&lt;/avc:sendNotification&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="125227455631229025" aei:toPart="parameters" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125227455631229025"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {184,733}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="128267834877613306" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="128267834877613306">
+            <dc:Bounds height="60" width="70" x="-175" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:linkName="L2" aei:linkSimState="0" aei:objectId="128267831414713028" aei:showLabel="false" bpmnElement="128267823002811948To133028853684844715">
+            <aei:Attribute name="xtnConditionComp">
+               <aeds:expression xmlns:aeds="urn:active-endpoints:dataSpec">
+                  <aeds:value/>
+                  <aeds:language/>
+               </aeds:expression>
+            </aei:Attribute>
+            <di:waypoint weight="0.5" x="326" y="615"/>
+            <di:waypoint weight="0.5" x="219" y="615"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {55,25}" aei:absoluteSize="DIM {145,459}" aei:gap="20" aei:objectId="125053343156207563" aei:type="SEQUENCE" bpmnElement="125053343156207563" isHorizontal="false">
+            <dc:Bounds height="632" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {92,35}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="1250535950265153297" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="1250535950265153297">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {65,115}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Start the estimation process" aei:objectId="125053343156207565" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="125053343156207565">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Prepare_Estimation" aei:objectId="125053343156207571" aei:type="ASSIGN" bpmnElement="125053343156207571">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$refNumber" aei:fromType="3" aei:objectId="125053343156207573" aei:toPart="Document" aei:toQuery="quote:refNumber" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343156207573"/>
+         <bpmndi:BPMNShape aei:fromExpression="$quoteRequest" aei:fromType="3" aei:objectId="125053343157807575" aei:toPart="Document" aei:toQuery="quote:quoteRequest" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343157807575"/>
+         <bpmndi:BPMNShape aei:fromExpression="$QuoteRulesOutput" aei:fromType="3" aei:objectId="125053343157807577" aei:toPart="Document" aei:toQuery="qrulesd:QuoteRulesOutput" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343157807577"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {65,188}" aei:absoluteSize="DIM {125,53}" aei:name="Status = in progress" aei:objectId="125053343159307579" aei:type="ASSIGN" bpmnElement="125053343159307579">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'In process'" aei:fromType="3" aei:objectId="125053343159307581" aei:toVariable="QuoteStatus" aei:type="ASSIGN_COPY" bpmnElement="125053343159307581"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {92,261}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Get estimate from subprocess" aei:objectId="125053343159307583" aei:principal="" aei:type="RECEIVE" bpmnElement="125053343159307583">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {146,302}" aei:absoluteSize="DIM {143,18}" aei:anchor.location="0" aei:anchor.objectId="125053343159307583" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607637" aei:relative.location="LOC {9,31}" aei:text="Get estimate from subprocess" bpmnElement="125053343159307583label">
+               <dc:Bounds height="18" width="143" x="24" y="296"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {65,341}" aei:absoluteSize="DIM {125,53}" aei:name="Status = Completed" aei:objectId="125053343159307585" aei:type="ASSIGN" bpmnElement="125053343159307585">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'Completed'" aei:fromType="3" aei:objectId="1251312594072134843" aei:toVariable="QuoteStatus" aei:type="ASSIGN_COPY" bpmnElement="1251312594072134843"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {92,414}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="125303236015103181" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="125303236015103181">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {307,62}" aei:absoluteSize="DIM {211,452}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="125053343153107449" aei:text="Any Error" aei:type="CATCH_ALL" bpmnElement="125053343153107449" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="257" y="42"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {460,40}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="7" aei:anchor.objectId="125053343153107449" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343206207641" aei:relative.location="LOC {38,-32}" aei:text="Any Error" bpmnElement="125053343153107449label">
+               <dc:Bounds height="13" width="56" x="301" y="122"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {327,132}" aei:absoluteSize="DIM {171,352}" aei:objectId="125053343153107451" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="125053343153107451" isHorizontal="false">
+            <dc:Bounds height="346" width="171" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {435,137}" aei:absoluteSize="DIM {0,13}" aei:anchor.location="11" aei:anchor.objectId="125053343153107451" aei:backgroundColor="RGB {255,255,255}" aei:objectId="131904052175513895" aei:relative.location="LOC {13,-5}" bpmnElement="125053343153107451label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {337,142}" aei:absoluteSize="DIM {145,336}" aei:objectId="125053343154607471" aei:type="SEQUENCE" bpmnElement="125053343154607471" isHorizontal="false">
+            <dc:Bounds height="93" width="490" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {374,152}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="125303238687503279" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="125303238687503279">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {347,237}" aei:absoluteSize="DIM {125,53}" aei:name="Status = faulted" aei:objectId="125053343154607473" aei:type="ASSIGN" bpmnElement="125053343154607473">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="'Faulted'" aei:fromType="3" aei:objectId="125053343154607475" aei:toVariable="QuoteStatus" aei:type="ASSIGN_COPY" bpmnElement="125053343154607475"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {10,10}" aei:absoluteSize="DIM {375,225}" aei:expanded="false" aei:expandedSize="DIM {375,192}" aei:name="Send problem email" aei:objectId="126892948033419967" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="126892948033419967" isHorizontal="false">
+            <dc:Bounds height="192" width="375" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {62,24}" aei:absoluteSize="DIM {92,13}" aei:anchor.location="11" aei:anchor.objectId="126892948033419967" aei:backgroundColor="RGB {255,255,255}" aei:objectId="131904052175713897" aei:relative.location="LOC {-145,4}" aei:text="Send problem email" bpmnElement="126892948033419967label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {32,75}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send problem email" aei:objectId="1251297618727120863" aei:subprocessPath="" aei:text="send" aei:type="INVOKE" bpmnElement="1251297618727120863">
+            <dc:Bounds height="53" width="125" x="328" y="141"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:font="FONT {Segoe UI,9,0}" aei:imageLocation="icons/activity/large/paletteAssignLarge.png" aei:implicitScopeIO="INPUT" aei:objectId="1251297636099121015" aei:type="ASSIGN" bpmnElement="1251297636099121015">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;reply-to@gmail.com&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;reply-to@gmail.com&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $quoteRequest/quote:contact/quote:email/text() }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;We encountered a problem processing your request ( {$refNumber} )&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/plain&quot;&gt;We encountered a problem processing your request for quote (reference number { $refNumber }. Please contact us directly. ClassicCars!).&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;&#10;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="1251297638409121195" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1251297638409121195"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {22,65}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:gap="50" aei:joinConditionComp="" aei:objectId="126892948033919985" aei:type="Sequence" bpmnElement="1251297618727120863wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="7" y="50"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {204,76}" aei:absoluteSize="DIM {165,153}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="126892952997631465" aei:text="Catch All" aei:type="CATCH_ALL" bpmnElement="126892952997631465" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="189" y="61"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {205,80}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="7" aei:anchor.objectId="126892952997631465" aei:backgroundColor="RGB {255,255,255}" aei:objectId="126892952998031467" aei:relative.location="LOC {-91,-6}" aei:text="Catch All" bpmnElement="126892952997631465label">
+               <dc:Bounds height="13" width="42" x="601" y="39"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {224,146}" aei:absoluteSize="DIM {125,53}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="EmptyTask" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="126892953189331579" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="126892953189331579">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {214,136}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:gap="50" aei:joinConditionComp="" aei:objectId="126892953189831581" aei:type="Sequence" bpmnElement="126892953189331579wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {374,408}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="125303238909203379" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="125303238909203379">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {317,122}" aei:absoluteSize="DIM {191,372}" aei:actySimState="0" aei:bpelName="" aei:gap="20" aei:joinConditionComp="" aei:objectId="125053343153107469" aei:type="Sequence" bpmnElement="125053343153107451wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="390" width="185" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {339,618}" aei:absoluteSize="DIM {195,128}" aei:expanded="false" aei:expandedSize="DIM {432,424}" aei:name="Send estimate" aei:objectId="128267843468714401" aei:showEventHandler="true" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="128267843468714401" isHorizontal="false">
+            <dc:Bounds height="424" width="432" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {65,24}" aei:absoluteSize="DIM {68,13}" aei:anchor.location="11" aei:anchor.objectId="128267843468714401" aei:backgroundColor="RGB {255,255,255}" aei:objectId="131904052175913901" aei:relative.location="LOC {-236,4}" aei:text="Send estimate" bpmnElement="128267843468714401label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {339,662}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:boundaryEvent="true" aei:constraint="1,44" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:imageLocation="icons/bpmn/boundaryevents/non-interrupting-message.png" aei:objectId="133028900210258580" aei:text="Status?" aei:type="ON_EVENT" bpmnElement="133028900210258580" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {319,685}" aei:absoluteSize="DIM {36,13}" aei:anchor.location="0" aei:anchor.objectId="133028900210258580" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133028900211458600" aei:relative.location="LOC {-65,13}" aei:text="Status?" bpmnElement="133028900210258580label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {255,255,255}" aei:borderColor="RGB {128,128,128}" aei:objectId="133624115256310707" aei:showTerminationHandler="false" aei:textAlignment="1" aei:textFormat="1" aei:transparent="false" aei:type="SCOPE" bpmnElement="133624115256310707" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="11" aei:anchor.objectId="133624115256310707" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133624115256410725" aei:text="Embedded Subprocess" bpmnElement="133624115256310707label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {185,840}" aei:absoluteSize="DIM {70,60}" aei:name="Send Status" aei:objectId="133028905226661035" aei:type="REPLY" bpmnElement="133028905226661035">
+            <dc:Bounds height="60" width="70" x="78" y="406"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {136,850}" aei:absoluteSize="DIM {58,13}" aei:anchor.location="1" aei:anchor.objectId="133028518469901785" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133028905226761036" aei:relative.location="LOC {-94,0}" aei:text="Send Status" bpmnElement="133028905226661035label">
+               <dc:Bounds height="13" width="58" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:implicitScopeIO="INPUT" aei:objectId="133028519786701959" aei:type="ASSIGN" bpmnElement="133028519786701959">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;quote:quoteInquiryResponse xmlns:quote=&quot;http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd&quot;&gt;&#10;   &lt;quote:refNumber&gt;{ $refNumber }&lt;/quote:refNumber&gt;&#10;   &lt;quote:quoteStatus&gt;{ $QuoteStatus }&lt;/quote:quoteStatus&gt;&#10;   &lt;quote:link&gt;&#10;      &lt;quote:URL&gt;{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html&lt;/quote:URL&gt;&#10;      &lt;quote:description&gt;Response to $StatusRequest/quote:refNumber/text()&lt;/quote:description&gt;&#10;   &lt;/quote:link&gt;&#10;&lt;/quote:quoteInquiryResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133028520020001981" aei:toPart="response" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133028520020001981"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {175,830}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133028905253161104" aei:type="Sequence" bpmnElement="133028905226661035wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="165" y="820"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:linkName="L3" aei:linkSimState="0" aei:objectId="133028906456061378" aei:showLabel="false" aei:sourceTerminal="SV" bpmnElement="133028900210258580To133028905226661035">
+            <aei:Attribute name="xtnConditionComp">
+               <aeds:expression xmlns:aeds="urn:active-endpoints:dataSpec">
+                  <aeds:value/>
+                  <aeds:language/>
+               </aeds:expression>
+            </aei:Attribute>
+            <di:waypoint weight="0.5" x="320" y="824"/>
+            <di:waypoint weight="0.5" x="220" y="824"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,38}" aei:absoluteSize="DIM {280,390}" aei:objectId="133028877222748123" aei:type="SEQUENCE" bpmnElement="133028877222748123" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="23"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,48}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133028880012848217" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133028880012848217">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,133}" aei:absoluteSize="DIM {260,200}" aei:objectId="133028877100948117" aei:type="FORK_JOIN" bpmnElement="133028877100948117">
+            <dc:Bounds height="-1" width="-1" x="133" y="25"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {35,203}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Send estimate" aei:objectId="128267843468714407" aei:subprocessPath="" aei:text="send" aei:type="INVOKE" bpmnElement="128267843468714407">
+            <dc:Bounds height="53" width="125" x="51" y="-32"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:font="FONT {Segoe UI,9,0}" aei:imageLocation="icons/activity/large/paletteAssignLarge.png" aei:implicitScopeIO="INPUT" aei:objectId="1251295918949113307" aei:type="ASSIGN" bpmnElement="1251295918949113307">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aem:emailMessage xmlns:aem=&quot;http://schemas.active-endpoints.com/email/2007/01/email.xsd&quot;&gt;&#10;   &lt;aem:from&gt;reply-to@gmail.com&lt;/aem:from&gt;&#10;   &lt;aem:replyTo&gt;reply-to@gmail.com&lt;/aem:replyTo&gt;&#10;   &lt;aem:to&gt;{ $quoteRequest/quote:contact/quote:email/text() }&lt;/aem:to&gt;&#10;   &lt;aem:subject&gt;Quote result from ClassicCars! (Ref# { $refNumber })&lt;/aem:subject&gt;&#10;   &lt;aem:body mimeType=&quot;text/html&quot;&gt;Dear { $quoteRequest/quote:contact/quote:name/text() },&#10;&lt;html&gt;&#10;&lt;body&gt;&#10;&lt;p&gt;&#10;We are pleased to provide you with this completed quote Reference Number { $refNumber }. &#10;&lt;/p&gt;&#10;&lt;p&gt;The estimated cost is ${ $EstimationResponse/ns3:TotalCost/text() } with a projected completion date of { $EstimationResponse/ns3:WorkCompletionDate/text() } if you act today. &lt;/p&gt;&#10;&#10;&lt;p&gt;Itemized Bill of Material:&lt;/p&gt;&#10;&lt;table border=&quot;1&quot;&gt;&#10;&lt;thead&gt;&#10;&lt;tr&gt;&#10;  &lt;td&gt;Part Category&lt;/td&gt;&#10;  &lt;td&gt;SKU&lt;/td&gt;&#10;  &lt;td&gt;Description&lt;/td&gt;&#10;  &lt;td&gt;Part Cost&lt;/td&gt;&#10;  &lt;td&gt;Part Qty&lt;/td&gt;&#10;  &lt;td&gt;Labor Hours&lt;/td&gt;&#10;  &lt;td&gt;Labor Cost&lt;/td&gt;&#10;  &lt;td&gt;Total Cost&lt;/td&gt;&#10;&lt;/tr&gt;&#10;&lt;/thead&gt;&#10;&lt;tbody&gt;&#10;   {&#10;  for $part in $EstimationResponse/ns3:PartList/ns3:part&#10;return&#10;&lt;tr&gt;&#10;&lt;td&gt;{$part/ns3:category/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:sku/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:desc/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:partCost/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:partQty/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:laborHrs/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:laborCost/text()}&lt;/td&gt;&#10;&lt;td&gt;{$part/ns3:totalCost/text()}&lt;/td&gt;&#10;&lt;/tr&gt; &#10;   }&#10;&lt;/tbody&gt;&#10;&lt;/table&gt;&#10;&lt;p&gt;Thank you. We look forward to working on your ClassicCar!&lt;/p&gt;&#10;&#10;&lt;p&gt;&#10;Vintage Old Stock&lt;br/&gt;&#10;Web: http://www.vintageoldstock.com&lt;br/&gt;&#10;Tel: +1.866.555.1212&lt;br/&gt;&#10;Email: {$runtimeParameters/param:emailAddress/text()}&lt;/p&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;&#10;&lt;/aem:body&gt;&#10;&lt;/aem:emailMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="1251295924606113483" aei:toPart="emailPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1251295924606113483"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,193}" aei:absoluteSize="DIM {145,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133028877101148119" aei:type="Sequence" bpmnElement="128267843468714407wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {205,203}" aei:absoluteSize="DIM {70,60}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:name="Wait for quote to expire" aei:objectId="128267843468714416" aei:type="WAIT" aei:waitExpression="concat('P', $QuoteRulesOutput/qrulesd:TimeToLive, 'D')" aei:waitType="1" bpmnElement="128267843468714416">
+            <dc:Bounds height="60" width="70" x="143" y="46"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {263,227}" aei:absoluteSize="DIM {116,13}" aei:anchor.location="0" aei:anchor.objectId="125053343159307599" aei:backgroundColor="RGB {255,255,255}" aei:objectId="128267843468714417" aei:relative.location="LOC {13,14}" aei:text="Wait for quote to expire" bpmnElement="128267843468714416label">
+               <dc:Bounds height="13" width="116" x="32" y="538"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {195,193}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133028877101348121" aei:type="Sequence" bpmnElement="128267843468714416wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,358}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133028880576548225" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133028880576548225">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {402,48}" aei:absoluteSize="DIM {165,153}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="128267843468714409" aei:text="Catch All" aei:type="CATCH_ALL" bpmnElement="128267843468714409" isHorizontal="false">
+            <dc:Bounds height="-1" width="-1" x="387" y="33"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {494,52}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="7" aei:anchor.objectId="126892952087031239" aei:backgroundColor="RGB {255,255,255}" aei:objectId="128267843468714410" aei:relative.location="LOC {0,-6}" aei:text="Catch All" bpmnElement="128267843468714409label">
+               <dc:Bounds height="13" width="42" x="601" y="39"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {422,118}" aei:absoluteSize="DIM {125,53}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="EmptyTask" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="128267843468714412" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="128267843468714412">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {412,108}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:gap="50" aei:joinConditionComp="" aei:objectId="128267843468714411" aei:type="Sequence" bpmnElement="128267843468714412wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {401,771}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133028870401845935" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133028870401845935">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {588,248}" aei:absoluteSize="DIM {128,593}" aei:objectId="125053343151507403" aei:text="no" aei:type="ELSE" bpmnElement="125053343151507387elseDef">
+            <dc:Bounds height="109" width="128" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {660,225}" aei:absoluteSize="DIM {12,13}" aei:anchor.location="4" aei:anchor.objectId="125053343151507403" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607633" aei:relative.location="LOC {-2,-47}" aei:text="no" aei:textAlignment="32" bpmnElement="125053343151507387elseDeflabel">
+               <dc:Bounds height="13" width="12" x="439" y="243"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {617,287}" aei:absoluteSize="DIM {70,60}" aei:name="Request Input Corrections" aei:objectId="125053343151507407" aei:type="REPLY" bpmnElement="125053343151507407">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {668,323}" aei:absoluteSize="DIM {127,13}" aei:anchor.location="0" aei:anchor.objectId="125053343151507407" aei:backgroundColor="RGB {255,255,255}" aei:objectId="125053343204607629" aei:relative.location="LOC {6,26}" aei:text="Request Input Corrections" bpmnElement="125053343151507407label">
+               <dc:Bounds height="13" width="127" x="462" y="323"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:name="Prepare_Fault" aei:objectId="125053343151507413" aei:type="ASSIGN" bpmnElement="125053343151507413">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="abx:getProcessId()" aei:fromType="3" aei:objectId="125053343151507415" aei:toPart="fault" aei:toQuery="quote:refNumber" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343151507415"/>
+         <bpmndi:BPMNShape aei:fromExpression="$QuoteRulesOutput/qrulesd:ReasonOfRejection" aei:fromType="3" aei:objectId="125053343151507417" aei:toPart="fault" aei:toQuery="quote:reason" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="125053343151507417"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {607,277}" aei:absoluteSize="DIM {90,80}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="125053343151507405" aei:type="Sequence" bpmnElement="125053343151507407wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/BPEL4People"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/WS-HT"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/QuoteRequest.wsdl" namespace="http://docs.active-endpoints.com/activebpel/demo/quoteRequest/2008/06/QuoteRequest.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/QuoteRequest.xsd" namespace="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/QuoteRules.wsdl" namespace="http://www.active-endpoints.com/demo/wsdl/QuoteRules/2008/06/QuoteRules.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/QuoteRules.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/QuoteRules/2008/06/QuoteRules.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Estimation.wsdl" namespace="http://www.active-endpoints.com/demo/wsdl/Estimation/2008/06/Estimation.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/Estimation.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Estimation/2008/06/Estimation.xsd"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/RuntimeParameters.xsd" namespace="http://schemas.active-endpoints.com/sample/QuoteRequest/2008/02/RuntimeParameters.xsd"/>
+   <bpel:import importType="http://www.w3.org/XML/" location="../support/runtimeParameters.xml"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" namespace="http://schemas.active-endpoints.com/email/2007/01/email.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/NotificationInterface.wsdl" namespace="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/QuoteProcess.private.wsdl" namespace="http://QuoteProcess"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="125053343150007299" myRole="quote" name="Customer" partnerLinkType="ns1:QuoteRequestPLT">
+         <bpel:documentation>This is the person requesting the estimate.  They will have provided an email address as part of their original request.&#13;
+</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="125053343150007311" name="Rules_Service" partnerLinkType="qrules:QuoteRulesPLT" partnerRole="BusinessRulesService">
+         <bpel:documentation>Rules service implemented with DRools that will check that the estimate has been correctly filled out and also determine&#13;
+how long the estimate will be good for.</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="125053343150007323" myRole="EstimationRequestInitiator" name="Estimation_Subprocess" partnerLinkType="ns2:EstimationPLT" partnerRole="estimator">
+         <bpel:documentation>This is the process that determines the various experts that will be involved in the estimation process and the forms&#13;
+they will use.</bpel:documentation>
+      </bpel:partnerLink>
+      <bpel:partnerLink aei:id="125053343150007335" name="Email_Service" partnerLinkType="ns4:emailPLT" partnerRole="sender">
+         <bpel:documentation>This is the email service that will be used to communicate with the customer.</bpel:documentation>
+      </bpel:partnerLink>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable name="QuoteStatus" type="xsd:string"/>
+      <bpel:variable element="quote:quoteRequest" name="quoteRequest"/>
+      <bpel:variable element="qrulesd:QuoteRulesOutput" name="QuoteRulesOutput"/>
+      <bpel:variable element="ns3:EstimationResponse" name="EstimationResponse">
+         <bpel:from>
+            <bpel:literal>
+               <ns3:EstimationResponse>
+                  <quote:refNumber/>
+                  <quote:quoteStatus/>
+                  <ns3:WorkCompletionDate>2099-01-01</ns3:WorkCompletionDate>
+                  <ns3:TotalCost/>
+                  <quote:link>
+                     <quote:URL/>
+                     <quote:description/>
+                  </quote:link>
+                  <ns3:Workflow_Flag/>
+                  <ns3:PartList/>
+               </ns3:EstimationResponse>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+      <bpel:variable element="ns3:EstimationRequestAck" name="EstimationAck"/>
+      <bpel:variable element="ns4:resultElement" name="emailResult"/>
+      <bpel:variable element="param:runtimeParameters" name="runtimeParameters">
+         <bpel:from>abx:getCatalogResource("project:/QuoteProcessing/support/runtimeParameters.xml")</bpel:from>
+      </bpel:variable>
+      <bpel:variable name="refNumber" type="xsd:string">
+         <bpel:from>abx:getProcessId()</bpel:from>
+      </bpel:variable>
+   </bpel:variables>
+   <bpel:correlationSets>
+      <bpel:correlationSet aei:id="125053343150007371" name="CS1" properties="ns1:QuoteRefId"/>
+   </bpel:correlationSets>
+   <bpel:flow aei:id="125189654295702775">
+      <bpel:sequence aei:id="125053343150007373">
+         <bpel:receive aei:id="125053343150007375" createInstance="yes" name="Receive_quote_request" operation="QuoteRequestOperation" partnerLink="Customer" variable="quoteRequest">
+            <bpel:documentation>Receive the initial request for an estimate from the presentation tier of the application.&#13;
+</bpel:documentation>
+         </bpel:receive>
+         <bpel:scope aei:implicit="true" name="Validate_Request_with_Rules">
+            <bpel:variables>
+               <bpel:variable messageType="qrules:InvokeQuoteRulesRequest" name="parameters"/>
+            </bpel:variables>
+            <bpel:sequence>
+               <bpel:assign aei:id="127317256837544063">
+                  <bpel:copy aei:id="127317257074844095">
+                     <bpel:from>$quoteRequest</bpel:from>
+                     <bpel:to part="Document" variable="parameters">
+                        <bpel:query>quote:quoteRequest</bpel:query>
+                     </bpel:to>
+                  </bpel:copy>
+               </bpel:assign>
+               <bpel:invoke aei:id="127317243492944035" inputVariable="parameters" name="Task1" operation="InvokeQuoteRules" outputVariable="QuoteRulesOutput" partnerLink="Rules_Service">
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path1 path2 path3</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </bpel:invoke>
+            </bpel:sequence>
+         </bpel:scope>
+         <bpel:if aei:id="125053343151507387" name="Is_quote_valid">
+            <bpel:documentation>Did the rules service determine that the quote request is valid?</bpel:documentation>
+            <bpel:condition>$QuoteRulesOutput/qrulesd:IsValid = 'true'</bpel:condition>
+            <bpel:sequence aei:id="125053343151507391">
+               <bpel:scope aei:implicit="true" name="Reply_with_ref_num">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:QuoteResponse" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="125053343151507399">
+                        <bpel:copy aei:id="125053343151507401">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<quote:quoteAck xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd">
+   <quote:refNumber>{ $refNumber}</quote:refNumber>
+   <quote:quoteDate>{ current-date()}</quote:quoteDate>
+   <quote:quoteStatus>pending</quote:quoteStatus>
+</quote:quoteAck>
+]]></bpel:from>
+                           <bpel:to part="response" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:reply aei:id="125053343151507393" name="Reply_with_ref_num" operation="QuoteRequestOperation" partnerLink="Customer" variable="parameters">
+                        <bpel:correlations>
+                           <bpel:correlation initiate="yes" set="CS1"/>
+                        </bpel:correlations>
+                     </bpel:reply>
+                  </bpel:sequence>
+               </bpel:scope>
+               <bpel:scope aei:id="126892945628617625" name="Send_customer_email_with_ref_num">
+                  <bpel:faultHandlers>
+                     <bpel:catchAll aei:id="126892946496217773">
+                        <bpel:empty aei:id="126892946718517911"/>
+                     </bpel:catchAll>
+                  </bpel:faultHandlers>
+                  <bpel:scope aei:implicit="true" name="Send_customer_email_and_Ref_ID">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="125129521907403693">
+                           <bpel:copy aei:id="125129522359603879">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>reply-to@gmail.com</aem:from>
+   <aem:replyTo>reply-to@gmail.com</aem:replyTo>
+   <aem:to>{ $quoteRequest/quote:contact/quote:email/text()  }</aem:to>
+   <aem:subject>Confirmation: Request for quote Reference Number ({ $refNumber }) received. Thank you.</aem:subject>
+   <aem:body mimeType="text/plain">Dear { $quoteRequest/quote:contact/quote:name/text() },
+
+Your request for a quote has been received and is pending review from our team of specialists. 
+   
+We will be back to you shortly. Please use the Reference Number {$refNumber} to check status at http://{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html.
+
+We welcome your business,
+
+Vintage Old Stock.
+Web: http://www.vintageoldstock.com
+Tel: +1.866.555.1212
+Email: {$runtimeParameters/param:emailAddress/text()}
+</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                              <bpel:to part="emailPart" variable="parameters"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:invoke aei:id="125129517511003397" inputVariable="parameters" name="Task2" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+                           </bpelx:toProperties>
+                        </bpel:invoke>
+                     </bpel:sequence>
+                  </bpel:scope>
+               </bpel:scope>
+               <bpel:scope aei:id="125053343153107431" name="Generate_Quote">
+                  <bpel:documentation>Scope that will control the call to the subprocess for generating the quote.</bpel:documentation>
+                  <bpel:faultHandlers>
+                     <bpel:catchAll aei:id="125053343153107449">
+                        <bpel:documentation>Catch any problems that may occur either in this process or its subprocess.</bpel:documentation>
+                        <bpel:scope aei:id="125053343153107451">
+                           <bpel:sequence aei:id="125053343154607471">
+                              <bpel:empty aei:id="125303238687503279"/>
+                              <bpel:assign aei:id="125053343154607473" name="Status__faulted">
+                                 <bpel:documentation>Set Status to "Faulted"</bpel:documentation>
+                                 <bpel:copy aei:id="125053343154607475">
+                                    <bpel:from>'Faulted'</bpel:from>
+                                    <bpel:to variable="QuoteStatus"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:scope aei:id="126892948033419967" name="Send_problem_email">
+                                 <bpel:faultHandlers>
+                                    <bpel:catchAll aei:id="126892952997631465">
+                                       <bpel:empty aei:id="126892953189331579"/>
+                                    </bpel:catchAll>
+                                 </bpel:faultHandlers>
+                                 <bpel:scope aei:implicit="true" name="Send_problem_email">
+                                    <bpel:variables>
+                                       <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                                    </bpel:variables>
+                                    <bpel:sequence>
+                                       <bpel:assign aei:id="1251297636099121015">
+                                          <bpel:copy aei:id="1251297638409121195">
+                                             <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>reply-to@gmail.com</aem:from>
+   <aem:replyTo>reply-to@gmail.com</aem:replyTo>
+   <aem:to>{ $quoteRequest/quote:contact/quote:email/text() }</aem:to>
+   <aem:subject>We encountered a problem processing your request ( {$refNumber} )</aem:subject>
+   <aem:body mimeType="text/plain">We encountered a problem processing your request for quote (reference number { $refNumber }. Please contact us directly. ClassicCars!).</aem:body>
+</aem:emailMessage>
+]]></bpel:from>
+                                             <bpel:to part="emailPart" variable="parameters"/>
+                                          </bpel:copy>
+                                       </bpel:assign>
+                                       <bpel:invoke aei:id="1251297618727120863" inputVariable="parameters" name="Task4" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                                          <bpelx:toProperties>
+                                             <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+                                             <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+                                          </bpelx:toProperties>
+                                       </bpel:invoke>
+                                    </bpel:sequence>
+                                 </bpel:scope>
+                              </bpel:scope>
+                              <bpel:empty aei:id="125303238909203379"/>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:catchAll>
+                  </bpel:faultHandlers>
+                  <bpel:eventHandlers>
+                     <bpel:onEvent aei:boundaryEvent="non-interrupting" aei:id="133028523594205201" element="quote:quoteInquiryRequest" operation="QuoteInquiryOperation" partnerLink="Customer" variable="StatusRequest">
+                        <bpel:correlations>
+                           <bpel:correlation initiate="no" set="CS1"/>
+                        </bpel:correlations>
+                        <bpel:scope aei:id="133624115254210653">
+                           <bpel:scope aei:implicit="true" name="Send_Status">
+                              <bpel:variables>
+                                 <bpel:variable messageType="ns1:QuoteInquiryResponse" name="parameters"/>
+                              </bpel:variables>
+                              <bpel:sequence>
+                                 <bpel:assign aei:id="133028519786701959">
+                                    <bpel:copy aei:id="133028520020001981">
+                                       <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<quote:quoteInquiryResponse xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd">
+   <quote:refNumber>{ $refNumber }</quote:refNumber>
+   <quote:quoteStatus>{ $QuoteStatus }</quote:quoteStatus>
+   <quote:link>
+      <quote:URL>{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html</quote:URL>
+      <quote:description>Response to $StatusRequest/quote:refNumber/text()</quote:description>
+   </quote:link>
+</quote:quoteInquiryResponse>]]></bpel:from>
+                                       <bpel:to part="response" variable="parameters"/>
+                                    </bpel:copy>
+                                 </bpel:assign>
+                                 <bpel:reply aei:id="133028518469901785" name="Send_Status" operation="QuoteInquiryOperation" partnerLink="Customer" variable="parameters"/>
+                              </bpel:sequence>
+                           </bpel:scope>
+                        </bpel:scope>
+                     </bpel:onEvent>
+                     <bpel:onAlarm aei:boundaryEvent="non-interrupting" aei:id="128267823002811948">
+                        <bpel:for>'P2D'</bpel:for>
+                        <bpel:scope aei:id="133624115254710675">
+                           <bpel:sequence aei:id="133028853684844715">
+                              <bpel:scope aei:implicit="true" name="Notify_Chief">
+                                 <bpel:variables>
+                                    <bpel:variable messageType="avc:sendNotificationRequest" name="parameters"/>
+                                 </bpel:variables>
+                                 <bpel:sequence>
+                                    <bpel:assign aei:id="125227455631229023">
+                                       <bpel:copy aei:id="125227455631229025">
+                                          <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<avc:sendNotification xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/">
+   <avc:processIdRef>{$refNumber}</avc:processIdRef>
+   <avc:notifText>Please review ASAP process {$refNumber} </avc:notifText>
+</avc:sendNotification>]]></bpel:from>
+                                          <bpel:to part="parameters" variable="parameters"/>
+                                       </bpel:copy>
+                                    </bpel:assign>
+                                    <bpel:extensionActivity>
+                                       <b4p:peopleActivity aei:id="128267829790412747" inputVariable="parameters" name="Notify_Chief">
+                                          <b4p:localNotification reference="NotifyChief" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns1="http://docs.active-endpoints.com/activebpel/demo/quoteRequest/2008/06/QuoteRequest.wsdl" xmlns:ns2="http://www.active-endpoints.com/demo/wsdl/Estimation/2008/06/Estimation.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/demo/schema/Estimation/2008/06/Estimation.xsd" xmlns:ns4="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl" xmlns:param="http://schemas.active-endpoints.com/sample/QuoteRequest/2008/02/RuntimeParameters.xsd" xmlns:qrules="http://www.active-endpoints.com/demo/wsdl/QuoteRules/2008/06/QuoteRules.wsdl" xmlns:qrulesd="http://schemas.active-endpoints.com/demo/schema/QuoteRules/2008/06/QuoteRules.xsd" xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                                             <htd:peopleAssignments/>
+                                          </b4p:localNotification>
+                                       </b4p:peopleActivity>
+                                    </bpel:extensionActivity>
+                                 </bpel:sequence>
+                              </bpel:scope>
+                              <bpel:empty aei:id="128267834877613306"/>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:onAlarm>
+                  </bpel:eventHandlers>
+                  <bpel:sequence aei:id="125053343156207563">
+                     <bpel:empty aei:id="1250535950265153297"/>
+                     <bpel:scope aei:implicit="true" name="Start_the_estimation_process">
+                        <bpel:variables>
+                           <bpel:variable messageType="ns2:InvokeEstimationRequest" name="parameters"/>
+                        </bpel:variables>
+                        <bpel:sequence>
+                           <bpel:assign aei:id="125053343156207571" name="Prepare_Estimation">
+                              <bpel:copy aei:id="125053343156207573">
+                                 <bpel:from>$refNumber</bpel:from>
+                                 <bpel:to part="Document" variable="parameters">
+                                    <bpel:query>quote:refNumber</bpel:query>
+                                 </bpel:to>
+                              </bpel:copy>
+                              <bpel:copy aei:id="125053343157807575">
+                                 <bpel:from>$quoteRequest</bpel:from>
+                                 <bpel:to part="Document" variable="parameters">
+                                    <bpel:query>quote:quoteRequest</bpel:query>
+                                 </bpel:to>
+                              </bpel:copy>
+                              <bpel:copy aei:id="125053343157807577">
+                                 <bpel:from>$QuoteRulesOutput</bpel:from>
+                                 <bpel:to part="Document" variable="parameters">
+                                    <bpel:query>qrulesd:QuoteRulesOutput</bpel:query>
+                                 </bpel:to>
+                              </bpel:copy>
+                           </bpel:assign>
+                           <bpel:invoke aei:id="125053343156207565" inputVariable="parameters" name="Task3" operation="InvokeEstimation" outputVariable="EstimationAck" partnerLink="Estimation_Subprocess">
+                              <bpelx:toProperties>
+                                 <bpelx:toProperty name="probability">Task2:1</bpelx:toProperty>
+                                 <bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+                              </bpelx:toProperties>
+                           </bpel:invoke>
+                        </bpel:sequence>
+                     </bpel:scope>
+                     <bpel:assign aei:id="125053343159307579" name="Status__in_progress">
+                        <bpel:documentation>Set Status to "In progress"</bpel:documentation>
+                        <bpel:copy aei:id="125053343159307581">
+                           <bpel:from>'In process'</bpel:from>
+                           <bpel:to variable="QuoteStatus"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:receive aei:id="125053343159307583" name="Get_estimate_from_subprocess" operation="SendEstimationResult" partnerLink="Estimation_Subprocess" variable="EstimationResponse">
+                        <bpel:documentation>Receive the response from the subprocess.  The entire estimate should be complete in this response.</bpel:documentation>
+                        <bpel:correlations>
+                           <bpel:correlation initiate="no" set="CS1"/>
+                        </bpel:correlations>
+                     </bpel:receive>
+                     <bpel:assign aei:id="125053343159307585" name="Status__Completed">
+                        <bpel:documentation>Set Status to "Completed"</bpel:documentation>
+                        <bpel:copy aei:id="1251312594072134843">
+                           <bpel:from>'Completed'</bpel:from>
+                           <bpel:to variable="QuoteStatus"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:empty aei:id="125303236015103181"/>
+                  </bpel:sequence>
+               </bpel:scope>
+               <bpel:scope aei:id="128267843468714401" name="Send_estimate">
+                  <bpel:faultHandlers>
+                     <bpel:catchAll aei:id="128267843468714409">
+                        <bpel:empty aei:id="128267843468714412"/>
+                     </bpel:catchAll>
+                  </bpel:faultHandlers>
+                  <bpel:eventHandlers>
+                     <bpel:onEvent aei:boundaryEvent="non-interrupting" aei:id="133028900210258580" element="quote:quoteInquiryRequest" operation="QuoteInquiryOperation" partnerLink="Customer" variable="StatusRequest">
+                        <bpel:correlations>
+                           <bpel:correlation initiate="no" set="CS1"/>
+                        </bpel:correlations>
+                        <bpel:scope aei:id="133624115256310707">
+                           <bpel:scope aei:implicit="true" name="Send_Status">
+                              <bpel:variables>
+                                 <bpel:variable messageType="ns1:QuoteInquiryResponse" name="parameters"/>
+                              </bpel:variables>
+                              <bpel:sequence>
+                                 <bpel:assign aei:id="133028519786701959">
+                                    <bpel:copy aei:id="133028520020001981">
+                                       <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<quote:quoteInquiryResponse xmlns:quote="http://schemas.active-endpoints.com/demo/quoteRequest/2008/06/QuoteRequest.xsd">
+   <quote:refNumber>{ $refNumber }</quote:refNumber>
+   <quote:quoteStatus>{ $QuoteStatus }</quote:quoteStatus>
+   <quote:link>
+      <quote:URL>{ $runtimeParameters/param:server/text() }/AVQuoteClient/quoteStatus.html</quote:URL>
+      <quote:description>Response to $StatusRequest/quote:refNumber/text()</quote:description>
+   </quote:link>
+</quote:quoteInquiryResponse>]]></bpel:from>
+                                       <bpel:to part="response" variable="parameters"/>
+                                    </bpel:copy>
+                                 </bpel:assign>
+                                 <bpel:reply aei:id="133028905226661035" name="Send_Status" operation="QuoteInquiryOperation" partnerLink="Customer" variable="parameters"/>
+                              </bpel:sequence>
+                           </bpel:scope>
+                        </bpel:scope>
+                     </bpel:onEvent>
+                  </bpel:eventHandlers>
+                  <bpel:sequence aei:id="133028877222748123">
+                     <bpel:empty aei:id="133028880012848217"/>
+                     <bpel:flow aei:forkJoin="yes" aei:id="133028877100948117">
+                        <bpel:scope aei:implicit="true" name="Send_estimate">
+                           <bpel:variables>
+                              <bpel:variable messageType="ns4:emailMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="1251295918949113307">
+                                 <bpel:copy aei:id="1251295924606113483">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<aem:emailMessage xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd">
+   <aem:from>reply-to@gmail.com</aem:from>
+   <aem:replyTo>reply-to@gmail.com</aem:replyTo>
+   <aem:to>{ $quoteRequest/quote:contact/quote:email/text() }</aem:to>
+   <aem:subject>Quote result from ClassicCars! (Ref# { $refNumber })</aem:subject>
+   <aem:body mimeType="text/html">Dear { $quoteRequest/quote:contact/quote:name/text() },
+<html>
+<body>
+<p>
+We are pleased to provide you with this completed quote Reference Number { $refNumber }. 
+</p>
+<p>The estimated cost is ${ $EstimationResponse/ns3:TotalCost/text() } with a projected completion date of { $EstimationResponse/ns3:WorkCompletionDate/text() } if you act today. </p>
+
+<p>Itemized Bill of Material:</p>
+<table border="1">
+<thead>
+<tr>
+  <td>Part Category</td>
+  <td>SKU</td>
+  <td>Description</td>
+  <td>Part Cost</td>
+  <td>Part Qty</td>
+  <td>Labor Hours</td>
+  <td>Labor Cost</td>
+  <td>Total Cost</td>
+</tr>
+</thead>
+<tbody>
+   {
+  for $part in $EstimationResponse/ns3:PartList/ns3:part
+return
+<tr>
+<td>{$part/ns3:category/text()}</td>
+<td>{$part/ns3:sku/text()}</td>
+<td>{$part/ns3:desc/text()}</td>
+<td>{$part/ns3:partCost/text()}</td>
+<td>{$part/ns3:partQty/text()}</td>
+<td>{$part/ns3:laborHrs/text()}</td>
+<td>{$part/ns3:laborCost/text()}</td>
+<td>{$part/ns3:totalCost/text()}</td>
+</tr> 
+   }
+</tbody>
+</table>
+<p>Thank you. We look forward to working on your ClassicCar!</p>
+
+<p>
+Vintage Old Stock<br/>
+Web: http://www.vintageoldstock.com<br/>
+Tel: +1.866.555.1212<br/>
+Email: {$runtimeParameters/param:emailAddress/text()}</p>
+</body>
+</html>
+</aem:body>
+</aem:emailMessage>]]></bpel:from>
+                                    <bpel:to part="emailPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="128267843468714407" inputVariable="parameters" name="Task5" operation="send" outputVariable="emailResult" partnerLink="Email_Service">
+                                 <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task3:0.5 Task4:1</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path2 path3</bpelx:toProperty>
+                                 </bpelx:toProperties>
+                              </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                        <bpel:wait aei:id="128267843468714416" name="Wait_for_quote_to_expire">
+                           <bpel:documentation>Wait for the time that was given to the customer, keeping the process running for as long as the estimate is valid.</bpel:documentation>
+                           <bpel:for>concat('P', $QuoteRulesOutput/qrulesd:TimeToLive, 'D')</bpel:for>
+                        </bpel:wait>
+                     </bpel:flow>
+                     <bpel:empty aei:id="133028880576548225"/>
+                  </bpel:sequence>
+               </bpel:scope>
+               <bpel:empty aei:id="133028870401845935"/>
+            </bpel:sequence>
+            <bpel:else aei:id="125053343151507403">
+               <bpel:documentation>No, the quote isn't valid.</bpel:documentation>
+               <bpel:scope aei:implicit="true" name="Request_Input_Corrections">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:QuoteFault" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="125053343151507413" name="Prepare_Fault">
+                        <bpel:copy aei:id="125053343151507415">
+                           <bpel:from>abx:getProcessId()</bpel:from>
+                           <bpel:to part="fault" variable="parameters">
+                              <bpel:query>quote:refNumber</bpel:query>
+                           </bpel:to>
+                        </bpel:copy>
+                        <bpel:copy aei:id="125053343151507417">
+                           <bpel:from>$QuoteRulesOutput/qrulesd:ReasonOfRejection</bpel:from>
+                           <bpel:to part="fault" variable="parameters">
+                              <bpel:query>quote:reason</bpel:query>
+                           </bpel:to>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:reply aei:id="125053343151507407" faultName="ns1:QuoteRequestFault" name="Request_Input_Corrections" operation="QuoteRequestOperation" partnerLink="Customer" variable="parameters"/>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:else>
+         </bpel:if>
+      </bpel:sequence>
+   </bpel:flow>
+</bpel:process>

@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+   name="ASTROBookCart_exe"
+   targetNamespace="http://enterprise.netbeans.org/bpel/ASTROBookCart/ASTROBookCart_exe"
+   xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"   
+   xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+   xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+   xmlns:tns="http://enterprise.netbeans.org/bpel/ASTROBookCart/ASTROBookCart_exe"
+   xmlns:ns0="http://xml.netbeans.org/schema/ASTROCartSCHEMA"
+   xmlns:ns1="http://j2ee.netbeans.org/wsdl/ASTROBookCart"
+   xmlns:ns3="http://xml.netbeans.org/schema/AMAZONSchema"
+   xmlns:ns2="http://j2ee.netbeans.org/wsdl/ASTROBookCart/AMAZONCart">
+  
+
+  <import namespace="http://xml.netbeans.org/schema/ASTROCartSCHEMA" location="ASTROCartSCHEMA.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+  <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookCart" location="ASTROBookCart.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <import namespace="http://xml.netbeans.org/schema/AMAZONSchema" location="AMAZONSchema.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+  <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookCart/AMAZONCart" location="AMAZONCart.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <partnerLinks>
+    <partnerLink myRole="ASTROBookCart_Service" name="ASTROBookCart_PLT" partnerLinkType="ns1:ASTROBookCart_PLT" partnerRole="ASTROBookCart_Customer"/>
+    <partnerLink name="Amazon_PLT" partnerLinkType="ns2:Amazon_PLT" partnerRole="Amazon_Service"/>
+  </partnerLinks>
+  <variables>
+    <variable messageType="ns1:cartCreateMsg" name="createMsg"/>
+    <variable messageType="ns1:cartCreateResponseMsg" name="createAckMsg"/>
+    <variable messageType="ns1:cartCreateErrMsg" name="createNackMsg"/>
+
+    <variable messageType="ns1:cartGetMsg" name="checkoutMsg"/>
+    <variable messageType="ns1:cartGetErrMsg" name="checkoutNackMsg"/>
+    <variable messageType="ns1:cartGetResponseMsg" name="checkoutAckMsg"/>
+    <variable messageType="ns1:clearMsg" name="clearMsg"/>
+    <variable messageType="ns1:nopMsg" name="nopMsg"/>
+
+    <variable name="validCreation" type="xsd:boolean"/>
+    <variable name="validGet" type="xsd:boolean"/>
+
+    <variable messageType="ns1:cartAddMsg" name="addMsg"/>
+    <variable messageType="ns1:cartAddResponseMsg" name="addAckMsg"/>
+    <variable messageType="ns1:cartAddErrMsg" name="addNackMsg"/>
+    <variable name="validAdd" type="xsd:boolean"/>
+    
+    <variable messageType="ns2:CartCreateRequestMsg" name="CartCreateRequestMsg"/> <!-- Estos son de AMAZON_PLT -->
+    <variable messageType="ns2:CartCreateResponseMsg" name="CartCreateResponseMsg"/>
+    <variable messageType="ns2:CartAddRequestMsg" name="CartAddRequestMsg"/>
+    <variable messageType="ns2:CartAddResponseMsg" name="CartAddResponseMsg"/>
+    <variable messageType="ns2:CartGetRequestMsg" name="CartGetRequestMsg"/>
+    <variable messageType="ns2:CartGetResponseMsg" name="CartGetResponseMsg"/>
+
+
+    <variable name="isvalid" type="xsd:boolean"/>
+    <variable name="numArticulos" type="xsd:positiveInteger"/>
+
+  </variables>
+  <correlationSets>
+    <correlationSet name="bookcart" properties="ns1:key"/>
+  </correlationSets>
+  <sequence>
+    <receive createInstance="yes" name="create" operation="cartCreate" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="createMsg">
+      <correlations>
+        <correlation initiate="yes" set="bookcart"/>
+      </correlations>
+    </receive>
+    <assign>
+      <copy>
+	<from>0</from>
+	<to variable="numArticulos"/>
+      </copy>
+    </assign>
+      <assign>
+      <copy>
+        <from><literal>
+            <ns3:CartCreate>
+              <ns3:AWSAccessKeyId>1SJAAASKFGB223</ns3:AWSAccessKeyId>
+              <ns3:Request>
+		<ns3:Items>
+		  <ns3:Item>
+		    <ns3:ASIN>23344</ns3:ASIN>
+		    <ns3:Quantity>67</ns3:Quantity>
+		  </ns3:Item>
+		</ns3:Items>
+	      </ns3:Request>
+            </ns3:CartCreate>
+        </literal></from>
+        <to variable="CartCreateRequestMsg" part="body"/>
+      </copy>
+      <copy>
+        <from>"1JCNA3F1DE5FAWXC06G2"</from>
+        <to part="body" variable="CartCreateRequestMsg"> 
+          <query>/ns3:CartCreate/ns3:AWSAccessKeyId</query> 
+        </to>
+      </copy>
+      
+      <copy> <!--Esqueleto de la variable CartCreateRequestMsg-->
+        <from><literal>
+            <ns3:CartCreate>
+              <ns3:AWSAccessKeyId>1SJAAASKFGB223</ns3:AWSAccessKeyId>
+              <ns3:Request>
+		<ns3:Items>
+		  <ns3:Item>
+		    <ns3:ASIN>23344</ns3:ASIN>
+		    <ns3:Quantity>67</ns3:Quantity>
+		  </ns3:Item>
+		</ns3:Items>
+	      </ns3:Request>
+            </ns3:CartCreate>
+        </literal></from>
+        <to variable="CartCreateRequestMsg" part="body"/>
+      </copy>		 
+      <copy>
+        <from part="body" variable="createMsg">
+          <query>/ns0:CartCreate/ns0:Request/ns0:Items/ns0:Item[1]/ns0:ASIN[1]</query>
+        </from>
+        <to part="body" variable="CartCreateRequestMsg">
+          <query>/ns3:CartCreate/ns3:Request/ns3:Items/ns3:Item/ns3:ASIN</query> 
+        </to>
+      </copy>
+      
+      <copy> <!--Esqueleto de la variable CartCreateRequestMsg-->
+        <from><literal>
+            <ns3:CartCreate>
+              <ns3:AWSAccessKeyId>1SJAAASKFGB223</ns3:AWSAccessKeyId>
+              <ns3:Request>
+		<ns3:Items>
+		  <ns3:Item>
+		    <ns3:ASIN>23344</ns3:ASIN>
+		    <ns3:Quantity>67</ns3:Quantity>
+		  </ns3:Item>
+		</ns3:Items>
+	      </ns3:Request>
+            </ns3:CartCreate>
+        </literal></from>
+        <to variable="CartCreateRequestMsg" part="body"/>
+      </copy>
+      <copy>
+        <from part="body" variable="createMsg">
+          <query>/ns0:CartCreate/ns0:Request/ns0:Items/ns0:Item[1]/ns0:Quantity</query>
+        </from>
+        <to part="body" variable="CartCreateRequestMsg">
+          <query>/ns3:CartCreate/ns3:Request/ns3:Items/ns3:Item[1]/ns3:Quantity</query> 
+        </to>
+      </copy>
+
+      
+    </assign>
+
+    <invoke inputVariable="CartCreateRequestMsg" name="Task1" operation="CartCreate" outputVariable="CartCreateResponseMsg" partnerLink="Amazon_PLT" portType="ns2:AWSECommerceServicePortType">
+      <bpelx:toProperties>
+         <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+         <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10</bpelx:toProperty>
+      </bpelx:toProperties>
+   </invoke> 
+
+    <assign>
+      <copy>
+	<from variable="CartCreateResponseMsg" part="body">
+	  <query>/ns3:CartCreateResponse/ns3:Cart/ns3:Request/ns3:IsValid</query>
+	</from>
+	<to variable="isvalid"/>
+      </copy>
+    </assign>
+
+    <if>
+      <condition>$isvalid='true'</condition> 
+      <sequence>
+        <assign>
+          <copy>
+            <from part="key" variable="createMsg"/>
+            <to part="key" variable="createAckMsg"/>
+          </copy>
+	  
+	  <copy> <!--Esqueleto de createAckMsg-->
+	    <from><literal>
+		<ns0:CartCreateResponse>
+		  <ns0:Cart>
+		    <ns0:SubTotal>
+		      <ns0:FormattedPrice>FormattedPrice</ns0:FormattedPrice>
+		    </ns0:SubTotal>
+		  </ns0:Cart>
+		</ns0:CartCreateResponse>
+	    </literal></from>
+	    <to variable="createAckMsg" part="body"/>
+  	  </copy>
+          <copy>
+            <from part="body" variable="CartCreateResponseMsg">
+              <query>/ns3:CartCreateResponse/ns3:Cart/ns3:SubTotal/ns3:FormattedPrice</query> 
+            </from>
+            <to part="body" variable="createAckMsg">
+              <query>/ns0:CartCreateResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+            </to>
+          </copy>
+          
+        </assign>
+
+        <invoke inputVariable="createAckMsg" name="Task2" operation="cartCreateResponse" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+          <correlations>
+            <correlation pattern="request" set="bookcart"/>
+          </correlations>
+          <bpelx:toProperties>
+             <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+             <bpelx:toProperty name="paths">path2 path3 path4 path5 path6 path7 path8 path9 path10</bpelx:toProperty>
+          </bpelx:toProperties>
+       </invoke> 
+	
+        <while>
+          <condition>($numArticulos) &lt; 1 </condition>
+         <sequence> 
+	<assign>
+	<copy>
+	<from>$numArticulos + 1</from>
+	<to variable="numArticulos"/>
+	</copy>
+	</assign>
+
+
+
+          <pick name="nop-add">
+
+
+            <onMessage  operation="nop" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="nopMsg">
+              <correlations>
+                <correlation set="bookcart"/>
+              </correlations>
+              <empty name="NOSE"/>                     
+            </onMessage>
+
+
+
+            <onMessage operation="cartAdd" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="addMsg">
+              <correlations>
+                <correlation set="bookcart"/>
+              </correlations>
+		<sequence>
+                 <assign>
+		  <copy> <!--Esqueleto de CartAddRequestMsg-->
+		    <from><literal>
+			<ns3:CartAdd>
+			  <ns3:AWSAccessKeyId>7585894ADFT</ns3:AWSAccessKeyId>
+			  <ns3:Request>
+			    <ns3:CartId/>
+			    <ns3:HMAC/>
+			    <ns3:Items>
+			      <ns3:Item>
+				<ns3:ASIN/>
+				<ns3:Quantity/>
+			      </ns3:Item>
+			    </ns3:Items>
+			  </ns3:Request>
+			</ns3:CartAdd>
+		    </literal></from>
+		    <to variable="CartAddRequestMsg" part="body"/>
+		  </copy>
+                  <copy>
+                    <from>"1JCNA3F1DE5FAWXC06G2"</from>
+                    <to part="body" variable="CartAddRequestMsg">
+                      <query>/ns3:CartAdd/ns3:AWSAccessKeyId</query> 
+                    </to>
+                  </copy>
+
+                  <copy>
+                    <from part="body" variable="CartCreateResponseMsg">
+                      <query>/ns3:CartCreateResponse/ns3:Cart/ns3:CartId</query> 
+                    </from>
+                    <to part="body" variable="CartAddRequestMsg">
+                      <query>/ns3:CartAdd/ns3:Request/ns3:CartId</query>
+                    </to>
+                  </copy></assign><assign>
+		  <copy> <!--Esqueleto de CartAddRequestMsg-->
+		    <from><literal>
+			<ns3:CartAdd>
+			  <ns3:AWSAccessKeyId/>
+			  <ns3:Request>
+			    <ns3:CartId/>
+			    <ns3:HMAC/>
+			    <ns3:Items>
+			      <ns3:Item>
+				<ns3:ASIN/>
+				<ns3:Quantity/>
+			      </ns3:Item>
+			    </ns3:Items>
+			  </ns3:Request>
+			</ns3:CartAdd>
+		    </literal></from>
+		    <to variable="CartAddRequestMsg" part="body"/>
+		  </copy>
+
+
+                  <copy>
+                    <from part="body" variable="CartCreateResponseMsg">
+                      <query>/ns3:CartCreateResponse/ns3:Cart/ns3:HMAC</query>
+                    </from>
+                    <to part="body" variable="CartAddRequestMsg">
+                      <query>/ns3:CartAdd/ns3:Request/ns3:HMAC</query>
+                    </to>
+                  </copy>
+
+		  <copy> <!--Esqueleto de CartAddRequestMsg-->
+		    <from><literal>
+			<ns3:CartAdd>
+			  <ns3:AWSAccessKeyId/>
+			  <ns3:Request>
+			    <ns3:CartId/>
+			    <ns3:HMAC/>
+			    <ns3:Items>
+			      <ns3:Item>
+				<ns3:ASIN/>
+				<ns3:Quantity/>
+			      </ns3:Item>
+			    </ns3:Items>
+			  </ns3:Request>
+			</ns3:CartAdd>
+		    </literal></from>
+		    <to variable="CartAddRequestMsg" part="body"/>
+		  </copy>
+		  </assign><assign>
+                 
+                  <copy>
+                    <from part="body" variable="addMsg">
+                      <query>/ns0:CartAdd/ns0:Request/ns0:Items/ns0:Item[1]/ns0:ASIN</query>
+                    </from>
+                    <to part="body" variable="CartAddRequestMsg">
+                      <query>/ns3:CartAdd/ns3:Request/ns3:Items/ns3:Item/ns3:ASIN</query> 
+                    </to>
+                  </copy>
+		  </assign><assign>
+		  <copy> <!--Esqueleto de CartAddRequestMsg-->
+		    <from><literal>
+			<ns3:CartAdd>
+			  <ns3:AWSAccessKeyId/>
+			  <ns3:Request>
+			    <ns3:CartId/>
+			    <ns3:HMAC/>
+			    <ns3:Items>
+			      <ns3:Item>
+				<ns3:ASIN/>
+				<ns3:Quantity/>
+			      </ns3:Item>
+			    </ns3:Items>
+			  </ns3:Request>
+			</ns3:CartAdd>
+		    </literal></from>
+		    <to variable="CartAddRequestMsg" part="body"/>
+		  </copy>
+		  
+                  <copy>
+                    <from part="body" variable="addMsg">
+                      <query>/ns0:CartAdd/ns0:Request/ns0:Items/ns0:Item[1]/ns0:Quantity</query>
+                    </from>
+                    <to part="body" variable="CartAddRequestMsg">
+                      <query>/ns3:CartAdd/ns3:Request/ns3:Items/ns3:Item[1]/ns3:Quantity</query>
+                    </to>
+                  </copy>
+                  
+                </assign>
+                
+                <invoke inputVariable="CartAddRequestMsg" name="Task4" operation="CartAdd" outputVariable="CartAddResponseMsg" partnerLink="Amazon_PLT" portType="ns2:AWSECommerceServicePortType">
+                  <bpelx:toProperties>
+                     <bpelx:toProperty name="probability">Task2:0.33</bpelx:toProperty>
+                     <bpelx:toProperty name="paths">path3 path4 path7 path8 path9 path10</bpelx:toProperty>
+                  </bpelx:toProperties>
+               </invoke> 
+                <if>
+                  <condition>$CartAddResponseMsg.body/ns3:Cart/ns3:Request/ns3:IsValid='true'</condition>
+                  <sequence>
+                    <assign>
+		      
+
+					     <copy>
+						<from part="key" variable="addMsg"/>
+						<to part="key" variable="addAckMsg"/>
+						</copy>
+						 <copy> <!--Esqueleto de addAckMsg-->
+						<from><literal>
+							<ns0:CartAddResponse>
+							  <ns0:Cart>
+							<ns0:SubTotal>
+							  <ns0:FormattedPrice>FormattedPrice</ns0:FormattedPrice>
+							</ns0:SubTotal>
+							  </ns0:Cart>
+							</ns0:CartAddResponse>
+						</literal></from>
+						<to variable="addAckMsg" part="body"/>
+						  </copy>									   
+                      <copy>
+                        <from part="body" variable="CartAddResponseMsg">
+                          <query>/ns3:CartAddResponse/ns3:Cart/ns3:SubTotal/ns3:FormattedPrice</query> 
+                        </from>
+                        <to part="body" variable="addAckMsg">
+                          <query>/ns0:CartAddResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+                        </to>
+                      </copy>
+                    </assign>
+                    
+                    <invoke inputVariable="addAckMsg" name="Task5" operation="cartAddResponse" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+                      <bpelx:toProperties>
+                         <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                         <bpelx:toProperty name="paths">path3 path7 path8</bpelx:toProperty>
+                      </bpelx:toProperties>
+                   </invoke> 
+
+                  </sequence>
+                  <else>
+             	<sequence>
+                      <assign>
+                        <copy>
+                          <from part="key" variable="addMsg"/>
+                          <to part="key" variable="addNackMsg"/>
+                        </copy>
+			<copy> 
+			      <from><literal>
+				  <ns0:Errors>
+				    <ns0:Error>
+				      <ns0:Code>5</ns0:Code>
+				      <ns0:Message>Error: addNackMsg</ns0:Message>
+				    </ns0:Error>
+				  </ns0:Errors>
+
+			      </literal></from>
+			      <to variable="addNackMsg" part="error"/>
+			    </copy>
+                          </assign>
+                      
+                     <invoke inputVariable="addNackMsg" name="Task6" operation="cartAddErr" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+                      <bpelx:toProperties>
+                         <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                         <bpelx:toProperty name="paths">path4 path9 path10</bpelx:toProperty>
+                      </bpelx:toProperties>
+                   </invoke> 
+
+		    </sequence>
+                  </else>
+                </if>
+        	</sequence>         
+            </onMessage>
+
+          </pick>
+
+
+		</sequence> 
+        </while>
+
+        <pick name="checkout-nop">
+          <onMessage operation="cartGet" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="checkoutMsg">
+            <correlations>
+              <correlation set="bookcart"/>
+            </correlations>
+            <sequence>
+              
+	      <assign>
+		<copy> 
+		  <from><literal>
+		      <ns3:CartGet>
+			<ns3:AWSAccessKeyId/>
+			<ns3:Request>
+			  <ns3:HMAC/>
+			  <ns3:CartId/>
+			</ns3:Request>
+		      </ns3:CartGet>
+  		  </literal></from>
+		  <to variable="CartGetRequestMsg" part="body"/>
+  		</copy>
+                <copy>
+                  <from>"1JCNA3F1DE5FAWXC06G"</from>
+                  <to part="body" variable="CartGetRequestMsg">
+                    <query>/ns3:CartGet/ns3:AWSAccessKeyId</query>
+                  </to>
+                </copy>
+                <copy>
+                  <from part="body" variable="CartCreateResponseMsg">
+                    <query>/ns3:CartCreateResponse/ns3:Cart/ns3:CartId</query>
+                  </from>
+                  <to part="body" variable="CartGetRequestMsg"/>
+                </copy>
+		<copy> 
+		  <from><literal>
+		      <ns3:CartGet>
+			<ns3:AWSAccessKeyId/>
+			<ns3:Request>
+			  <ns3:HMAC/>
+			  <ns3:CartId/>
+			</ns3:Request>
+		      </ns3:CartGet>
+		  </literal></from>
+		  <to variable="CartGetRequestMsg" part="body"/>
+		</copy>                           
+		
+		<copy>
+                  <from part="body" variable="CartCreateResponseMsg">
+                    <query>/ns3:CartCreateResponse/ns3:Cart/ns3:HMAC</query> 
+                  </from>
+                  <to part="body" variable="CartGetRequestMsg">
+                    <query>/ns3:CartGet/ns3:Request/ns3:HMAC</query>
+                  </to>
+                </copy>
+                
+              </assign>
+            
+              <invoke inputVariable="CartGetRequestMsg" name="Task7" operation="CartGet" outputVariable="CartGetResponseMsg" partnerLink="Amazon_PLT" portType="ns2:AWSECommerceServicePortType">
+                <bpelx:toProperties>
+                   <bpelx:toProperty name="probability">Task2:0.33 Task5:0.5 Task6:0.5</bpelx:toProperty>
+                   <bpelx:toProperty name="paths">path5 path6 path7 path8 path9 path10</bpelx:toProperty>
+                </bpelx:toProperties>
+             </invoke> 
+
+
+              <if name="ifnombredeifinventado">
+                <condition>$CartGetResponseMsg.body/ns3:Cart/ns3:Request/ns3:IsValid='true'</condition>
+                <sequence>
+                  <assign name="assignmeinventoelnombre">
+                    <copy>
+                      <from part="key" variable="checkoutMsg"/>
+                      <to part="key" variable="checkoutAckMsg"/>
+                    </copy>
+		    <copy>
+		      <from><literal>
+			  <ns0:CartGetResponse>
+			    <ns0:Cart>
+			      <ns0:SubTotal>
+				    <ns0:FormattedPrice>5786</ns0:FormattedPrice>
+			      </ns0:SubTotal>
+			    </ns0:Cart>
+			  </ns0:CartGetResponse>
+		      </literal></from>
+		      <to variable="checkoutAckMsg" part="body"/>
+		    </copy>									
+                    <copy>
+                      <from part="body" variable="CartGetResponseMsg">
+                        <query>/ns3:CartGetResponse/ns3:Cart/ns3:SubTotal/ns3:FormattedPrice</query>
+                      </from>
+                      <to part="body" variable="checkoutAckMsg">
+                        <query>/ns0:CartGetResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+                      </to>
+                    </copy>
+                  </assign>
+                
+
+                  <invoke inputVariable="checkoutAckMsg" name="Task8" operation="cartGetResponse" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+                    <correlations>
+                      <correlation pattern="request" set="bookcart"/>
+                    </correlations>
+                    <bpelx:toProperties>
+                       <bpelx:toProperty name="probability">Task7:0.5</bpelx:toProperty>
+                       <bpelx:toProperty name="paths">path5 path7 path9</bpelx:toProperty>
+                    </bpelx:toProperties>
+                 </invoke> 
+
+<!--  -->
+                  <pick name="clear-nop">
+                    <onMessage operation="clear" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="clearMsg">
+                      <correlations>
+                        <correlation set="bookcart"/>
+                      </correlations>
+                      <empty name="SUCC"/>
+                    </onMessage>
+                    <onMessage operation="nop" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="nopMsg"> 
+                      <correlations>
+                        <correlation set="bookcart"/>
+                      </correlations>
+                      <empty name="FAIL3"/>
+                    </onMessage>
+                  </pick>
+                </sequence>
+                <else>
+                  <sequence>
+                    <assign name="medaproblemas">
+                        <copy>
+                          <from part="key" variable="checkoutMsg"/>
+                          <to part="key" variable="checkoutNackMsg"/>
+                        </copy>
+			    <copy> 
+			      <from><literal>
+				  <ns0:Errors>
+				    <ns0:Error>
+				      <ns0:Code>8</ns0:Code>
+				      <ns0:Message>Error:checkoutNackMsg</ns0:Message>
+				    </ns0:Error>
+				  </ns0:Errors>
+
+			      </literal></from>
+			      <to variable="checkoutNackMsg" part="error"/>
+			    </copy>
+
+
+                    </assign>
+                    <invoke inputVariable="checkoutNackMsg" name="Task9" operation="cartGetErr" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+
+                      <correlations>
+                        <correlation pattern="request" set="bookcart"/>
+                      </correlations>
+                      <bpelx:toProperties>
+                         <bpelx:toProperty name="probability">Task7:0.5</bpelx:toProperty>
+                         <bpelx:toProperty name="paths">path6 path8 path10</bpelx:toProperty>
+                      </bpelx:toProperties>
+                   </invoke> 
+
+                    <empty name="FAIL2"/>
+                  </sequence>
+                </else>
+              </if>
+
+            </sequence>
+          </onMessage>
+
+          <onMessage operation="nop" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_PT" variable="nopMsg">
+            <correlations>
+              <correlation set="bookcart"/>
+            </correlations>
+            <empty name="FAIL4"/>
+          </onMessage>
+
+        </pick>
+
+      </sequence>
+
+      <else>
+        <sequence>
+          <assign>
+            <copy>
+              <from part="key" variable="createMsg"/>
+              <to part="key" variable="createNackMsg"/>
+            </copy>
+	    <copy> <!--Esqueleto de CartCreateResponseMsg-->
+	      <from><literal>
+		  <ns0:Errors>
+		    <ns0:Error>
+		      <ns0:Code>8</ns0:Code>
+		      <ns0:Message>Error: cartCreateResponseMsg</ns0:Message>
+		    </ns0:Error>
+		  </ns0:Errors>
+
+	      </literal></from>
+	      <to variable="createNackMsg" part="error"/>
+	    </copy>	
+
+          </assign>
+          <invoke inputVariable="createNackMsg" name="Task3" operation="cartCreateErr" partnerLink="ASTROBookCart_PLT" portType="ns1:ASTROBookCart_CallbackPT">
+            <correlations>
+              <correlation pattern="request" set="bookcart"/>
+            </correlations>
+            <bpelx:toProperties>
+               <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+               <bpelx:toProperty name="paths">path1</bpelx:toProperty>
+            </bpelx:toProperties>
+         </invoke> 
+          <empty name="FAIL1"/>
+        </sequence>
+      </else>
+
+    </if>
+
+  </sequence>
+</process>

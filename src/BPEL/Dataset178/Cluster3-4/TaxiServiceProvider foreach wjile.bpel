@@ -1,0 +1,771 @@
+<bpel:process name="TaxiServiceProvider"
+  targetNamespace="http://www.taxiserviceprovider.eu/definitions"
+  suppressJoinFailure="yes" xmlns:tns="http://www.taxiserviceprovider.eu/definitions"
+  xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+  xmlns:types="http://www.taxiserviceprovider.eu/types" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  xmlns:atns="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/definitions"
+  xmlns:attns="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/types"
+  xmlns:tdins="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/definitions"
+  xmlns:tditns="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/types"
+  xmlns:ttns="http://www.taxiserviceprovider.eu/transmitter/definitions"
+  xmlns:tttns="http://www.taxiserviceprovider.eu/transmitter/types"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <!-- 
+   TaxiServiceProvider is a context-aware BPEL process. TaxiServiceProvider represents
+   a taxi booking system using context information to offer taxi transport services 
+   tailored to best suit customer expectations. Taxi Service Provider process is 
+   responsible for the discovery of the nearest taxi cab to a customer. In order to
+   achieve this, the TaxiServiceProviderr process extracts address information out of 
+   the booking request message, obtains the list of the available taxicabs next to the
+   customer origin address, contacts a particular taxi driver to confirm booking and 
+   generates acknowledgment response for the requester after the taxi booking is accomplished.
+   
+   TaxiServiceProvider integrates context information obtained from C-CAST CMF and 
+   Google Maps Web services. 
+  
+   @Domain Specific CIPs: GetAvailableTaxis, GetTaxiDriverInformation 
+
+   @System1: Google Maps Web services
+   @Component: Directions
+   @Interface: directions
+
+   @System2: C-CAST CMF
+   @Component: ContextBroker
+   @Interface: GetContext, GetActiveEntities
+
+
+   @Author: Rodion Hagin
+   @Created: 01.06.2011
+  
+  -->
+
+  <!-- WSDL IMPORTS -->
+  <bpel:import location="TaxiServiceProviderArtifacts.wsdl"
+    namespace="http://www.taxiserviceprovider.eu/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <bpel:import location="GetAvailableTaxisArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <bpel:import location="GetTaxiDriverInformationArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <bpel:import location="TaxiTransmitter.wsdl"
+    namespace="http://www.taxiserviceprovider.eu/transmitter/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+
+  <!-- PARTNERLINKS -->
+  <bpel:partnerLinks>
+  
+  	<!-- Represents the requester of this service. Used for callback. -->
+    <bpel:partnerLink name="Customer" partnerLinkType="tns:TaxiServiceProviderPLT"
+      myRole="TaxiServiceProviderProvider" />
+	
+	<!-- Represents GetAvailableTaxis CIP. -->
+    <bpel:partnerLink name="AvailableTaxisProvider"
+      partnerLinkType="atns:AvailableTaxisProviderPLT" partnerRole="AvailableTaxisProvider" />
+	
+	<!-- Represents GetTaxiDriverInformation CIP. -->
+    <bpel:partnerLink name="TaxiDriverInformationProvider"
+      partnerLinkType="tdins:TaxiDriverInformationProviderPLT"
+      partnerRole="TaxiDriverInformationProvider" />
+
+	<!-- Represents a stub service providing communication with taxi drivers -->
+    <bpel:partnerLink name="TaxiTransmitterProvider"
+      partnerLinkType="ttns:TaxiTransmitterPLT" partnerRole="TaxiTransmitterProvider" />
+    
+  </bpel:partnerLinks>
+
+
+  <!-- VARIABLES -->
+  <bpel:variables>
+    <!-- Business process input -->
+    <bpel:variable name="input" messageType="tns:TaxiBookingRequestMessage" />
+
+    <!-- Business process output -->
+    <bpel:variable name="output" messageType="tns:TaxiBookingResponseMessage" />
+    
+    <!-- Business process fault -->
+    <bpel:variable name="fault" messageType="tns:TaxiBookingFaultMessage" />
+
+    <!-- GetAvailableTaxis CIP input -->
+    <bpel:variable name="inputAT"
+      messageType="atns:GetAvailableTaxisRequestMessage" />
+
+    <!-- GetAvailableTaxis CIP output -->
+    <bpel:variable name="outputAT"
+      messageType="atns:GetAvailableTaxisResponseMessage" />
+
+    <!-- GetTaxiDriverInformation CIP input -->
+    <bpel:variable name="inputTDI"
+      messageType="tdins:GetTaxiDriverInformationRequestMessage" />
+
+    <!-- GetTaxiDriverInformation CIP output -->
+    <bpel:variable name="outputTDI"
+      messageType="tdins:GetTaxiDriverInformationResponseMessage" />
+
+    <!-- TaxiTransmitter transport request input -->
+    <bpel:variable name="inputTT" messageType="ttns:TransportRequestMessage" />
+
+    <!-- TaxiTransmitter transport request output -->
+    <bpel:variable name="outputTT" messageType="tns:TransportResponseMessage" />
+
+    <!-- TaxiTransmitter transport confirmation input -->
+    <bpel:variable name="inputConfirmTT"
+      messageType="ttns:TransportConfirmationMessage" />
+      
+    <!-- Counter for negative confirmations sent by taxi drivers -->
+    <bpel:variable name="cancellations" type="xsd:integer"/>
+    
+  </bpel:variables>
+
+
+  <!-- CORRELATION SETS -->
+  <bpel:correlationSets>
+    <bpel:correlationSet name="CustomerIdentification"
+      properties="tns:correlationID" />
+  </bpel:correlationSets>
+
+
+  <!-- FAULT HANDLING LOGIC --> 
+  <bpel:faultHandlers>
+    
+    <!-- Catch and process faults thrown by GetAvailableTaxis CIP -->
+    <bpel:catch 
+      faultName="atns:GetAvailableTaxisFault" 
+      faultVariable="faultAT"
+      faultMessageType="atns:GetAvailableTaxisFaultMessage">
+      
+      <bpel:sequence>
+        <bpel:assign validate="no" name="ProcessFaultFromAT">
+            
+            <!-- To manipulate variable contents it should be pre-initiliazed. 
+	      	   Apache ODE requirement. 
+	      	  -->
+            <bpel:copy>
+              <bpel:from>
+                <bpel:literal>
+                  <tn:TaxiBookingFault xmlns:tn="http://www.taxiserviceprovider.eu/types"
+                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <tn:status></tn:status>
+                  </tn:TaxiBookingFault>
+                </bpel:literal>
+              </bpel:from>
+              <bpel:to part="payload" variable="fault"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$faultAT.payload//attns:status]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="fault">
+                <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[types:status]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply 
+          name="replyFaultOutput" 
+          partnerLink="Customer"
+          portType="tns:TaxiServiceProvider"
+          operation="book" 
+          variable="fault"
+          faultName="tns:TaxiServiceProviderFault" />
+      </bpel:sequence>
+    </bpel:catch>
+    
+	<!-- Catch and process faults thrown by GetTaxiDriverInformation CIP -->
+    <bpel:catch 
+      faultName="tdins:GetTaxiDriverInformationFault" 
+      faultVariable="faultTDI"
+      faultMessageType="tdins:GetTaxiDriverInformationFaultMessage">
+      
+      <bpel:sequence>
+        <bpel:assign validate="no" name="ProcessFaultFromTDI">
+            
+            <!-- To manipulate variable contents it should be pre-initiliazed. 
+	      	   Apache ODE requirement. 
+	      	  -->
+            <bpel:copy>
+              <bpel:from>
+                <bpel:literal>
+                  <tn:TaxiBookingFault xmlns:tn="http://www.taxiserviceprovider.eu/types"
+                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <tn:status></tn:status>
+                  </tn:TaxiBookingFault>
+                </bpel:literal>
+              </bpel:from>
+              <bpel:to part="payload" variable="fault"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$faultTDI.payload//tdins:status]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="fault">
+                <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[types:status]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply 
+          name="replyFaultOutput" 
+          partnerLink="Customer"
+          portType="tns:TaxiServiceProvider"
+          operation="book" 
+          variable="fault"
+          faultName="tns:TaxiServiceProviderFault" />
+      </bpel:sequence>
+    </bpel:catch>
+    
+    <!-- Catch all faults during current process execution, generate fault message and 
+       send back to the requester interface 
+      -->
+    <bpel:catchAll>
+      <bpel:sequence>
+        <bpel:assign validate="no" name="CreateNewFault">
+            <bpel:copy>
+                <bpel:from>
+                  <bpel:literal>
+                    <tn:TaxiBookingFault xmlns:tn="http://www.taxiserviceprovider.eu/types"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                      <tn:status>TaxiServiceProvide process fault</tn:status>
+                    </tn:TaxiBookingFault>
+                  </bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="fault" />
+            </bpel:copy>
+        </bpel:assign>
+        
+        <bpel:reply 
+          name="replyFaultOutput" 
+          partnerLink="Customer"
+          portType="tns:TaxiServiceProvider"
+          operation="book" 
+          variable="fault"
+          faultName="tns:TaxiServiceProviderFault" />
+      </bpel:sequence>
+    </bpel:catchAll> 
+    
+  </bpel:faultHandlers>
+
+  
+  <!-- ORCHESTRATION LOGIC -->
+    
+  <!-- Set of activities coordinating the flow of messages across the    
+     services integrated within this business process.  
+     
+     TaxiServiceProvider BPEL process extracts customer location information out of 
+     booking request and invokes GetAvailableTaxis process to obtain the list of nearby
+     located taxi cabs. As the next step, TaxiServiceProvider invokes GetTaxiDriverInformation
+     process to get contact details of taxi drivers and disseminates transport request in an
+     asynchronous invocation mode. Each taxi driver optionally replies with a transport
+     confirmation. Finally, TaxiServiceProvider generates taxi booking confiramtion and 
+     sends reply to the customer.
+    -->
+  <bpel:sequence name="main">
+
+    <bpel:receive name="GetTaxiBookingRequest" partnerLink="Customer"
+      portType="tns:TaxiServiceProvider" operation="book" variable="input"
+      createInstance="yes">
+
+      <bpel:correlations>
+        <bpel:correlation set="CustomerIdentification"
+          initiate="yes" />
+      </bpel:correlations>
+    </bpel:receive>
+	
+	<!-- First, extract customer location information. -->
+    <bpel:assign validate="no" name="ExtractBookingInformation">
+      
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <tn:GetAvailableTaxisRequest
+              xmlns:tn="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/types"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <tn:customerLocation></tn:customerLocation>
+            </tn:GetAvailableTaxisRequest>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputAT"></bpel:to>
+      </bpel:copy>
+
+      <bpel:copy>
+        <bpel:from>
+            <![CDATA[$input.payload/types:originLocation]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputAT">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[attns:customerLocation]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+	
+	<!-- Then invoke GetAvailableTaxis process to find nearby located taxis -->
+    <bpel:invoke name="Task1" partnerLink="AvailableTaxisProvider"
+      operation="process" portType="atns:GetAvailableTaxis"
+      inputVariable="inputAT" outputVariable="outputAT" >
+		<bpelx:toProperties>
+			<bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+			<bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+		</bpelx:toProperties>
+	</bpel:invoke>
+	
+	<!-- As the next step, iterate over the list of the available and nearby located taxi cabs,
+	invoke GetTaxiDriverInformation to obtain contact details of available taxi drivers and
+	send transport request. -->
+    <bpel:forEach parallel="no" counterName="taxi"
+      name="ForEachAvailableTaxi">
+      <bpel:startCounterValue>1</bpel:startCounterValue>
+      <bpel:finalCounterValue>
+        number(count($outputAT.payload/attns:taxiList/attns:taxi))
+      </bpel:finalCounterValue>
+
+      <bpel:scope>
+        <bpel:sequence name="SendTransportRequest">
+			
+          <bpel:assign validate="no" name="ExtractTaxiId">
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputAT.payload/attns:taxiList/attns:taxi[number($taxi)]/attns:id/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTDI">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                     <![CDATA[tditns:taxiID]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+          </bpel:assign>
+		  
+		  <!-- Obtain contact details of a particular taxi driver -->
+          <bpel:invoke name="Task2"
+            partnerLink="TaxiDriverInformationProvider" operation="process"
+            portType="tdins:GetTaxiDriverInformation" inputVariable="inputTDI"
+            outputVariable="outputTDI" >
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task1:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+            </bpelx:toProperties>
+          </bpel:invoke>
+
+          <bpel:assign validate="no" name="PrepareTransportRequest">
+          
+            <bpel:copy>
+              <bpel:from>
+                <bpel:literal>
+                  <tn:TransportRequest
+                    xmlns:tn="http://www.taxiserviceprovider.eu/transmitter/types"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  </tn:TransportRequest>
+                </bpel:literal>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT"></bpel:to>
+            </bpel:copy>
+			
+			<!-- Prepare transport request. TaxiTransmitter needs both customer information
+				for transport request and information to contact taxi driver -->
+				
+			<!-- Eclipde BPEL Designer: cannot resolve the XPath string. 
+          	-->
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputAT.payload/attns:taxiList/attns:taxi[number($taxi)]/attns:id/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxiID]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:customerID/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:customerID]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            <!-- Set customer origin and desired destination laocation -->
+			<bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:originLocation/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:pickupLocation]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:destinationLocation/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:dropoffLocation]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+			<!-- Set taxi driver information including name, cantact details and current location -->
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputTDI.payload/tditns:firstName/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:firstName]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputTDI.payload/tditns:lastName/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:lastName]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputTDI.payload/tditns:email/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:email]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputTDI.payload/tditns:mobile/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:mobile]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputAT.payload/attns:taxiList/attns:taxi[number($taxi)]/attns:currentLocation/attns:latitude/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:location/tttns:latitude]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$outputAT.payload/attns:taxiList/attns:taxi[number($taxi)]/attns:currentLocation/attns:longitude/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:taxi/tttns:location/tttns:longitude]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+			
+			<!-- Set customer contact information -->
+			<bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:customerInfo/types:phone/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:customer/tttns:phone]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:customerInfo/types:email/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:customer/tttns:email]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+            
+            <bpel:copy>
+              <bpel:from>
+                  <![CDATA[$input.payload/types:customerInfo/types:messenger/node()]]>
+              </bpel:from>
+              <bpel:to part="payload" variable="inputTT">
+                <bpel:query
+                  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[tttns:customer/tttns:messenger]]>
+                </bpel:query>
+              </bpel:to>
+            </bpel:copy>
+
+          </bpel:assign>
+		  
+		  <!-- Send transport request to TaxiTransmitter. TaxiTransmitter contacts a
+		  	 taxi driver using contact information -->
+          <bpel:invoke name="Task3"
+            partnerLink="TaxiTransmitterProvider" operation="orderTransport"
+            portType="ttns:TaxiTransmitter" inputVariable="inputTT" >
+		<bpelx:toProperties>
+			<bpelx:toProperty name="probability">Task2:1</bpelx:toProperty>
+			<bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+		</bpelx:toProperties>
+	</bpel:invoke>
+
+        </bpel:sequence>
+      </bpel:scope>
+    </bpel:forEach>
+
+	<!-- Prepare default booking confirmation which will be used if
+		no taxi driver accepts transport request. -->
+    <bpel:assign validate="no" name="PrepareBookingConfirmation">
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <tn:TaxiBookingResponse
+              xmlns:tn="http://www.taxiserviceprovider.eu/types"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <tn:status>NO_TAXI_AVAILABLE</tn:status>
+            </tn:TaxiBookingResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="output"></bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>
+                 <![CDATA[$input.payload/types:customerID/node()]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[types:customerID]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+	
+	<!-- Define a timer (5 minutes) and wait for the transport confirmation. Since the 
+	transportation was asssigned to several taxi drivers, do not respond immediately if
+	a negative confirmation is received. To avoid this define a while loop and count negative 
+	confirmations. In case waiting time is over or all the taxi drivers reject the transport 
+	assignment, send a negative confirmation back to customer. -->
+		
+	<bpel:assign name="initCancellationCounter" validate="no">
+		<bpel:copy>
+			<bpel:from>
+				<![CDATA[0]]>
+			</bpel:from>
+			<bpel:to variable="cancellations"/>
+		</bpel:copy>   
+	</bpel:assign>
+	
+    <bpel:while>
+	<bpel:condition>(number($cancellations) &lt; 2)</bpel:condition>
+		<bpel:scope name="ConfirmationProcessing">
+	    <bpel:pick name="GetTransportReply" createInstance="no">
+	                
+	      <!-- Process transport confirmation, if there is one -->
+	      <bpel:onMessage partnerLink="Customer"
+	        portType="tns:TaxiServiceProvider" operation="confirmTransport"
+	        variable="outputTT">
+	
+	        <bpel:correlations>
+	          <bpel:correlation set="CustomerIdentification"
+	            initiate="no" />
+	        </bpel:correlations>
+	
+	        <bpel:sequence name="ProcessTransportReply">
+			  
+			  <!-- Check reply status. Taxi Driver may answer with negative confirmation. -->
+	          <bpel:if name="CheckTransportReplyStatus">
+	            <bpel:condition>
+	              $outputTT.payload/types:status/node() = 'ACK'
+	            </bpel:condition>
+	
+	             <bpel:sequence name="Acknowledged">
+		           <bpel:assign name="quitCancellationCounter" validate="no">
+				 	  <bpel:copy>
+					   <bpel:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+						  2
+					   </bpel:from>
+					  <bpel:to variable="cancellations"/>
+				    </bpel:copy>   
+				  </bpel:assign>
+					
+	              <bpel:assign validate="no"
+	                name="PrepareTransportConfirmation">
+	                <bpel:copy>
+	                  <bpel:from>
+	                    <bpel:literal>
+	                      <tn:TransportConfirmation
+	                        xmlns:tn="http://www.taxiserviceprovider.eu/transmitter/types"
+	                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	                        <tn:status>ACK</tn:status>
+	                      </tn:TransportConfirmation>
+	                    </bpel:literal>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="inputConfirmTT"></bpel:to>
+	                </bpel:copy>
+	                <bpel:copy>
+	                  <bpel:from>
+	                 	<![CDATA[$outputTT.payload/types:taxiID]]>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="inputConfirmTT">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  		<![CDATA[tttns:taxiID]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	                <bpel:copy>
+	                  <bpel:from>
+	                 	<![CDATA[$outputTT.payload/types:customerID]]>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="inputConfirmTT">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  		<![CDATA[tttns:customerID]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	              </bpel:assign>
+	
+				  <!-- If taxi driver replied with a positive confirmation to the transport 
+				  	request, send an acknowledgement to the taxi driver.  -->
+	              <bpel:invoke name="Task4"
+	                partnerLink="TaxiTransmitterProvider" operation="confirmTransport"
+	                portType="ttns:TaxiTransmitter" inputVariable="inputConfirmTT" >
+                  <bpelx:toProperties>
+                    <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+                    <bpelx:toProperty name="paths">path1</bpelx:toProperty>
+                  </bpelx:toProperties>
+                </bpel:invoke>
+	
+				  <!-- Subsequently, create a booking confirmation for the customer containing
+				  	contact details of the taxi driver and arrival time. -->
+	              <bpel:assign validate="no"
+	                name="PrepareBookingConfirmation">
+	                <bpel:copy>
+	                  <bpel:from>
+	                    <bpel:literal>
+	                   		<![CDATA[TAXI_AVAILABLE]]>
+	                    </bpel:literal>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="output">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  		<![CDATA[types:status]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	                <bpel:copy>
+	                  <bpel:from>
+	                 <![CDATA[$outputTT.payload/types:taxiID]]>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="output">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  <![CDATA[types:taxiID]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	                <bpel:copy>
+	                  <bpel:from>
+	                 <![CDATA[$outputAT.payload/attns:taxiList/attns:taxi[attns:id=$outputTT.payload/types:taxiID/node()]//attns:arrival/attns:durationText/node()]]>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="output">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  <![CDATA[types:arrivalTime]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	                <bpel:copy>
+	                  <bpel:from>
+	                 <![CDATA[$outputTT.payload/types:taxi]]>
+	                  </bpel:from>
+	                  <bpel:to part="payload" variable="output">
+	                    <bpel:query
+	                      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+	                  <![CDATA[types:taxi]]>
+	                    </bpel:query>
+	                  </bpel:to>
+	                </bpel:copy>
+	              </bpel:assign>
+	            </bpel:sequence>
+	            
+	            <!-- Ignore taxi driver's negative confirmation to the transport request and
+	            	 increase the cancellation counter -->
+	            <bpel:else>
+	              <bpel:sequence name="NotAcknowledged">
+	                <bpel:empty name="IgnoreTransportReply" />
+	                <bpel:assign name="increaseCancellationCounter" validate="no">
+						<bpel:copy>
+							<bpel:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+								($cancellations + 1)
+							</bpel:from>
+							<bpel:to variable="cancellations"/>
+						</bpel:copy>   
+					</bpel:assign>
+	              </bpel:sequence>
+	            </bpel:else>
+	          </bpel:if>
+	
+	        </bpel:sequence>
+	      </bpel:onMessage>
+	      
+	      <!-- Wait two minutes for the reply to the transport request -->
+	      <bpel:onAlarm>
+	      	<bpel:for><![CDATA['PT2M']]></bpel:for>
+			<bpel:sequence name="NoTransportConfirmationReceived">
+	        	<bpel:empty name="NoTaxiAvailable" />
+	        </bpel:sequence>
+	      </bpel:onAlarm>
+	      
+	    </bpel:pick>
+	    </bpel:scope>
+	</bpel:while>
+
+	<!-- Send booking confirmation to the customer -->
+    <bpel:reply name="SendTaxiBookingConfirmation"
+      partnerLink="Customer" portType="tns:TaxiServiceProvider"
+      operation="book" variable="output">
+    </bpel:reply>
+  </bpel:sequence>
+</bpel:process>
+

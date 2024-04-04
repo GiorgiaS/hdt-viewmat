@@ -1,0 +1,220 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Tue Dec 05 14:07:10 CET 2023
+  Author:  sirigu
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="TuberculosisProcess"
+         targetNamespace="http://xmlns.oracle.com/Workflow/TuberculosisWorkflow/TuberculosisProcess"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:client="http://xmlns.oracle.com/Workflow/TuberculosisWorkflow/TuberculosisProcess"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ui="http://xmlns.oracle.com/soa/designer"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/Workflow/TuberculosisWorkflow/TuberculosisProcess"
+          location="../WSDLs/TuberculosisProcess.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="tuberculosisprocess_client" partnerLinkType="client:TuberculosisProcess"
+                 myRole="TuberculosisProcessProvider"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:TuberculosisProcessRequestMessage"/>
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable" messageType="client:TuberculosisProcessResponseMessage"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <!-- Receive input from requestor. (Note: This maps to operation defined in TuberculosisProcess.wsdl) -->
+    <receive name="receiveInput" partnerLink="tuberculosisprocess_client" portType="client:TuberculosisProcess"
+             operation="process" variable="inputVariable" createInstance="yes"/>
+    <invoke name="Task1" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+            inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+      <bpelx:toProperties>
+        <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+        <bpelx:toProperty name="paths">path1 path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+      </bpelx:toProperties>
+    </invoke>
+    <sequence>
+      <if name="If1">
+        <sequence name="Sequence1">
+          <invoke name="Task2" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path2 path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <if name="If2">
+            <sequence name="Sequence2">
+              <invoke name="Task3" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                      operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                      bpelx:invokeAsDetail="no">
+                <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task2:0.33</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path12 path13 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+                </bpelx:toProperties>
+              </invoke>
+              <if name="If3">
+                <sequence name="Sequence8">
+                  <reply name="replyOutput" partnerLink="tuberculosisprocess_client"
+                         portType="client:TuberculosisProcess" operation="process" variable="outputVariable"
+                         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"/>
+                  <exit name="Exit4"/>
+                </sequence>
+              </if>
+            </sequence>
+            <elseif>
+              <sequence name="Sequence7">
+                <reply name="replyOutput" partnerLink="tuberculosisprocess_client" portType="client:TuberculosisProcess"
+                       operation="process" variable="outputVariable"
+                       xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"/>
+                <exit name="Exit3"/>
+              </sequence>
+            </elseif>
+            <else></else>
+          </if>
+          <invoke name="Task4" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task2:0.33 Task3:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path3 path4 path5 path6 path7 path8 path9 path10 path11 path12 path14 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <if name="If4">
+            <sequence name="Sequence3">
+              <invoke name="Task5" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                      operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                      bpelx:invokeAsDetail="no">
+                <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task4:0.5</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path3 path4 path5 path6 path7 path8 path9 path14 path15 path16 path17</bpelx:toProperty>
+                </bpelx:toProperties>
+              </invoke>
+              <if name="If5">
+                <sequence name="Sequence4">
+                  <invoke name="Task6" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                          operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                          bpelx:invokeAsDetail="no">
+                    <bpelx:toProperties>
+                      <bpelx:toProperty name="probability">Task5:0.5</bpelx:toProperty>
+                      <bpelx:toProperty name="paths">path3 path4 path5 path6 path14 path15 path16 path17 path18 path19 path20</bpelx:toProperty>
+                    </bpelx:toProperties>
+                  </invoke>
+                  <if name="If6">
+                    <sequence>
+                      <invoke name="Task7" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                              operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                              bpelx:invokeAsDetail="no">
+                        <bpelx:toProperties>
+                          <bpelx:toProperty name="probability">Task6:0.5</bpelx:toProperty>
+                          <bpelx:toProperty name="paths">path3 path14</bpelx:toProperty>
+                        </bpelx:toProperties>
+                      </invoke>
+                      <reply name="replyOutput" partnerLink="tuberculosisprocess_client"
+                             portType="client:TuberculosisProcess" operation="process" variable="outputVariable"
+                             xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"/>
+                      <exit name="Exit2"/>
+                    </sequence>
+                  </if>
+                </sequence>
+              </if>
+            </sequence>
+          </if>
+          <invoke name="Task8" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task4:0.5 Task5:0.5 Task6:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path4 path5 path6 path7 path8 path9 path10 path11 path12 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <invoke name="Task9" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task8:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path4 path5 path6 path7 path8 path9 path10 path11 path12 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <invoke name="Task10" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task9:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path4 path5 path6 path7 path8 path9 path10 path11 path12 path15 path16 path17 path18 path19 path20 path21 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <if name="If7">
+            <sequence name="Sequence6">
+              <reply name="replyOutput" partnerLink="tuberculosisprocess_client" portType="client:TuberculosisProcess"
+                     operation="process" variable="outputVariable"
+                     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"/>
+              <exit name="Exit1"/>
+            </sequence>
+          </if>
+          <invoke name="Task11" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task10:0.5</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path5 path6 path8 path9 path11 path12 path16 path17 path19 path20 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <invoke name="Task12" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess" operation="process"
+                  inputVariable="Service1_input" outputVariable="Service1_output" bpelx:invokeAsDetail="no">
+            <bpelx:toProperties>
+              <bpelx:toProperty name="probability">Task11:1</bpelx:toProperty>
+              <bpelx:toProperty name="paths">path5 path6 path8 path9 path11 path12 path16 path17 path19 path20 path22 path23</bpelx:toProperty>
+            </bpelx:toProperties>
+          </invoke>
+          <if name="If8">
+            <invoke name="Task13" partnerLink="ServiceProvider" portType="ns1:ServiceProviderProcess"
+                    operation="process" inputVariable="Service1_input" outputVariable="Service1_output"
+                    bpelx:invokeAsDetail="no">
+              <bpelx:toProperties>
+                <bpelx:toProperty name="probability">Task12:0.5</bpelx:toProperty>
+                <bpelx:toProperty name="paths">path6 path9 path12 path17 path20 path23</bpelx:toProperty>
+              </bpelx:toProperties>
+            </invoke>
+          </if>
+        </sequence>
+        <else>
+          <sequence name="Sequence9">
+            <reply name="replyOutput" partnerLink="tuberculosisprocess_client" portType="client:TuberculosisProcess"
+                   operation="process" variable="outputVariable"
+                   xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"/>
+            <exit name="Exit5"/>
+          </sequence>
+        </else>
+      </if>
+    </sequence>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="tuberculosisprocess_client" portType="client:TuberculosisProcess"
+           operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

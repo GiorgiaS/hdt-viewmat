@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:logging="http://docs.active-endpoints/wsdl/logging/2009/05/logging.wsdl" xmlns:ns1="http://docs.active-endpoints/wsdl/data-access/2010/04/data-access.wsdl" xmlns:ns2="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl" xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="PartsDataService" suppressJoinFailure="yes" targetNamespace="http://PartsDataService"
+              xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132923086951907745" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923086952907811" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923086952907811"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923086953107823" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923086953107823"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923086953307835" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923086953307835"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,25}" aei:absoluteSize="DIM {2645,532}" aei:name="Receive_Request" aei:objectId="132923086954007861" aei:type="PICK" bpmnElement="132923086954007861" isHorizontal="false">
+            <dc:Bounds height="532" width="2645" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1341,42}" aei:absoluteSize="DIM {84,13}" aei:anchor.location="7" aei:anchor.objectId="132923086954007861" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086954307865" aei:relative.location="LOC {-32,-23}" aei:text="Receive_Request" bpmnElement="132923086954007861label">
+               <dc:Bounds height="13" width="84" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086954307867" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086954307867">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {224,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086954307867" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086957007935" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086954307867label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {44,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086954407869" aei:type="SEQUENCE" bpmnElement="132923086954407869" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {54,155}" aei:absoluteSize="DIM {362,247}" aei:name="Create_Table" aei:objectId="132923086954607871" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086954607871" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {213,170}" aei:absoluteSize="DIM {65,13}" aei:anchor.location="11" aei:anchor.objectId="132923086954607871" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086955107889" aei:relative.location="LOC {-32,5}" aei:text="Create_Table" bpmnElement="132923086954607871label">
+               <dc:Bounds height="13" width="65" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {74,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Create_Table" aei:objectId="132923086956207911" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086956207911">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086956507919" aei:type="ASSIGN" bpmnElement="132923086956507919">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;CREATE TABLE SampleParts (&#10;&#10;   make      VARCHAR(32) NOT NULL,&#10;&#10;   model     VARCHAR(32) NOT NULL,&#10;&#10;   yr      VARCHAR(4)  NOT NULL,&#10;&#10;   category  VARCHAR(32) NOT NULL,&#10;&#10;   sku       VARCHAR(10) NOT NULL,&#10;&#10;   descr     VARCHAR(64) NOT NULL,&#10;&#10;   partCost   VARCHAR(10) NOT NULL,&#10;&#10;   PRIMARY KEY (sku)&#10;&#10;)&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086956607921" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086956607921"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {64,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086956207913" aei:type="Sequence" bpmnElement="132923086956207911wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {246,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086955307891" aei:type="CATCH_ALL" bpmnElement="132923086955307891" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {326,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086955307891" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086956107909" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086955307891label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {256,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086955507893" aei:type="SEQUENCE" bpmnElement="132923086955507893" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {266,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086955607895" aei:type="ASSIGN" bpmnElement="132923086955607895">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail while creating table: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001042615203065" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="133001042615203065"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {266,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086955807899" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086955807899">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086955907905" aei:type="ASSIGN" bpmnElement="132923086955907905">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ abx:getFaultCode() }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086956107907" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086956107907"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {200,427}" aei:absoluteSize="DIM {70,60}" aei:name="CreateTable-Reply" aei:objectId="132923086956707923" aei:type="REPLY" bpmnElement="132923086956707923">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {200,484}" aei:absoluteSize="DIM {90,13}" aei:anchor.location="1" aei:anchor.objectId="132923086956707923" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086956807925" aei:relative.location="LOC {-45,47}" aei:text="CreateTable-Reply" bpmnElement="132923086956707923label">
+               <dc:Bounds height="13" width="90" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086956907931" aei:type="ASSIGN" bpmnElement="132923086956907931">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:CreateTableResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;&#10;   &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;   &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;   &lt;types1:details&gt;{ data($dataAccessResponse) }&lt;/types1:details&gt;&#10;&#10;&lt;/types1:CreateTableResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086957007933" aei:toPart="CreateTableResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086957007933"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {470,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086957007937" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086957007937">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {669,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086957007937" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086959708005" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086957007937label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {489,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086957107939" aei:type="SEQUENCE" bpmnElement="132923086957107939" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {499,155}" aei:absoluteSize="DIM {362,247}" aei:name="Drop_Table" aei:objectId="132923086957307941" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086957307941" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {663,170}" aei:absoluteSize="DIM {55,13}" aei:anchor.location="11" aei:anchor.objectId="132923086957307941" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086957807959" aei:relative.location="LOC {-27,5}" aei:text="Drop_Table" bpmnElement="132923086957307941label">
+               <dc:Bounds height="13" width="55" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {519,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Drop_Table" aei:objectId="132923086958807981" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086958807981">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086959107989" aei:type="ASSIGN" bpmnElement="132923086959107989">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;DROP TABLE SampleParts&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086959207991" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086959207991"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {509,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086958907983" aei:type="Sequence" bpmnElement="132923086958807981wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {691,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086958007961" aei:type="CATCH_ALL" bpmnElement="132923086958007961" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {771,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086958007961" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086958807979" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086958007961label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {701,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086958107963" aei:type="SEQUENCE" bpmnElement="132923086958107963" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {711,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086958307965" aei:type="ASSIGN" bpmnElement="132923086958307965">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail while dropping table: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001045479903075" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="133001045479903075"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {711,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086958507969" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086958507969">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086958607975" aei:type="ASSIGN" bpmnElement="132923086958607975">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ abx:getFaultCode() }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086958707977" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086958707977"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {645,427}" aei:absoluteSize="DIM {70,60}" aei:name="DropTable-Reply" aei:objectId="132923086959307993" aei:type="REPLY" bpmnElement="132923086959307993">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {650,484}" aei:absoluteSize="DIM {80,13}" aei:anchor.location="1" aei:anchor.objectId="132923086959307993" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086959407995" aei:relative.location="LOC {-40,47}" aei:text="DropTable-Reply" bpmnElement="132923086959307993label">
+               <dc:Bounds height="13" width="80" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086959508001" aei:type="ASSIGN" bpmnElement="132923086959508001">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:DropTableResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;   &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;   &lt;types1:details&gt;{ data($dataAccessResponse) }&lt;/types1:details&gt;&#10;&lt;/types1:DropTableResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086959608003" aei:toPart="DropTableResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086959608003"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {915,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086959708007" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086959708007">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1114,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086959708007" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086962308075" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086959708007label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {934,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086959808009" aei:type="SEQUENCE" bpmnElement="132923086959808009" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {944,155}" aei:absoluteSize="DIM {362,247}" aei:name="Delete_Data" aei:objectId="132923086959908011" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086959908011" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1105,170}" aei:absoluteSize="DIM {60,13}" aei:anchor.location="11" aei:anchor.objectId="132923086959908011" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086960408029" aei:relative.location="LOC {-30,5}" aei:text="Delete_Data" bpmnElement="132923086959908011label">
+               <dc:Bounds height="13" width="60" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {964,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Delete_Data" aei:objectId="132923086961508051" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086961508051">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086961808059" aei:type="ASSIGN" bpmnElement="132923086961808059">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;{concat('DELETE FROM SampleParts ', $DeleteDataRequest/types1:whereClause/text()) }&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086961908061" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086961908061"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {954,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086961508053" aei:type="Sequence" bpmnElement="132923086961508051wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1136,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086960608031" aei:type="CATCH_ALL" bpmnElement="132923086960608031" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1216,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086960608031" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086961408049" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086960608031label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1146,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086960808033" aei:type="SEQUENCE" bpmnElement="132923086960808033" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1156,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086960908035" aei:type="ASSIGN" bpmnElement="132923086960908035">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail while deleting from table: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001048415703085" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="133001048415703085"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1156,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086961108039" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086961108039">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086961308045" aei:type="ASSIGN" bpmnElement="132923086961308045">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ abx:getFaultCode() }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086961408047" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086961408047"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1090,427}" aei:absoluteSize="DIM {70,60}" aei:name="DeleteData-Reply" aei:objectId="132923086962008063" aei:type="REPLY" bpmnElement="132923086962008063">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1093,484}" aei:absoluteSize="DIM {85,13}" aei:anchor.location="1" aei:anchor.objectId="132923086962008063" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086962108065" aei:relative.location="LOC {-42,47}" aei:text="DeleteData-Reply" bpmnElement="132923086962008063label">
+               <dc:Bounds height="13" width="85" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086962208071" aei:type="ASSIGN" bpmnElement="132923086962208071">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:DeleteDataResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;&#10;   &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;   &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;   &lt;types1:details&gt;{ data($dataAccessResponse) }&lt;/types1:details&gt;&#10;&#10;&lt;/types1:DeleteDataResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086962308073" aei:toPart="DeleteDataResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086962308073"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1360,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086962308077" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086962308077">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1559,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086962308077" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086965008145" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086962308077label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1379,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086962408079" aei:type="SEQUENCE" bpmnElement="132923086962408079" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1389,155}" aei:absoluteSize="DIM {362,247}" aei:name="Insert_Data" aei:objectId="132923086962508081" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086962508081" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1551,170}" aei:absoluteSize="DIM {58,13}" aei:anchor.location="11" aei:anchor.objectId="132923086962508081" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086963108099" aei:relative.location="LOC {-29,5}" aei:text="Insert_Data" bpmnElement="132923086962508081label">
+               <dc:Bounds height="13" width="58" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1409,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Insert_Data" aei:objectId="132923086964208121" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086964208121">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086964408129" aei:type="ASSIGN" bpmnElement="132923086964408129">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;{concat(&quot;INSERT INTO SampleParts VALUES ('&quot;, &#10;&#10;      $InsertDataRequest/types1:make/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:model/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:year/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:category/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:sku/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:desc/text(), &quot;','&quot;,&#10;&#10;      $InsertDataRequest/types1:partCost/text(), &quot;')&quot;) }&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086964508131" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086964508131"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1399,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086964208123" aei:type="Sequence" bpmnElement="132923086964208121wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1581,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086963308101" aei:type="CATCH_ALL" bpmnElement="132923086963308101" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1661,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086963308101" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086964108119" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086963308101label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1591,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086963508103" aei:type="SEQUENCE" bpmnElement="132923086963508103" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1601,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086963608105" aei:type="ASSIGN" bpmnElement="132923086963608105">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail while inserting data to the table: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001050522803091" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="133001050522803091"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1601,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086963808109" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086963808109">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086963908115" aei:type="ASSIGN" bpmnElement="132923086963908115">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ abx:getFaultCode() }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086964008117" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086964008117"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1535,427}" aei:absoluteSize="DIM {70,60}" aei:name="InsertData-Reply" aei:objectId="132923086964608133" aei:type="REPLY" bpmnElement="132923086964608133">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1539,484}" aei:absoluteSize="DIM {83,13}" aei:anchor.location="1" aei:anchor.objectId="132923086964608133" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086964808135" aei:relative.location="LOC {-41,47}" aei:text="InsertData-Reply" bpmnElement="132923086964608133label">
+               <dc:Bounds height="13" width="83" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086964808141" aei:type="ASSIGN" bpmnElement="132923086964808141">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:InsertDataResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;&#10;   &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;   &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;   &lt;types1:details&gt;{ data($dataAccessResponse) }&lt;/types1:details&gt;&#10;&#10;&lt;/types1:InsertDataResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086965008143" aei:toPart="InsertDataResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086965008143"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1805,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086965008147" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086965008147">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2004,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086965008147" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086967708215" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086965008147label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1824,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086965108149" aei:type="SEQUENCE" bpmnElement="132923086965108149" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1834,155}" aei:absoluteSize="DIM {362,247}" aei:name="Select_Data" aei:objectId="132923086965308151" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086965308151" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1996,170}" aei:absoluteSize="DIM {58,13}" aei:anchor.location="11" aei:anchor.objectId="132923086965308151" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086965808169" aei:relative.location="LOC {-29,5}" aei:text="Select_Data" bpmnElement="132923086965308151label">
+               <dc:Bounds height="13" width="58" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1854,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Select_Data" aei:objectId="132923086966908191" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086966908191">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086967208199" aei:type="ASSIGN" bpmnElement="132923086967208199">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;{concat('SELECT * FROM SampleParts ',$SelectDataRequest/types1:whereClause/text()) }&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086967308201" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086967308201"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1844,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086966908193" aei:type="Sequence" bpmnElement="132923086966908191wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2026,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086966008171" aei:type="CATCH_ALL" bpmnElement="132923086966008171" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2106,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086966008171" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086966808189" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086966008171label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2036,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086966208173" aei:type="SEQUENCE" bpmnElement="132923086966208173" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2046,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086966308175" aei:type="ASSIGN" bpmnElement="132923086966308175">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail while selecting from table: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001052428303097" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="133001052428303097"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2046,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086966508179" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086966508179">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086966708185" aei:type="ASSIGN" bpmnElement="132923086966708185">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ concat(&quot;fault code: &quot;, abx:getFaultCode(), &quot; faultString: &quot;, abx:getFaultString()) }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086966808187" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086966808187"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {1980,427}" aei:absoluteSize="DIM {70,60}" aei:name="SelectData-Reply" aei:objectId="132923086967308203" aei:type="REPLY" bpmnElement="132923086967308203">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {1984,484}" aei:absoluteSize="DIM {83,13}" aei:anchor.location="1" aei:anchor.objectId="132923086967308203" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086967508205" aei:relative.location="LOC {-41,47}" aei:text="SelectData-Reply" bpmnElement="132923086967308203label">
+               <dc:Bounds height="13" width="83" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086967508211" aei:type="ASSIGN" bpmnElement="132923086967508211">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:SelectDataResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   &lt;types1:ResponseInfo&gt;&#10;      &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;      &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;      &lt;types1:details&gt;{ data($dataAccessResponse) }&lt;/types1:details&gt;&#10;   &lt;/types1:ResponseInfo&gt;&#10;   {&#10;   for $part in $dataAccessResponse/ns3:row&#10;   return&#10;&#9;&lt;types1:part&gt;&#10;      &lt;types1:make&gt;{ $part/make/text() }&lt;/types1:make&gt;&#10;      &lt;types1:model&gt;{ $part/model/text() }&lt;/types1:model&gt;&#10;      &lt;types1:year&gt;{ $part/yr/text() }&lt;/types1:year&gt;&#10;      &lt;types1:category&gt;{ $part/category/text() }&lt;/types1:category&gt;&#10;      &lt;types1:sku&gt;{ $part/sku/text() }&lt;/types1:sku&gt;&#10;      &lt;types1:desc&gt;{ $part/descr/text() }&lt;/types1:desc&gt;&#10;      &lt;types1:partCost&gt;{ $part/partcost/text() }&lt;/types1:partCost&gt;&#10;&#9;&lt;/types1:part&gt;&#10;   }&#10;&lt;/types1:SelectDataResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086967608213" aei:toPart="SelectDataResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086967608213"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2250,85}" aei:absoluteSize="DIM {420,412}" aei:attachments="" aei:objectId="132923086967708217" aei:principal="" aei:type="ON_MESSAGE" bpmnElement="132923086967708217">
+            <dc:Bounds height="412" width="420" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2449,82}" aei:absoluteSize="DIM {42,13}" aei:anchor.location="0" aei:anchor.objectId="132923086967708217" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086970308285" aei:relative.location="LOC {-21,-13}" aei:text="Message" bpmnElement="132923086967708217label">
+               <dc:Bounds height="13" width="42" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2269,145}" aei:absoluteSize="DIM {382,352}" aei:objectId="132923086967808219" aei:type="SEQUENCE" bpmnElement="132923086967808219" isHorizontal="false">
+            <dc:Bounds height="357" width="387" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2279,155}" aei:absoluteSize="DIM {362,247}" aei:name="Update_Data" aei:objectId="132923086967908221" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132923086967908221" isHorizontal="false">
+            <dc:Bounds height="247" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2438,170}" aei:absoluteSize="DIM {64,13}" aei:anchor.location="11" aei:anchor.objectId="132923086967908221" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086968508239" aei:relative.location="LOC {-32,5}" aei:text="Update_Data" bpmnElement="132923086967908221label">
+               <dc:Bounds height="13" width="64" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2299,175}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Update_Data" aei:objectId="132923086969508261" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086969508261">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086969808269" aei:type="ASSIGN" bpmnElement="132923086969808269">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:dataAccessRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&gt;&#10;&#10;   &lt;ns:sqlStatement includeMetadata=&quot;true&quot; maxRows=&quot;100&quot; maxWaitSeconds=&quot;120&quot; columnCase=&quot;lowercase&quot;&gt;&#10;&#10;      &lt;ns:statement&gt;{concat(&quot;UPDATE SampleParts SET make='&quot;, &#10;&#10;      $UpdateDataRequest/types1:make/text(), &quot;',model='&quot;,&#10;&#10;      $UpdateDataRequest/types1:model/text(), &quot;',yr='&quot;,&#10;&#10;      $UpdateDataRequest/types1:year/text(), &quot;',category='&quot;,&#10;&#10;      $UpdateDataRequest/types1:category/text(), &quot;',sku='&quot;,&#10;&#10;      $UpdateDataRequest/types1:sku/text(), &quot;',descr='&quot;,&#10;&#10;      $UpdateDataRequest/types1:desc/text(), &quot;',partCost='&quot;,&#10;&#10;      $UpdateDataRequest/types1:partCost/text(), &quot;' WHERE SKU='&quot;,&#10;&#10;      $UpdateDataRequest/types1:sku/text(), &quot;'&quot; ) }&lt;/ns:statement&gt;&#10;&#10;   &lt;/ns:sqlStatement&gt;&#10;&#10;&lt;/ns:dataAccessRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086969908271" aei:toPart="dataAccessPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086969908271"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2289,165}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086969508263" aei:type="Sequence" bpmnElement="132923086969508261wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2471,165}" aei:absoluteSize="DIM {165,231}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132923086968708241" aei:type="CATCH_ALL" bpmnElement="132923086968708241" isHorizontal="false">
+            <dc:Bounds height="231" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2551,175}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132923086968708241" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086969408259" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132923086968708241label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2481,225}" aei:absoluteSize="DIM {145,151}" aei:objectId="132923086968808243" aei:type="SEQUENCE" bpmnElement="132923086968808243" isHorizontal="false">
+            <dc:Bounds height="156" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2491,235}" aei:absoluteSize="DIM {125,53}" aei:objectId="132923086968908245" aei:type="ASSIGN" bpmnElement="132923086968908245">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns3:dataAccessResponse xmlns:ns3=&quot;http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd&quot;&#10;                        sqlcode=&quot;-1&quot;&#10;                        sqlstate=&quot;{ concat(&quot;fault code: &quot;, abx:getFaultCode()) } &quot;&#10;                        statementId=&quot;&quot;&gt;&#10;    &lt;ns3:errorMessage&gt;{ concat(&quot;fault detail: &quot;,  abx:getFaultDetail()) }&lt;/ns3:errorMessage&gt;&#10;&lt;/ns3:dataAccessResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086969108247" aei:toVariable="dataAccessResponse" aei:type="ASSIGN_COPY" bpmnElement="132923086969108247"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2491,313}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132923086969108249" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923086969108249">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086969308255" aei:type="ASSIGN" bpmnElement="132923086969308255">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;{ concat(&quot;fault code: &quot;, abx:getFaultCode(), &quot; faultString: &quot;, abx:getFaultString()) }&lt;/ns:message&gt;&#10;   &lt;!--Optional:--&gt;&lt;ns:level&gt;Error&lt;/ns:level&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086969408257" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086969408257"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {2425,427}" aei:absoluteSize="DIM {70,60}" aei:name="UpdateData-Reply" aei:objectId="132923086969908273" aei:type="REPLY" bpmnElement="132923086969908273">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {2426,484}" aei:absoluteSize="DIM {89,13}" aei:anchor.location="1" aei:anchor.objectId="132923086969908273" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923086970108275" aei:relative.location="LOC {-44,47}" aei:text="UpdateData-Reply" bpmnElement="132923086969908273label">
+               <dc:Bounds height="13" width="89" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923086970108281" aei:type="ASSIGN" bpmnElement="132923086970108281">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:UpdateDataResponse xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;&#10;   &lt;types1:sqlcode&gt;0&lt;/types1:sqlcode&gt;&#10;   &lt;types1:sqlstate&gt;0&lt;/types1:sqlstate&gt;&#10;   &lt;types1:details&gt;{  data($dataAccessResponse) }&lt;/types1:details&gt;&#10;&#10;&lt;/types1:UpdateDataResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923086970208283" aei:toPart="UpdateDataResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923086970208283"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {2665,552}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923086954107863" aei:type="Sequence" bpmnElement="132923086954007861wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="552" width="2665" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints/wsdl/data-access/2010/04/data-access.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/PartsDataService.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/PartsDataService.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" namespace="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints/wsdl/logging/2009/05/logging.wsdl"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132923086952907811" name="Provider" partnerLinkType="ns1:dataAccessPLT" partnerRole="sender"/>
+      <bpel:partnerLink aei:id="132923086953107823" myRole="process" name="PartsDataServicePL" partnerLinkType="ns2:PartsDataServicePL"/>
+      <bpel:partnerLink aei:id="132923086953307835" name="LoggingService" partnerLinkType="logging:loggingPLT" partnerRole="sender"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="types1:CreateTableRequest" name="CreateTableRequest"/>
+      <bpel:variable element="types1:DropTableRequest" name="DropTableRequest"/>
+      <bpel:variable element="types1:DeleteDataRequest" name="DeleteDataRequest"/>
+      <bpel:variable element="types1:InsertDataRequest" name="InsertDataRequest"/>
+      <bpel:variable element="types1:SelectDataRequest" name="SelectDataRequest"/>
+      <bpel:variable element="types1:UpdateDataRequest" name="UpdateDataRequest"/>
+      <bpel:variable element="ns3:dataAccessResponse" name="dataAccessResponse"/>
+   </bpel:variables>
+   <bpel:pick aei:id="132923086954007861" createInstance="yes" name="Receive_Request">
+      <bpel:onMessage aei:id="132923086954307867" operation="CreateTable" partnerLink="PartsDataServicePL" variable="CreateTableRequest">
+         <bpel:sequence aei:id="132923086954407869">
+            <bpel:scope aei:id="132923086954607871" name="Create_Table">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086955307891">
+                     <bpel:sequence aei:id="132923086955507893">
+                        <bpel:assign aei:id="132923086955607895">
+                           <bpel:copy aei:id="133001042615203065">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail while creating table: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086955907905">
+                                 <bpel:copy aei:id="132923086956107907">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ abx:getFaultCode() }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086955807899" inputVariable="parameters" name="Task2" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task1:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Create_Table">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086956507919">
+                        <bpel:copy aei:id="132923086956607921">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>CREATE TABLE SampleParts (
+
+   make      VARCHAR(32) NOT NULL,
+
+   model     VARCHAR(32) NOT NULL,
+
+   yr      VARCHAR(4)  NOT NULL,
+
+   category  VARCHAR(32) NOT NULL,
+
+   sku       VARCHAR(10) NOT NULL,
+
+   descr     VARCHAR(64) NOT NULL,
+
+   partCost   VARCHAR(10) NOT NULL,
+
+   PRIMARY KEY (sku)
+
+)</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086956207911" inputVariable="parameters" name="Task1" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="CreateTable-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:CreateTableResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086956907931">
+                     <bpel:copy aei:id="132923086957007933">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:CreateTableResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+
+   <types1:sqlcode>0</types1:sqlcode>
+   <types1:sqlstate>0</types1:sqlstate>
+   <types1:details>{ data($dataAccessResponse) }</types1:details>
+
+</types1:CreateTableResponse>]]></bpel:from>
+                        <bpel:to part="CreateTableResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086956707923" name="CreateTable-Reply" operation="CreateTable" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+      <bpel:onMessage aei:id="132923086957007937" operation="DropTable" partnerLink="PartsDataServicePL" variable="DropTableRequest">
+         <bpel:sequence aei:id="132923086957107939">
+            <bpel:scope aei:id="132923086957307941" name="Drop_Table">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086958007961">
+                     <bpel:sequence aei:id="132923086958107963">
+                        <bpel:assign aei:id="132923086958307965">
+                           <bpel:copy aei:id="133001045479903075">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail while dropping table: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086958607975">
+                                 <bpel:copy aei:id="132923086958707977">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ abx:getFaultCode() }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086958507969" inputVariable="parameters" name="Task4" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task3:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path4</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Drop_Table">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086959107989">
+                        <bpel:copy aei:id="132923086959207991">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>DROP TABLE SampleParts</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086958807981" inputVariable="parameters" name="Task3" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path3 path4</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="DropTable-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:DropTableResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086959508001">
+                     <bpel:copy aei:id="132923086959608003">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:DropTableResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   <types1:sqlcode>0</types1:sqlcode>
+   <types1:sqlstate>0</types1:sqlstate>
+   <types1:details>{ data($dataAccessResponse) }</types1:details>
+</types1:DropTableResponse>]]></bpel:from>
+                        <bpel:to part="DropTableResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086959307993" name="DropTable-Reply" operation="DropTable" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+      <bpel:onMessage aei:id="132923086959708007" operation="DeleteData" partnerLink="PartsDataServicePL" variable="DeleteDataRequest">
+         <bpel:sequence aei:id="132923086959808009">
+            <bpel:scope aei:id="132923086959908011" name="Delete_Data">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086960608031">
+                     <bpel:sequence aei:id="132923086960808033">
+                        <bpel:assign aei:id="132923086960908035">
+                           <bpel:copy aei:id="133001048415703085">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail while deleting from table: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086961308045">
+                                 <bpel:copy aei:id="132923086961408047">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ abx:getFaultCode() }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086961108039" inputVariable="parameters" name="Task6" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task5:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path6</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Delete_Data">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086961808059">
+                        <bpel:copy aei:id="132923086961908061">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>{concat('DELETE FROM SampleParts ', $DeleteDataRequest/types1:whereClause/text()) }</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086961508051" inputVariable="parameters" name="Task5" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path5 path6</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="DeleteData-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:DeleteDataResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086962208071">
+                     <bpel:copy aei:id="132923086962308073">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:DeleteDataResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+
+   <types1:sqlcode>0</types1:sqlcode>
+   <types1:sqlstate>0</types1:sqlstate>
+   <types1:details>{ data($dataAccessResponse) }</types1:details>
+
+</types1:DeleteDataResponse>]]></bpel:from>
+                        <bpel:to part="DeleteDataResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086962008063" name="DeleteData-Reply" operation="DeleteData" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+      <bpel:onMessage aei:id="132923086962308077" operation="InsertData" partnerLink="PartsDataServicePL" variable="InsertDataRequest">
+         <bpel:sequence aei:id="132923086962408079">
+            <bpel:scope aei:id="132923086962508081" name="Insert_Data">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086963308101">
+                     <bpel:sequence aei:id="132923086963508103">
+                        <bpel:assign aei:id="132923086963608105">
+                           <bpel:copy aei:id="133001050522803091">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail while inserting data to the table: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086963908115">
+                                 <bpel:copy aei:id="132923086964008117">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ abx:getFaultCode() }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086963808109" inputVariable="parameters" name="Task8" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task7:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path8</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Insert_Data">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086964408129">
+                        <bpel:copy aei:id="132923086964508131">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>{concat("INSERT INTO SampleParts VALUES ('", 
+
+      $InsertDataRequest/types1:make/text(), "','",
+
+      $InsertDataRequest/types1:model/text(), "','",
+
+      $InsertDataRequest/types1:year/text(), "','",
+
+      $InsertDataRequest/types1:category/text(), "','",
+
+      $InsertDataRequest/types1:sku/text(), "','",
+
+      $InsertDataRequest/types1:desc/text(), "','",
+
+      $InsertDataRequest/types1:partCost/text(), "')") }</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086964208121" inputVariable="parameters" name="Task7" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path7 path8</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="InsertData-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:InsertDataResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086964808141">
+                     <bpel:copy aei:id="132923086965008143">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:InsertDataResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+
+   <types1:sqlcode>0</types1:sqlcode>
+   <types1:sqlstate>0</types1:sqlstate>
+   <types1:details>{ data($dataAccessResponse) }</types1:details>
+
+</types1:InsertDataResponse>]]></bpel:from>
+                        <bpel:to part="InsertDataResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086964608133" name="InsertData-Reply" operation="InsertData" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+      <bpel:onMessage aei:id="132923086965008147" operation="SelectData" partnerLink="PartsDataServicePL" variable="SelectDataRequest">
+         <bpel:sequence aei:id="132923086965108149">
+            <bpel:scope aei:id="132923086965308151" name="Select_Data">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086966008171">
+                     <bpel:sequence aei:id="132923086966208173">
+                        <bpel:assign aei:id="132923086966308175">
+                           <bpel:copy aei:id="133001052428303097">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail while selecting from table: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086966708185">
+                                 <bpel:copy aei:id="132923086966808187">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ concat("fault code: ", abx:getFaultCode(), " faultString: ", abx:getFaultString()) }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086966508179" inputVariable="parameters" name="Task10" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task9:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path10</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Select_Data">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086967208199">
+                        <bpel:copy aei:id="132923086967308201">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>{concat('SELECT * FROM SampleParts ',$SelectDataRequest/types1:whereClause/text()) }</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086966908191" inputVariable="parameters" name="Task9" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path9 path10</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="SelectData-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:SelectDataResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086967508211">
+                     <bpel:copy aei:id="132923086967608213">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:SelectDataResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   <types1:ResponseInfo>
+      <types1:sqlcode>0</types1:sqlcode>
+      <types1:sqlstate>0</types1:sqlstate>
+      <types1:details>{ data($dataAccessResponse) }</types1:details>
+   </types1:ResponseInfo>
+   {
+   for $part in $dataAccessResponse/ns3:row
+   return
+	<types1:part>
+      <types1:make>{ $part/make/text() }</types1:make>
+      <types1:model>{ $part/model/text() }</types1:model>
+      <types1:year>{ $part/yr/text() }</types1:year>
+      <types1:category>{ $part/category/text() }</types1:category>
+      <types1:sku>{ $part/sku/text() }</types1:sku>
+      <types1:desc>{ $part/descr/text() }</types1:desc>
+      <types1:partCost>{ $part/partcost/text() }</types1:partCost>
+	</types1:part>
+   }
+</types1:SelectDataResponse>]]></bpel:from>
+                        <bpel:to part="SelectDataResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086967308203" name="SelectData-Reply" operation="SelectData" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+      <bpel:onMessage aei:id="132923086967708217" operation="UpdateData" partnerLink="PartsDataServicePL" variable="UpdateDataRequest">
+         <bpel:sequence aei:id="132923086967808219">
+            <bpel:scope aei:id="132923086967908221" name="Update_Data">
+               <bpel:faultHandlers>
+                  <bpel:catchAll aei:id="132923086968708241">
+                     <bpel:sequence aei:id="132923086968808243">
+                        <bpel:assign aei:id="132923086968908245">
+                           <bpel:copy aei:id="132923086969108247">
+                              <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns3:dataAccessResponse xmlns:ns3="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd"
+                        sqlcode="-1"
+                        sqlstate="{ concat("fault code: ", abx:getFaultCode()) } "
+                        statementId="">
+    <ns3:errorMessage>{ concat("fault detail: ",  abx:getFaultDetail()) }</ns3:errorMessage>
+</ns3:dataAccessResponse>]]></bpel:from>
+                              <bpel:to variable="dataAccessResponse"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:scope aei:implicit="true" name="send">
+                           <bpel:variables>
+                              <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                           </bpel:variables>
+                           <bpel:sequence>
+                              <bpel:assign aei:id="132923086969308255">
+                                 <bpel:copy aei:id="132923086969408257">
+                                    <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>{ concat("fault code: ", abx:getFaultCode(), " faultString: ", abx:getFaultString()) }</ns:message>
+   <!--Optional:--><ns:level>Error</ns:level>
+</ns:logWriteMessage>]]></bpel:from>
+                                    <bpel:to part="logPart" variable="parameters"/>
+                                 </bpel:copy>
+                              </bpel:assign>
+                              <bpel:invoke aei:id="132923086969108249" inputVariable="parameters" name="Task12" operation="send" partnerLink="LoggingService">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task11:0.5</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path12</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                           </bpel:sequence>
+                        </bpel:scope>
+                     </bpel:sequence>
+                  </bpel:catchAll>
+               </bpel:faultHandlers>
+               <bpel:scope aei:implicit="true" name="Update_Data">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:dataAccessMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132923086969808269">
+                        <bpel:copy aei:id="132923086969908271">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:dataAccessRequest xmlns:ns="http://schemas.active-endpoints.com/data-access/2010/04/data-access.xsd">
+
+   <ns:sqlStatement includeMetadata="true" maxRows="100" maxWaitSeconds="120" columnCase="lowercase">
+
+      <ns:statement>{concat("UPDATE SampleParts SET make='", 
+
+      $UpdateDataRequest/types1:make/text(), "',model='",
+
+      $UpdateDataRequest/types1:model/text(), "',yr='",
+
+      $UpdateDataRequest/types1:year/text(), "',category='",
+
+      $UpdateDataRequest/types1:category/text(), "',sku='",
+
+      $UpdateDataRequest/types1:sku/text(), "',descr='",
+
+      $UpdateDataRequest/types1:desc/text(), "',partCost='",
+
+      $UpdateDataRequest/types1:partCost/text(), "' WHERE SKU='",
+
+      $UpdateDataRequest/types1:sku/text(), "'" ) }</ns:statement>
+
+   </ns:sqlStatement>
+
+</ns:dataAccessRequest>]]></bpel:from>
+                           <bpel:to part="dataAccessPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132923086969508261" inputVariable="parameters" name="Task11" operation="execSQL" outputVariable="dataAccessResponse" partnerLink="Provider">
+                                <bpelx:toProperties>
+                                    <bpelx:toProperty name="probability">Task0:0.1667</bpelx:toProperty>
+                                    <bpelx:toProperty name="paths">path11 path12</bpelx:toProperty>
+                                </bpelx:toProperties>
+                            </bpel:invoke>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:scope>
+            <bpel:scope aei:implicit="true" name="UpdateData-Reply">
+               <bpel:variables>
+                  <bpel:variable messageType="ns2:UpdateDataResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132923086970108281">
+                     <bpel:copy aei:id="132923086970208283">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:UpdateDataResponse xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+
+   <types1:sqlcode>0</types1:sqlcode>
+   <types1:sqlstate>0</types1:sqlstate>
+   <types1:details>{  data($dataAccessResponse) }</types1:details>
+
+</types1:UpdateDataResponse>]]></bpel:from>
+                        <bpel:to part="UpdateDataResponse" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="132923086969908273" name="UpdateData-Reply" operation="UpdateData" partnerLink="PartsDataServicePL" variable="parameters"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:sequence>
+      </bpel:onMessage>
+   </bpel:pick>
+</bpel:process>

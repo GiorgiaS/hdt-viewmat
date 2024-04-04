@@ -1,0 +1,1017 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:process xmlns:ns3="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+             xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+             xmlns:crmws="http://docs.active-endpoints.com/sample/wsdl/loanCRM/2008/02/loanCRM.wsdl"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:loanprocess="http://docs.active-endpoints.com/sample/wsdl/loanprocess/2008/02/loanProcess.wsdl"
+             xmlns:htd="http://www.example.org/WS-HT"
+             xmlns:loanhuman="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApprovalHuman.wsdl"
+             xmlns:b4p="http://www.example.org/BPEL4People"
+             xmlns:approvews="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApproval.wsdl"
+             xmlns:loan="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd"
+             xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable"
+             xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling"
+             xmlns:ns2="http://loanProcessHuman"
+             xmlns:ns1="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+             xmlns:ns4="http://loanProcessHuman/public"
+             xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:loanmsg="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl"
+             xmlns:abx="http://www.activebpel.org/bpel/extension"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:riskws="http://docs.active-endpoints.com/sample/wsdl/riskAssessment/2008/02/riskAssessment.wsdl"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             aei:editStyle="BPMN"
+             ext1:linksAreTransitions="yes"
+             ext:createTargetXPath="yes"
+             ext:disableSelectionFailure="yes"
+             name="LoanProcessWithSwimlanes"
+             suppressJoinFailure="yes"
+             targetNamespace="http://loanProcess">
+   <ns3:documentation>This sample Loan Process reads an XML document from the resource catalog, which controls &#xD;
+branching logic within the process.  If more than one loan over the threshold is requested within &#xD;
+an hour, a manager is assigned a task automatically to review the threshold for loan amounts which &#xD;
+can be automatically processed by the system.</ns3:documentation>
+   <b4p:humanInteractions>
+      <htd:logicalPeopleGroups>
+         <htd:logicalPeopleGroup name="loanmgrs"/>
+         <htd:logicalPeopleGroup name="loanreps"/>
+      </htd:logicalPeopleGroups>
+      <htd:tasks>
+         <htd:task name="approveTask">
+            <htd:interface xmlns:ns="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApproval.wsdl"
+                           operation="approve"
+                           portType="ns:LoanApproval"/>
+            <htd:priority>3</htd:priority>
+            <htd:peopleAssignments>
+               <htd:potentialOwners>
+                  <htd:from logicalPeopleGroup="loanreps"/>
+               </htd:potentialOwners>
+               <htd:taskInitiator>
+                  <htd:from>
+                     <htd:literal>
+                        <ht:organizationalEntity xmlns:ht="http://www.example.org/WS-HT">
+	                                <ht:users>
+		                                  <ht:user>Loan Process</ht:user>
+	                                </ht:users>
+                              </ht:organizationalEntity>
+                     </htd:literal>
+                  </htd:from>
+               </htd:taskInitiator>
+               <htd:businessAdministrators>
+                  <htd:from logicalPeopleGroup="loanmgrs"/>
+               </htd:businessAdministrators>
+            </htd:peopleAssignments>
+            <htd:presentationElements>
+               <htd:name>Loan for review</htd:name>
+               <htd:presentationParameters>
+                  <htd:presentationParameter name="loansummary" type="xsd:string">concat( htd:getInput('Document')/loan:lastName , ", ", htd:getInput('Document')/loan:firstName , "; $" ,htd:getInput('Document')/loan:amountRequested )</htd:presentationParameter>
+                  <htd:presentationParameter name="lastName" type="xsd:string">htd:getInput('Document')/loan:lastName</htd:presentationParameter>
+                  <htd:presentationParameter name="loanAmount" type="xsd:integer">htd:getInput('Document')/loan:amountRequested</htd:presentationParameter>
+                  <htd:presentationParameter name="loanDescription" type="xsd:string">htd:getInput('Document')/loan:loanDescription</htd:presentationParameter>
+                  <htd:presentationParameter name="loanType" type="xsd:string">htd:getInput('Document')/loan:loanType</htd:presentationParameter>
+                  <htd:presentationParameter name="firstName" type="xsd:string">htd:getInput('Document')/loan:firstName</htd:presentationParameter>
+               </htd:presentationParameters>
+               <htd:subject>Please look at this loan and approve or decline it. (for {$loansummary})</htd:subject>
+            </htd:presentationElements>
+            <htd:renderings>
+               <htd:rendering xmlns:ns="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                              type="ns:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                                             developmentMode="false">
+                           <avcform:location>project:/CustomerService/form/task/approveTask.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </htd:rendering>
+            </htd:renderings>
+            <htd:deadlines>
+               <htd:startDeadline>
+                  <htd:for expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">'PT120M'</htd:for>
+                  <htd:escalation name="TwoHourReminder">
+                     <htd:notification name="ReminderToReps">
+                        <htd:interface xmlns:ns="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApprovalHuman.wsdl"
+                                       operation="remind"
+                                       portType="ns:LoanApprovalPeople"/>
+                        <htd:priority>2</htd:priority>
+                        <htd:peopleAssignments>
+                           <htd:businessAdministrators>
+                              <htd:from logicalPeopleGroup="loanmgrs"/>
+                           </htd:businessAdministrators>
+                           <htd:recipients>
+                              <htd:from logicalPeopleGroup="loanreps"/>
+                           </htd:recipients>
+                        </htd:peopleAssignments>
+                        <htd:presentationElements>
+                           <htd:name>Unclaimed Task reminder</htd:name>
+                           <htd:presentationParameters>
+                              <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="firstname" type="ns:string">htd:getInput('Document', 'approveTask')/loan:firstName</htd:presentationParameter>
+                              <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="lastname" type="ns:string">htd:getInput('Document', 'approveTask')/loan:lastName</htd:presentationParameter>
+                              <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="amount" type="ns:string">htd:getInput('Document', 'approveTask')/loan:amountRequested</htd:presentationParameter>
+                              <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="priority" type="ns:string">htd:getTaskPriority()</htd:presentationParameter>
+                           </htd:presentationParameters>
+                           <htd:subject>There is a loan task waiting to be claimed. ({$lastname}, {$firstname}; ${$amount} priority {$priority})</htd:subject>
+                           <htd:description>A loan review has been unclaimed for 2 hours. Please go to your inbox and claim if appropriate.</htd:description>
+                        </htd:presentationElements>
+                        <htd:renderings>
+                           <htd:rendering xmlns:ns="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                                          type="ns:AjaxForm">
+                              <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                                                         developmentMode="false">
+                                       <avcform:location>project:/CustomerService/form/task/ReminderToReps.html</avcform:location>
+                                    </avcform:ajaxFormRendering>
+                           </htd:rendering>
+                        </htd:renderings>
+                     </htd:notification>
+                  </htd:escalation>
+               </htd:startDeadline>
+               <htd:completionDeadline>
+                  <htd:for expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">'PT130M'</htd:for>
+                  <htd:escalation name="EscalateIfNotActedUpon">
+                     <htd:notification name="NotifyReassignToManager">
+                        <htd:interface xmlns:ns="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApprovalHuman.wsdl"
+                                       operation="remind"
+                                       portType="ns:LoanApprovalPeople"/>
+                        <htd:priority>1</htd:priority>
+                        <htd:peopleAssignments>
+                           <htd:businessAdministrators>
+                              <htd:from logicalPeopleGroup="loanmgrs"/>
+                           </htd:businessAdministrators>
+                           <htd:recipients>
+                              <htd:from logicalPeopleGroup="loanreps"/>
+                           </htd:recipients>
+                        </htd:peopleAssignments>
+                        <htd:presentationElements>
+                           <htd:name>Escalated To Manager</htd:name>
+                           <htd:subject>This loan is being reassigned to loanmgr1 for review</htd:subject>
+                           <htd:description>Needs to be completed within 10 minutes!</htd:description>
+                        </htd:presentationElements>
+                        <htd:renderings>
+                           <htd:rendering xmlns:ns="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                                          type="ns:AjaxForm">
+                              <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"
+                                                         developmentMode="false">
+                                       <avcform:location>project:/CustomerService/form/task/NotifyReassignToManager.html</avcform:location>
+                                    </avcform:ajaxFormRendering>
+                           </htd:rendering>
+                        </htd:renderings>
+                     </htd:notification>
+                  </htd:escalation>
+                  <htd:escalation name="ReassignToMgr1">
+                     <htd:reassignment>
+                        <htd:potentialOwners>
+                           <htd:from>
+                              <htd:literal>
+                                 <ht:organizationalEntity xmlns:ht="http://www.example.org/WS-HT">
+	                                         <ht:users>
+		                                           <ht:user>loanmgr1</ht:user>
+	                                         </ht:users>
+                                       </ht:organizationalEntity>
+                              </htd:literal>
+                           </htd:from>
+                        </htd:potentialOwners>
+                     </htd:reassignment>
+                  </htd:escalation>
+               </htd:completionDeadline>
+            </htd:deadlines>
+         </htd:task>
+      </htd:tasks>
+      <htd:notifications/>
+   </b4p:humanInteractions>
+   <bpmndi:BPMNDiagram aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false"
+                       aei:modelVersion="4"
+                       aei:objectId="131966216506401433"
+                       aei:processInitiatorSim=""
+                       isHorizontal="true">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:text="LoanProcess" aei:type="SWIMLANE_CONTAINER"
+                           bpmnElement="131966216506401433"/>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {255,255,255}" aei:parentElement="process"
+                           aei:text="Rules"
+                           aei:type="SWIMLANE"
+                           bpmnElement="130711179562918987">
+            <dc:Bounds x="0" y="215"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {255,255,255}" aei:parentElement="process"
+                           aei:text="Approver"
+                           aei:type="SWIMLANE"
+                           bpmnElement="130711181784118989">
+            <dc:Bounds x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {119,215,255}" aei:parentElement="process"
+                           aei:text="Customer"
+                           aei:type="SWIMLANE"
+                           bpmnElement="130711187820819141">
+            <dc:Bounds x="0" y="100"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:objectId="130711163605018237"
+                           aei:type="PARTNER_LINK"
+                           aei:visible="false,false,false,false,false,"
+                           bpmnElement="130711163605018237"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:objectId="130711163605018249"
+                           aei:type="PARTNER_LINK"
+                           aei:visible="false,false,false,false,false,"
+                           bpmnElement="130711163605018249"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:objectId="130711163605018261"
+                           aei:type="PARTNER_LINK"
+                           aei:visible="false,false,false,false,false,"
+                           bpmnElement="130711163605018261"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {65,525}" aei:absoluteSize="DIM {205,39}"
+                           aei:font="FONT {Tahoma,16,1}"
+                           aei:fontColor="RGB {128,128,128}"
+                           aei:objectId="128274453015107131"
+                           aei:parentElement="process"
+                           aei:text="Loan Process"
+                           aei:type="LABEL"
+                           bpmnElement="128274453015107131">
+            <dc:Bounds height="39" width="205" x="55" y="515"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {156,306}" aei:absoluteSize="DIM {70,60}"
+                           aei:objectId="132674324458207333"
+                           aei:parentElement="process"
+                           aei:type="DATAOBJECT"
+                           bpmnElement="132674324458207333">
+            <dc:Bounds height="-1" width="-1" x="146" y="296"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {172,363}" aei:absoluteSize="DIM {58,13}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="132674324458207333"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="132674324547307335"
+                              aei:relative.location="LOC {-29,47}"
+                              aei:text="Data Object"
+                              bpmnElement="132674324458207333label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:end="4" aei:linkSimState="0" aei:objectId="132674324967007407"
+                          aei:showLabel="false"
+                          aei:sourceTerminal="SV"
+                          bpmnElement="132674324967007407"
+                          sourceElement="132674324458207333"
+                          targetElement="L2"/>
+         <bpmndi:BPMNShape aei:objectId="130711185289119041" aei:type="FLOW"
+                           bpmnElement="130711185289119041">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {90,125}" aei:absoluteSize="DIM {240,80}"
+                           aei:objectId="130711185301219049"
+                           aei:type="SEQUENCE"
+                           bpmnElement="130711185301219049"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="80" y="115"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="130711185276118993" bpmnElement="130711185276118993"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {100,135}" aei:absoluteSize="DIM {70,60}"
+                           aei:attachments=""
+                           aei:name="Receive Application"
+                           aei:objectId="128257882650100185"
+                           aei:principal=""
+                           aei:type="RECEIVE"
+                           bpmnElement="128257882650100185">
+            <dc:Bounds height="60" width="70" x="75" y="354"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {67,124}" aei:absoluteSize="DIM {104,15}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="128257882650100185"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501657"
+                              aei:relative.location="LOC {-78,-21}"
+                              aei:sizeToFit="true"
+                              aei:text="Receive Application"
+                              bpmnElement="128257882650100185label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {195,139}" aei:absoluteSize="DIM {125,53}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockWhite.png"
+                           aei:name="Get Cut Off Amount"
+                           aei:objectId="128257882650400189"
+                           aei:type="ASSIGN"
+                           bpmnElement="128257882650400189">
+            <dc:Bounds height="53" width="125" x="170" y="358"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="abx:getCatalogResource(&#34;project:/CustomerService/runtimeParameters/approvalParameters.xml&#34;)"
+                           aei:fromType="3"
+                           aei:objectId="130711518129731883"
+                           aei:toVariable="approvalParams"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="130711518129731883"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {460,140}" aei:absoluteSize="DIM {240,80}"
+                           aei:objectId="130711185301219051"
+                           aei:type="SEQUENCE"
+                           bpmnElement="130711185301219051"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="450" y="130"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {470,154}" aei:absoluteSize="DIM {125,53}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockYellow.png"
+                           aei:bpmNotation="SendTask"
+                           aei:name="Notify Customer Service Of Decision"
+                           aei:objectId="128257882655200221"
+                           aei:subprocessPath=""
+                           aei:type="INVOKE"
+                           bpmnElement="128257882655200221">
+            <dc:Bounds height="53" width="125" x="834" y="193"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {620,150}" aei:absoluteSize="DIM {70,60}"
+                           aei:backgroundColor="RGB {226,226,226}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:borderColor="RGB {0,0,255}"
+                           aei:bpmNotation="NoneEvent"
+                           aei:collapsed="false"
+                           aei:drawBorder="false"
+                           aei:font="${system.default}"
+                           aei:fontColor="RGB {0,0,0}"
+                           aei:imageDisplay="true"
+                           aei:imageTextGap="4"
+                           aei:joinCondition=""
+                           aei:joinConditionLang=""
+                           aei:name=""
+                           aei:objectId="128257882655300223"
+                           aei:scaleImage="false"
+                           aei:sizeToFit="true"
+                           aei:text=""
+                           aei:textAlignment="1"
+                           aei:textFormat="1"
+                           aei:textPlacement="16"
+                           aei:transparent="true"
+                           aei:type="NONE_EVENT"
+                           bpmnElement="128257882655300223">
+            <dc:Bounds height="-1" width="-1" x="984" y="189"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {185,310}" aei:absoluteSize="DIM {579,267}"
+                           aei:objectId="130711185301219053"
+                           aei:type="SEQUENCE"
+                           bpmnElement="130711185301219053"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="175" y="300"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="130711501454829011" aei:sourceTerminal="SV"
+                          bpmnElement="130711501454829011">
+            <di:waypoint weight="0.5" x="830" y="443"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {195,417}" aei:absoluteSize="DIM {125,53}"
+                           aei:attachments=""
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockYellow.png"
+                           aei:bpmNotation="RuleTask"
+                           aei:name="Assess Risk"
+                           aei:objectId="128257882650500193"
+                           aei:subprocessPath=""
+                           aei:type="INVOKE"
+                           bpmnElement="128257882650500193">
+            <dc:Bounds height="53" width="125" x="320" y="358"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {345,413}" aei:absoluteSize="DIM {70,60}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:gatewayType="1"
+                           aei:name="Large loan or Medium Risk Customer"
+                           aei:objectId="130711185276118995"
+                           aei:parallelImageLocation="icons/bpmn/activity/large/paletteExclusiveGatewayLarge.png"
+                           aei:type="GATEWAY"
+                           bpmnElement="130711185276118995">
+            <dc:Bounds height="-1" width="-1" x="470" y="354"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {384,286}" aei:absoluteSize="DIM {173,13}"
+                              aei:anchor.location="7"
+                              aei:anchor.objectId="130711185276118995"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="131966216509501679"
+                              aei:relative.location="LOC {-6,-137}"
+                              aei:sizeToFit="true"
+                              aei:text="Large loan or Medium Risk Customer"
+                              bpmnElement="130711185276118995label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="130711185277119005" aei:text=" "
+                          aei:xtnCondition="$riskAssessment/loan:riskAssessment = 'review' or ( $creditInformation/loan:amountRequested &gt;= $approvalParams/loan:amountRequiresHumanApproval and $riskAssessment/loan:riskAssessment != 'high' )"
+                          bpmnElement="130711185277119005"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {440,320}" aei:absoluteSize="DIM {314,247}"
+                           aei:name=" Risk?"
+                           aei:objectId="130711489798028865"
+                           aei:type="IF"
+                           bpmnElement="130711489798028865"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {438,419}" aei:absoluteSize="DIM {27,13}"
+                              aei:anchor.location="4"
+                              aei:anchor.objectId="130711489798028865"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="131966216509501683"
+                              aei:relative.location="LOC {-47,-18}"
+                              aei:sizeToFit="true"
+                              aei:text=" Risk?"
+                              bpmnElement="130711489798028865label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$riskAssessment/loan:riskAssessment = 'low'"
+                           aei:IF_EXPR_LANG=""
+                           aei:absoluteLocation="LOC {510,320}"
+                           aei:absoluteSize="DIM {184,111}"
+                           aei:objectId="131966216509501685"
+                           aei:text="Low"
+                           aei:type="ELSE_IF"
+                           bpmnElement="130711489798028865ifDef">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {485,360}" aei:absoluteSize="DIM {19,13}"
+                              aei:anchor.location="4"
+                              aei:anchor.objectId="130711489798028869"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="131966216511001693"
+                              aei:relative.location="LOC {-54,-25}"
+                              aei:sizeToFit="true"
+                              aei:text="Low"
+                              bpmnElement="130711489798028865ifDeflabel">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {559,349}" aei:absoluteSize="DIM {125,53}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockGreen.png"
+                           aei:name="Format Approval Message"
+                           aei:objectId="128257882656100239"
+                           aei:type="ASSIGN"
+                           bpmnElement="128257882656100239">
+            <dc:Bounds height="53" width="125" x="832" y="381"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:loanApprovalResponse xmlns:loan=&#34;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&#34;&gt;&#xA;                           &lt;loan:responseToLoanRequest&gt;approved&lt;/loan:responseToLoanRequest&gt;&#xA;                           &lt;loan:responseDescription&gt;Your excellent credit has earned you automatic approval for your loan!&lt;/loan:responseDescription&gt;&#xA;                        &lt;/loan:loanApprovalResponse&gt;"
+                           aei:fromType="4"
+                           aei:objectId="130711518130731913"
+                           aei:toVariable="approve"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="130711518130731913"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {549,339}" aei:absoluteSize="DIM {145,73}"
+                           aei:actySimState="0"
+                           aei:bpelName=""
+                           aei:joinConditionComp=""
+                           aei:mutexLinks="true"
+                           aei:objectId="130711489798028873"
+                           aei:type="Sequence"
+                           bpmnElement="128257882656100239wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="0" y="20"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {510,456}" aei:absoluteSize="DIM {184,111}"
+                           aei:objectId="130711489798028875"
+                           aei:text="High"
+                           aei:type="ELSE"
+                           bpmnElement="130711489798028865elseDef">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {485,490}" aei:absoluteSize="DIM {21,13}"
+                              aei:anchor.location="4"
+                              aei:anchor.objectId="130711489798028875"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="131966216511001703"
+                              aei:relative.location="LOC {-54,-31}"
+                              aei:sizeToFit="true"
+                              aei:text="High"
+                              bpmnElement="130711489798028865elseDeflabel">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {559,485}" aei:absoluteSize="DIM {125,53}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockRootBeer.png"
+                           aei:name="Format Denial Message"
+                           aei:objectId="128257882656300247"
+                           aei:type="ASSIGN"
+                           bpmnElement="128257882656300247">
+            <dc:Bounds height="53" width="125" x="708" y="517"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:loanApprovalResponse xmlns:loan=&#34;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&#34;&gt;&#xA;                              &lt;loan:responseToLoanRequest&gt;declined&lt;/loan:responseToLoanRequest&gt;&#xA;                              &lt;loan:responseDescription&gt;We are sorry, this application falls out side of our credit risk guidelines.&lt;/loan:responseDescription&gt;&#xA;                              &lt;loan:rejectionReason&gt;&#xA;                                 &lt;loan:reason&gt;lowCredit&lt;/loan:reason&gt;&#xA;                                 &lt;loan:description&gt;low credit score&lt;/loan:description&gt;&#xA;                              &lt;/loan:rejectionReason&gt;&#xA;                           &lt;/loan:loanApprovalResponse&gt;"
+                           aei:fromType="4"
+                           aei:objectId="132828154380100601"
+                           aei:toVariable="approve"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="132828154380100601"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {549,475}" aei:absoluteSize="DIM {145,73}"
+                           aei:actySimState="0"
+                           aei:bpelName=""
+                           aei:joinConditionComp=""
+                           aei:mutexLinks="true"
+                           aei:objectId="130711489798028879"
+                           aei:type="Sequence"
+                           bpmnElement="128257882656300247wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {345,150}" aei:absoluteSize="DIM {70,60}"
+                           aei:name="Under Review"
+                           aei:objectId="128257882651000205"
+                           aei:type="REPLY"
+                           bpmnElement="128257882651000205">
+            <dc:Bounds height="60" width="70" x="589" y="189"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {387,201}" aei:absoluteSize="DIM {72,15}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="128257882651000205"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216511001709"
+                              aei:relative.location="LOC {-3,41}"
+                              aei:sizeToFit="true"
+                              aei:text="Under Review"
+                              bpmnElement="128257882651000205label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="128257882651200215" aei:type="ASSIGN"
+                           bpmnElement="128257882651200215">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:loanApprovalResponse xmlns:loan=&#34;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&#34;&gt;&#xA;                           &lt;loan:responseToLoanRequest&gt;underReview&lt;/loan:responseToLoanRequest&gt;&#xA;                           &lt;loan:responseDescription/&gt;&#xA;                        &lt;/loan:loanApprovalResponse&gt;"
+                           aei:fromType="4"
+                           aei:objectId="130711518131831939"
+                           aei:toPart="Document"
+                           aei:toVariable="parameters"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="130711518131831939"/>
+         <bpmndi:BPMNEdge aei:objectId="130711185277118999" bpmnElement="130711185277118999"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {335,140}" aei:absoluteSize="DIM {90,80}"
+                           aei:actySimState="0"
+                           aei:bpelName=""
+                           aei:joinConditionComp=""
+                           aei:objectId="130711185301219057"
+                           aei:type="Sequence"
+                           bpmnElement="128257882651000205wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="325" y="130"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {795,150}" aei:absoluteSize="DIM {70,60}"
+                           aei:name="Auto Review Reply"
+                           aei:objectId="128257882656500253"
+                           aei:type="REPLY"
+                           bpmnElement="128257882656500253">
+            <dc:Bounds height="60" width="70" x="928" y="425"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {783,135}" aei:absoluteSize="DIM {98,15}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="128257882656500253"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216511001723"
+                              aei:relative.location="LOC {-57,-25}"
+                              aei:sizeToFit="true"
+                              aei:text="Auto Review Reply"
+                              bpmnElement="128257882656500253label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {785,140}" aei:absoluteSize="DIM {90,80}"
+                           aei:actySimState="0"
+                           aei:bpelName=""
+                           aei:joinConditionComp=""
+                           aei:objectId="130711185301219059"
+                           aei:type="Sequence"
+                           bpmnElement="128257882656500253wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="775" y="130"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {318,45}" aei:absoluteSize="DIM {125,53}"
+                           aei:actualOwnerSim=""
+                           aei:backgroundImageLocation="icons/bpmn/activity/blocks/ActivityBlockBlue.png"
+                           aei:bpmNotation="UserTask"
+                           aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity"
+                           aei:name="Review Loan"
+                           aei:objectId="128257882651400219"
+                           aei:paSimulationFaultName=""
+                           aei:paSimulationOutput=""
+                           aei:paSimulationOutputAttachments=""
+                           aei:paSimulationResult="0"
+                           aei:type="EXTENSION_ACTIVITY"
+                           bpmnElement="128257882651400219">
+            <dc:Bounds height="53" width="125" x="684" y="193"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="130711185277119001" bpmnElement="130711185277119001">
+            <di:waypoint weight="0.5" x="532" y="71"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {308,35}" aei:absoluteSize="DIM {145,73}"
+                           aei:actySimState="0"
+                           aei:bpelName=""
+                           aei:joinConditionComp=""
+                           aei:objectId="130711185302219075"
+                           aei:type="Sequence"
+                           bpmnElement="128257882651400219wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="298" y="25"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:catchAllFaults="false"
+                           aei:catchFaultName="approvews:loanProcessFault faultType=0"
+                           aei:expanded="true"
+                           aei:expandedSize="DIM {-1,-1}"
+                           aei:objectId="128257882635400149"
+                           aei:text="Catch loanProcessFault"
+                           aei:type="CATCH"
+                           bpmnElement="128257882635400149"
+                           isHorizontal="true">
+            <dc:Bounds height="160" width="110" x="5" y="5"/>
+            <bpmndi:BPMNLabel aei:anchor.location="7" aei:anchor.objectId="128257882635400149"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501611"
+                              aei:relative.location="LOC {0,-7}"
+                              aei:sizeToFit="true"
+                              aei:text="Catch loanProcessFault"
+                              bpmnElement="128257882635400149label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:name="ReplyWithApprovalFault" aei:objectId="128257882636400153"
+                           aei:type="REPLY"
+                           bpmnElement="128257882636400153">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="1" aei:anchor.objectId="128257882636400153"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501609"
+                              aei:relative.location="LOC {-58,47}"
+                              aei:sizeToFit="true"
+                              aei:text="ReplyWithApprovalFault"
+                              bpmnElement="128257882636400153label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:actySimState="0" aei:bpelName="" aei:joinConditionComp=""
+                           aei:objectId="128257882636500155"
+                           aei:type="Sequence"
+                           bpmnElement="128257882636400153wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:catchAllFaults="false"
+                           aei:catchFaultName="riskws:loanProcessFault faultType=0"
+                           aei:expanded="true"
+                           aei:expandedSize="DIM {-1,-1}"
+                           aei:objectId="128257882637400159"
+                           aei:text="Catch loanProcessFault"
+                           aei:type="CATCH"
+                           bpmnElement="128257882637400159"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="220" y="10"/>
+            <bpmndi:BPMNLabel aei:anchor.location="7" aei:anchor.objectId="128257882637400159"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501623"
+                              aei:relative.location="LOC {0,-7}"
+                              aei:sizeToFit="true"
+                              aei:text="Catch loanProcessFault"
+                              bpmnElement="128257882637400159label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:name="ReplyWithAssessmentFault" aei:objectId="128257882637500163"
+                           aei:type="REPLY"
+                           bpmnElement="128257882637500163">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="1" aei:anchor.objectId="128257882637500163"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501621"
+                              aei:relative.location="LOC {-65,47}"
+                              aei:sizeToFit="true"
+                              aei:text="ReplyWithAssessmentFault"
+                              bpmnElement="128257882637500163label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:actySimState="0" aei:bpelName="" aei:joinConditionComp=""
+                           aei:objectId="128257882637600165"
+                           aei:type="Sequence"
+                           bpmnElement="128257882637500163wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="85" width="95" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:catchAllFaults="false" aei:catchFaultName="b4p:taskExpired faultType=0"
+                           aei:expanded="true"
+                           aei:expandedSize="DIM {-1,-1}"
+                           aei:objectId="128257882637700169"
+                           aei:text="Catch taskExpired"
+                           aei:type="CATCH"
+                           bpmnElement="128257882637700169"
+                           isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="430" y="10"/>
+            <bpmndi:BPMNLabel aei:anchor.location="7" aei:anchor.objectId="128257882637700169"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:font="FONT {Segoe UI,9,0}"
+                              aei:objectId="131966216509501639"
+                              aei:relative.location="LOC {0,-7}"
+                              aei:sizeToFit="true"
+                              aei:text="Catch taskExpired"
+                              bpmnElement="128257882637700169label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:name="Notify_CRM_Of_Expiration" aei:objectId="128257882638600171"
+                           aei:subprocessPath=""
+                           aei:type="INVOKE"
+                           bpmnElement="128257882638600171">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="128257882639400179" aei:type="ASSIGN"
+                           bpmnElement="128257882639400179">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:loanApprovalResponse xmlns:loan=&#34;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&#34;&gt;&#xA;                              &lt;loan:responseToLoanRequest&gt;declined&lt;/loan:responseToLoanRequest&gt;&#xA;                              &lt;loan:responseDescription&gt;We regret that your application could not be processed under our Qik-Approve guidelines. Please reapply in person at one of our offices.&lt;/loan:responseDescription&gt;&#xA;                              &lt;loan:rejectionReason&gt;&#xA;                                 &lt;loan:reason&gt;infoRequired&lt;/loan:reason&gt;&#xA;                                 &lt;loan:description&gt;Loan underwriting could not be completed in the recommended time window.&lt;/loan:description&gt;&#xA;                              &lt;/loan:rejectionReason&gt;&#xA;                           &lt;/loan:loanApprovalResponse&gt;"
+                           aei:fromType="4"
+                           aei:objectId="130711518129731859"
+                           aei:toPart="Document"
+                           aei:toVariable="parameters"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="130711518129731859"/>
+         <bpmndi:BPMNShape aei:actySimState="0" aei:bpelName="" aei:joinConditionComp=""
+                           aei:objectId="128257882638600173"
+                           aei:type="Sequence"
+                           bpmnElement="128257882638600171wrappingSequence"
+                           isHorizontal="true">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <ns3:extensions>
+      <ns3:extension mustUnderstand="no"
+                     namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <ns3:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <ns3:extension mustUnderstand="yes"
+                     namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <ns3:extension mustUnderstand="yes"
+                     namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+      <ns3:extension mustUnderstand="yes" namespace="http://www.example.org/BPEL4People"/>
+      <ns3:extension mustUnderstand="yes" namespace="http://www.example.org/WS-HT"/>
+   </ns3:extensions>
+   <ns3:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/bpel/LoanProcessWithSwimlanes.private.wsdl"
+               namespace="http://loanProcessHuman"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/loanMessages.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl"/>
+   <ns3:import importType="http://www.w3.org/2001/XMLSchema"
+               location="../schema/loanRequest.xsd"
+               namespace="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/riskAssessment.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/riskAssessment/2008/02/riskAssessment.wsdl"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/loanApproval.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApproval.wsdl"/>
+   <ns3:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/bpel/LoanProcessWithSwimlanes.public.wsdl"
+               namespace="http://loanProcessHuman/public"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/loanProcess.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/loanprocess/2008/02/loanProcess.wsdl"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/"
+               location="../wsdl/loanApprovalHuman.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/loanApproval/2008/02/loanApprovalHuman.wsdl"/>
+   <ns3:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/loanCRM.wsdl"
+               namespace="http://docs.active-endpoints.com/sample/wsdl/loanCRM/2008/02/loanCRM.wsdl"/>
+   <ns3:import importType="res:/text/html" location="../form/task/ReminderToReps.html"
+               namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <ns3:import importType="res:/text/html"
+               location="../form/task/NotifyReassignToManager.html"
+               namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <ns3:import importType="res:/text/html" location="../form/task/approveTask.html"
+               namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <ns3:partnerLinks>
+      <ns3:partnerLink aei:id="130711163605018237" aei:interface="ns:LoanApproval" myRole="Provider"
+                       name="LoanProcessor"
+                       partnerLinkType="ns4:LoanProcessPLT"/>
+      <ns3:partnerLink aei:id="130711163605018249" aei:interface="ns11:RiskAssessment"
+                       name="RiskAssessment"
+                       partnerLinkType="ns2:RiskAssessmentPLT"
+                       partnerRole="Provider"/>
+      <ns3:partnerLink aei:id="130711163605018261" aei:interface="ns21:LoanCRM" name="CustomerService"
+                       partnerLinkType="ns2:LoanCRMPLT"
+                       partnerRole="Provider"/>
+   </ns3:partnerLinks>
+   <ns3:variables>
+      <ns3:variable element="loan:loanProcessRequest" name="creditInformation"/>
+      <ns3:variable element="loan:riskAssessmentResponse" name="riskAssessment"/>
+      <ns3:variable element="loan:loanApprovalResponse" name="approve-task"/>
+      <ns3:variable element="loan:approvalParameters" name="approvalParams"/>
+      <ns3:variable element="loan:loanApprovalResponse" name="approve"/>
+   </ns3:variables>
+   <ns3:faultHandlers>
+      <ns3:catch aei:id="128257882635400149" faultElement="loan:errorMessage"
+                 faultName="approvews:loanProcessFault"
+                 faultVariable="errorApprove">
+         <ns3:reply aei:id="128257882636400153" faultName="loanprocess:unableToHandleRequest"
+                    name="ReplyWithApprovalFault"
+                    operation="request"
+                    partnerLink="LoanProcessor"
+                    variable="errorApprove"/>
+      </ns3:catch>
+      <ns3:catch aei:id="128257882637400159" faultMessageType="loanmsg:errorMessage"
+                 faultName="riskws:loanProcessFault"
+                 faultVariable="errorRisk">
+         <ns3:reply aei:id="128257882637500163" faultName="loanprocess:unableToHandleRequest"
+                    name="ReplyWithAssessmentFault"
+                    operation="request"
+                    partnerLink="LoanProcessor"
+                    variable="errorRisk"/>
+      </ns3:catch>
+      <ns3:catch aei:id="128257882637700169" faultName="b4p:taskExpired">
+         <ns3:scope aei:implicit="true" name="Notify_CRM_Of_Expiration">
+            <ns3:variables>
+               <ns3:variable messageType="loanmsg:approvalMessage" name="parameters"/>
+            </ns3:variables>
+            <ns3:sequence>
+               <ns3:assign aei:id="128257882639400179">
+                  <ns3:copy aei:id="130711518129731859">
+                     <ns3:from>
+                        <ns3:literal>
+                           <loan:loanApprovalResponse>
+                              <loan:responseToLoanRequest>declined</loan:responseToLoanRequest>
+                              <loan:responseDescription>We regret that your application could not be processed under our Qik-Approve guidelines. Please reapply in person at one of our offices.</loan:responseDescription>
+                              <loan:rejectionReason>
+                                 <loan:reason>infoRequired</loan:reason>
+                                 <loan:description>Loan underwriting could not be completed in the recommended time window.</loan:description>
+                              </loan:rejectionReason>
+                           </loan:loanApprovalResponse>
+                        </ns3:literal>
+                     </ns3:from>
+                     <ns3:to part="Document" variable="parameters"/>
+                  </ns3:copy>
+               </ns3:assign>
+               <ns3:invoke aei:id="128257882638600171" inputVariable="parameters"
+                           name="Task3"
+                           operation="notify"
+                           partnerLink="CustomerService">
+                           <bpelx:toProperties>
+                              <bpelx:toProperty name="probability">Task2:0.5</bpelx:toProperty>
+                              <bpelx:toProperty name="paths">path2</bpelx:toProperty>
+                           </bpelx:toProperties>
+               </ns3:invoke>
+            </ns3:sequence>
+         </ns3:scope>
+      </ns3:catch>
+   </ns3:faultHandlers>
+   <ns3:flow aei:id="130711185289119041">
+      <ns3:links>
+         <ns3:link aei:id="130711185276118993" name="L2"/>
+         <ns3:link aei:id="130711501454829011" name="L1"/>
+         <ns3:link aei:id="130711185277119005" name="L6"/>
+         <ns3:link aei:id="130711185277118999" name="L3"/>
+         <ns3:link aei:id="130711185277119001" name="L4"/>
+      </ns3:links>
+      <ns3:sequence aei:id="130711185301219049">
+         <ns3:sources>
+            <ns3:source linkName="L2"/>
+         </ns3:sources>
+         <ns3:receive aei:id="128257882650100185" createInstance="yes" name="Receive_Application"
+                      operation="request"
+                      partnerLink="LoanProcessor"
+                      variable="creditInformation">
+            <ns3:documentation>Loan Request receive event</ns3:documentation>
+         </ns3:receive>
+         <ns3:assign aei:id="128257882650400189" name="Get_Cut_Off_Amount">
+            <ns3:documentation>Obtains the cutoff amount ceiling for large loans</ns3:documentation>
+            <ns3:copy aei:id="130711518129731883" ignoreMissingFromData="yes">
+               <ns3:from>abx:getCatalogResource("project:/CustomerService/runtimeParameters/approvalParameters.xml")</ns3:from>
+               <ns3:to variable="approvalParams"/>
+            </ns3:copy>
+         </ns3:assign>
+      </ns3:sequence>
+      <ns3:sequence aei:id="130711185301219051">
+         <ns3:targets>
+            <ns3:target linkName="L4"/>
+         </ns3:targets>
+         <ns3:invoke aei:id="128257882655200221" inputVariable="approve"
+                     name="Task1"
+                     operation="notify"
+                     partnerLink="CustomerService">
+            <ns3:documentation>The Customer Service notifies the customer service team to communicate the outcome of the loan review decision to the customer.</ns3:documentation>
+            <bpelx:toProperties>
+               <bpelx:toProperty name="probability">Task0:1</bpelx:toProperty>
+               <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+            </bpelx:toProperties>
+         </ns3:invoke>
+         <ns3:empty aei:id="128257882655300223"/>
+      </ns3:sequence>
+      <ns3:sequence aei:id="130711185301219053">
+         <ns3:targets>
+            <ns3:target linkName="L2"/>
+         </ns3:targets>
+         <ns3:sources>
+            <ns3:source linkName="L1"/>
+         </ns3:sources>
+         <ns3:invoke aei:id="128257882650500193" inputVariable="creditInformation"
+                     name="Task2"
+                     operation="check"
+                     outputVariable="riskAssessment"
+                     partnerLink="RiskAssessment">
+            <bpelx:toProperties>
+                  <bpelx:toProperty name="probability">Task1:1</bpelx:toProperty>
+                  <bpelx:toProperty name="paths">path1 path2</bpelx:toProperty>
+            </bpelx:toProperties>
+            <ns3:documentation>The Assess Risk rules service determines the level of risk of loans</ns3:documentation>
+         </ns3:invoke>
+         <ns3:empty aei:gateway="1" aei:id="130711185276118995" ext1:mutexTransitions="yes"
+                    name="Large_loan_or_Medium_Risk_Customer">
+            <ns3:documentation>Process loan based on size and risk</ns3:documentation>
+            <ns3:sources>
+               <ns3:source linkName="L6">
+                  <ns3:transitionCondition>$riskAssessment/loan:riskAssessment = 'review' or ( $creditInformation/loan:amountRequested &gt;= $approvalParams/loan:amountRequiresHumanApproval and $riskAssessment/loan:riskAssessment != 'high' )</ns3:transitionCondition>
+               </ns3:source>
+            </ns3:sources>
+         </ns3:empty>
+         <ns3:if aei:id="130711489798028865" name="_Risk">
+            <ns3:documentation>Prepares Approval and Denial Message responses for low and high risk loans</ns3:documentation>
+            <ns3:condition>$riskAssessment/loan:riskAssessment = 'low'</ns3:condition>
+            <ns3:assign aei:id="128257882656100239" ext1:mutexTransitions="yes"
+                        name="Format_Approval_Message">
+               <ns3:documentation>Prepares an "approved" response with a description of "Your excellent credit has earned you automatic approval for your loan!"</ns3:documentation>
+               <ns3:copy aei:id="130711518130731913">
+                  <ns3:from>
+                     <ns3:literal>
+                        <loan:loanApprovalResponse>
+                           <loan:responseToLoanRequest>approved</loan:responseToLoanRequest>
+                           <loan:responseDescription>Your excellent credit has earned you automatic approval for your loan!</loan:responseDescription>
+                        </loan:loanApprovalResponse>
+                     </ns3:literal>
+                  </ns3:from>
+                  <ns3:to variable="approve"/>
+               </ns3:copy>
+            </ns3:assign>
+            <ns3:else aei:id="130711489798028875">
+               <ns3:assign aei:id="128257882656300247" ext1:mutexTransitions="yes"
+                           name="Format_Denial_Message">
+                  <ns3:documentation>Prepares a "declined" response with a description of "We are sorry, this application falls out side of our credit risk guidelines."&#xD;
+The reason provided is "lowCredit".</ns3:documentation>
+                  <ns3:copy aei:id="132828154380100601">
+                     <ns3:from>
+                        <ns3:literal>
+                           <loan:loanApprovalResponse>
+                              <loan:responseToLoanRequest>declined</loan:responseToLoanRequest>
+                              <loan:responseDescription>We are sorry, this application falls out side of our credit risk guidelines.</loan:responseDescription>
+                              <loan:rejectionReason>
+                                 <loan:reason>lowCredit</loan:reason>
+                                 <loan:description>low credit score</loan:description>
+                              </loan:rejectionReason>
+                           </loan:loanApprovalResponse>
+                        </ns3:literal>
+                     </ns3:from>
+                     <ns3:to variable="approve"/>
+                  </ns3:copy>
+               </ns3:assign>
+            </ns3:else>
+         </ns3:if>
+      </ns3:sequence>
+      <ns3:scope aei:implicit="true" name="Under_Review">
+         <ns3:targets>
+            <ns3:target linkName="L6"/>
+         </ns3:targets>
+         <ns3:sources>
+            <ns3:source linkName="L3"/>
+         </ns3:sources>
+         <ns3:variables>
+            <ns3:variable messageType="loanmsg:approvalMessage" name="parameters"/>
+         </ns3:variables>
+         <ns3:sequence>
+            <ns3:assign aei:id="128257882651200215">
+               <ns3:copy aei:id="130711518131831939">
+                  <ns3:from>
+                     <ns3:literal>
+                        <loan:loanApprovalResponse>
+                           <loan:responseToLoanRequest>underReview</loan:responseToLoanRequest>
+                           <loan:responseDescription/>
+                        </loan:loanApprovalResponse>
+                     </ns3:literal>
+                  </ns3:from>
+                  <ns3:to part="Document" variable="parameters"/>
+               </ns3:copy>
+            </ns3:assign>
+            <ns3:reply aei:id="128257882651000205" name="Under_Review" operation="request"
+                       partnerLink="LoanProcessor"
+                       variable="parameters">
+               <ns3:documentation>Under Review response event</ns3:documentation>
+            </ns3:reply>
+         </ns3:sequence>
+      </ns3:scope>
+      <ns3:reply aei:id="128257882656500253" name="Auto_Review_Reply" operation="request"
+                 partnerLink="LoanProcessor"
+                 variable="approve">
+         <ns3:documentation>Auto Review response event</ns3:documentation>
+         <ns3:targets>
+            <ns3:target linkName="L1"/>
+         </ns3:targets>
+      </ns3:reply>
+      <ns3:extensionActivity>
+         <b4p:peopleActivity aei:id="128257882651400219" inputVariable="creditInformation"
+                             name="Review_Loan"
+                             outputVariable="approve-task">
+            <ns3:documentation>Large or moderate risk loan are reviewed by Loan Reps. Customer Service is then notified of the outcome.</ns3:documentation>
+            <b4p:localTask reference="approveTask">
+               <htd:peopleAssignments/>
+            </b4p:localTask>
+            <b4p:scheduledActions>
+               <b4p:expiration>
+                  <b4p:for>'PT180M'</b4p:for>
+               </b4p:expiration>
+            </b4p:scheduledActions>
+            <ns3:sources>
+               <ns3:source linkName="L4"/>
+            </ns3:sources>
+            <ns3:targets>
+               <ns3:target linkName="L3"/>
+            </ns3:targets>
+         </b4p:peopleActivity>
+      </ns3:extensionActivity>
+   </ns3:flow>
+</ns3:process>
