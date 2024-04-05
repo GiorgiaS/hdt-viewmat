@@ -6,7 +6,7 @@ from metricsEvaluator import MetricsEvaluator
 
 
 class HDTFramework:
-    def computeAL(self, possiblePaths, traversedTasks, anTask, currentTask, parser, matcher, metEval, bpelFile, ppFilename, nextTasks):
+    def computeAL(self, possiblePaths, anTask, currentTask, parser, bpelFile):
         taskAL = 0
         counter = 0
         evaluatedTasks = []  
