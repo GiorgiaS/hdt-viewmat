@@ -1,12 +1,16 @@
 # HDT-ViewMat
 
-This is the official repository storing the implementation of the paper: "Efficient Privacy-Preserving Human Digital Twin Views Pre-Materialisation". (add doi to paper)
+This is the official repository storing the implementation of the paper: "Efficient Privacy-Preserving Human Digital Twin Views Pre-Materialisation".
 
 ```
-@inproceegings{conpref,
- title = {Efficient Privacy-Preserving Human Digital Twin Views Pre-Materialisation},
- author={Sirigu, Giorgia and Carminati, Barbara and Ferrari, Elena},
-....
+@inproceedings{sirigu2024human,
+  title={Human Digital Twins: Efficient Privacy-Preserving Access Control Through Views Pre-materialisation},
+  author={Sirigu, Giorgia and Carminati, Barbara and Ferrari, Elena},
+  booktitle={IFIP Annual Conference on Data and Applications Security and Privacy},
+  pages={24--43},
+  year={2024},
+  organization={Springer}
+}
 }
 ```
 
