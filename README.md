@@ -11,7 +11,6 @@ This is the official repository storing the implementation of the paper: "Effici
   year={2024},
   organization={Springer}
 }
-}
 ```
 
 ## Requirements
